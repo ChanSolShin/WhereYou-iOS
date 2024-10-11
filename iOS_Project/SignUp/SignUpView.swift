@@ -1,10 +1,11 @@
 // CreateAccountView.swift
 import SwiftUI
 
-struct CreateAccountView: View {
-    @StateObject private var viewModel = CreateAccountViewModel()
-
+struct SignUpView: View {
+    @StateObject private var viewModel = SignUpViewModel()
+    
     @Environment(\.presentationMode) var presentationMode
+    @State private var showPassword = false 
     var body: some View {
         NavigationView {
             VStack {
@@ -38,7 +39,7 @@ struct CreateAccountView: View {
                         .imageScale(.small)
                     TextField("생년월일(8자리)", text: $viewModel.birthday)
                         .keyboardType(.numberPad)
-                        //글자수 제한
+                    //글자수 제한
                         .onChange(of: viewModel.birthday) { newValue in
                             if newValue.count > 8 {
                                 viewModel.birthday = String(newValue.prefix(8))
@@ -114,9 +115,24 @@ struct CreateAccountView: View {
                     Image(systemName: "lock")
                         .foregroundColor(.gray)
                         .imageScale(.small)
-                    SecureField("비밀번호", text: $viewModel.password)
-                        .font(.system(size: 16))
-                        .autocapitalization(.none)
+                    if showPassword {
+                        TextField("비밀번호", text: $viewModel.password)
+                            .font(.system(size: 16))
+                            .autocapitalization(.none)
+                    } else {
+                        SecureField("비밀번호", text: $viewModel.password)
+                            .font(.system(size: 16))
+                            .autocapitalization(.none)
+                    }
+                    
+                    Button(action: {
+                        showPassword.toggle() // 비밀번호 가시성 토글
+                    }) {
+                        Image(systemName: showPassword ? "eye.slash" : "eye")
+                            .imageScale(.small)
+                            .foregroundColor(.gray)
+                    }
+                    
                 }
                 .padding()
                 .background(Color.gray.opacity(0.2))
@@ -153,24 +169,24 @@ struct CreateAccountView: View {
                 .background(Color.gray.opacity(0.2))
                 .cornerRadius(8)
                 .padding(.horizontal, 30)
-             
+                
                 
                 // 버튼을 탭 했을때 서버로 텍스트박스 필드 내용 전송 하는 로직 구성 해야함
                 Button(action: { // 첫 화면으로 돌아감
                     presentationMode.wrappedValue.dismiss()
-                           }) {
-                               Text("회원가입")
-                                   .font(.system(size: 20))
-                                   .foregroundColor(.blue)
-                                   .padding()
-                                   .frame(width: 150, height: 50)
-                                   .cornerRadius(8)
-                                   .opacity(viewModel.successCreate ? 0.5 : 1)
-                           }
-                            // 모든 텍스트 필드가 제대로 채워지지 않으면 회원가입 버튼을 누를 수 없음
-                           .disabled(viewModel.successCreate)
+                }) {
+                    Text("회원가입")
+                        .padding(.leading, 250)
+                        .font(.system(size: 20))
+                        .foregroundColor(.blue)
+                        .padding()
+                        .cornerRadius(8)
+                        .opacity(viewModel.successCreate ? 0.5 : 1)
+                }
+                // 모든 텍스트 필드가 제대로 채워지지 않으면 회원가입 버튼을 누를 수 없음
+                .disabled(viewModel.successCreate)
                 
-                           .padding(.top, 20)
+                .padding(.top, 40)
                 
                 Spacer()
             }
@@ -183,6 +199,6 @@ struct CreateAccountView: View {
 // 프리뷰용 코드
 struct CreateAccountView_Previews: PreviewProvider {
     static var previews: some View {
-        CreateAccountView()
+        SignUpView()
     }
 }

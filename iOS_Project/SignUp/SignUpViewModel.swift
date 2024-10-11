@@ -9,7 +9,7 @@
 import SwiftUI
 import Combine
 
-class CreateAccountViewModel: ObservableObject { // 이 항목들 서버로 보내서 저장.
+class SignUpViewModel: ObservableObject { // 이 항목들 서버로 보내서 저장.
     @Published var username: String = ""
     @Published var password: String = ""
     @Published var confirmPassword: String = ""
