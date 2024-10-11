@@ -10,7 +10,7 @@ import SwiftUI
 
 struct LoginView: View {
     @StateObject private var viewModel = LoginViewModel()
-
+    @State private var showPassword = false 
     var body: some View {
         NavigationView {
             VStack {
@@ -49,6 +49,13 @@ struct LoginView: View {
                     Image(systemName: "lock")
                         .foregroundColor(.gray)
                     SecureField("비밀번호", text: $viewModel.user.password)
+                    Button(action: {
+                        showPassword.toggle() // 비밀번호 가시성 토글
+                    }) {
+                        Image(systemName: showPassword ? "eye.slash" : "eye")
+                            .imageScale(.medium)
+                            .foregroundColor(.gray)
+                    }
                 }
                 .padding()
                 .background(Color.gray.opacity(0.2))
@@ -65,7 +72,7 @@ struct LoginView: View {
                     }
                     .disabled(!viewModel.isValidEmail || viewModel.isPasswordEmpty)
                         // 이메일 형식이 맞지않거나, 패스워드가 비어있으면 로그인 버튼을 누를수 없음. 
-                    NavigationLink(destination: CreateAccountView()) {
+                    NavigationLink(destination: SignUpView()) {
                         Text("회원가입")
                             .foregroundColor(.blue)
                     }

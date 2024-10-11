@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 class LoginViewModel: ObservableObject {
-    @Published var user: CreateUserModel = CreateUserModel(username: "", password: "")
+    @Published var user: SignUpModel = SignUpModel(username: "", password: "")
     
     // 이메일 유효성 검사
     var isValidEmail: Bool {
