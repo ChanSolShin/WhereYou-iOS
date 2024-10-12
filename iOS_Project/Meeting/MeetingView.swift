@@ -12,13 +12,7 @@ struct MeetingView: View {
 
     var body: some View {
         VStack {
-            Text(meeting.title)
-                .font(.largeTitle)
-                .padding()
-            Spacer()
-            Text("날짜: \(meeting.date, formatter: dateFormatter)")
-                .font(.subheadline)
-                .padding()
+          
         }
         .navigationTitle(meeting.title)
         .navigationBarTitleDisplayMode(.inline)
