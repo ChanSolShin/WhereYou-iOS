@@ -12,3 +12,9 @@ struct FriendView: View {
         Text("hi")
     }
 }
+
+struct FriendView_Previews: PreviewProvider {
+    static var previews: some View {
+        MeetingListView()
+    }
+}
