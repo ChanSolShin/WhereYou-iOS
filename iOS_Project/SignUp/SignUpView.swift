@@ -183,7 +183,7 @@ struct SignUpView: View {
                         .cornerRadius(8)
                         .opacity(viewModel.successCreate ? 0.5 : 1)
                 }
-                // 모든 텍스트 필드가 제대로 채워지지 않으면 회원가입 버튼을 누를 수 없음
+                // 모든 텍스트 필드가 제대로 채워지지 않으면 회원가입 버튼을 누를 수 없음 
                 .disabled(viewModel.successCreate)
                 
                 .padding(.top, 40)
