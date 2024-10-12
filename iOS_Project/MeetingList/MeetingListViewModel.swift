@@ -7,6 +7,7 @@
 
 import Foundation
 
+// 테스트용 코드
 class MeetingListViewModel: ObservableObject {
     @Published var meetings: [MeetingListModel] = [
         MeetingListModel(title: "술", date: createDate(year: 2024, month: 10, day: 13, hour: 18, minute: 0) ?? Date()),
