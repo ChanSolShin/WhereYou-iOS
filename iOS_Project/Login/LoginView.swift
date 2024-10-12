@@ -9,8 +9,11 @@
 import SwiftUI
 
 struct LoginView: View {
+    
     @StateObject private var viewModel = LoginViewModel()
-    @State private var showPassword = false 
+    @State private var showPassword = false
+    @State private var isLoggedIn = false
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -37,7 +40,7 @@ struct LoginView: View {
                 .background(Color.gray.opacity(0.2))
                 .cornerRadius(8)
                 .padding(.horizontal, 30)
-
+                
                 // 비밀번호
                 Text("Password")
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -65,13 +68,18 @@ struct LoginView: View {
                 
                 // 로그인 및 회원가입 버튼
                 HStack(spacing: 80) {
-                    NavigationLink(destination: MeetingListView()) {
-                        Text("로그인")
+                    Button("로그인") {
+                        // 로그인 성공 시
+                        isLoggedIn = true
+                    }
+                    .fullScreenCover(isPresented: $isLoggedIn) {
+                        MainTabView() // 로그인 후 메인 화면으로 전환
+                        
                             .foregroundColor(.blue)
                             .opacity(!viewModel.isValidEmail || viewModel.isPasswordEmpty ? 0.5 : 1)
                     }
                     .disabled(!viewModel.isValidEmail || viewModel.isPasswordEmpty)
-                        // 이메일 형식이 맞지않거나, 패스워드가 비어있으면 로그인 버튼을 누를수 없음. 
+                    // 이메일 형식이 맞지않거나, 패스워드가 비어있으면 로그인 버튼을 누를수 없음.
                     NavigationLink(destination: SignUpView()) {
                         Text("회원가입")
                             .foregroundColor(.blue)
