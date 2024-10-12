@@ -197,7 +197,7 @@ struct SignUpView: View {
 }
 
 // 프리뷰용 코드
-struct CreateAccountView_Previews: PreviewProvider {
+struct SignupView_Previews: PreviewProvider {
     static var previews: some View {
         SignUpView()
     }
