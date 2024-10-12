@@ -5,11 +5,13 @@
 //  Created by 신찬솔 on 10/11/24.
 //
 
+import SwiftUI
 import Foundation
 import Combine
 
 class LoginViewModel: ObservableObject {
     @Published var user: SignUpModel = SignUpModel(username: "", password: "")
+    @Published var isLoggedIn: Bool = false
     
     // 이메일 유효성 검사
     var isValidEmail: Bool {
@@ -23,5 +25,15 @@ class LoginViewModel: ObservableObject {
         return user.password.isEmpty
     }
     
-    // 이곳에 로그인 정보 확인 서버에서 사용자정보를 가져와서 일치하면 로그인 시키고 아니면 오류안내메시지
+    func login() {
+        // 로그인 성공 로직 (예: API 호출 후 성공 시)
+        isLoggedIn = true
+    }
+
+    func logout() {
+        // 로그아웃 로직
+        isLoggedIn = false
+    }
+    
 }
+
