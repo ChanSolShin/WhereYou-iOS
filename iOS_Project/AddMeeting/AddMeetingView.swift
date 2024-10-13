@@ -16,6 +16,6 @@ struct AddMeetingView: View {
 
 struct AddMeetingView_Previews: PreviewProvider {
     static var previews: some View {
-        LoginView()
+        AddMeetingView()
     }
 }
