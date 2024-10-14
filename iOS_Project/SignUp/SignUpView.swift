@@ -172,8 +172,12 @@ struct SignUpView: View {
                 
                 
                 // 버튼을 탭 했을때 서버로 텍스트박스 필드 내용 전송 하는 로직 구성 해야함
-                Button(action: { // 첫 화면으로 돌아감
-                    presentationMode.wrappedValue.dismiss()
+                Button(action: {                     viewModel.signUp()
+                    //회원가입 성공 시, 로그인 화면으로
+                    if viewModel.signUpSuccess{
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                    
                 }) {
                     Text("회원가입")
                         .padding(.leading, 250)
