@@ -5,7 +5,8 @@ struct SignUpView: View {
     @StateObject private var viewModel = SignUpViewModel()
     
     @Environment(\.presentationMode) var presentationMode
-    @State private var showPassword = false 
+    @State private var showPassword = false
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -172,7 +173,8 @@ struct SignUpView: View {
                 
                 
                 // 버튼을 탭 했을때 서버로 텍스트박스 필드 내용 전송 하는 로직 구성 해야함
-                Button(action: {                     viewModel.signUp()
+                Button(action: {
+                    viewModel.signUp() // Firebase 회원가입 및 계정 추가 정보 Firestore 저장
                     //회원가입 성공 시, 로그인 화면으로
                     if viewModel.signUpSuccess{
                         presentationMode.wrappedValue.dismiss()
@@ -197,6 +199,9 @@ struct SignUpView: View {
         }
         .navigationTitle("회원가입")
         .font(.largeTitle)
+        .alert(isPresented: .constant(viewModel.signUpErrorMessage != nil)) {
+            Alert(title: Text("회원가입 실패"), message: Text(viewModel.signUpErrorMessage ?? ""), dismissButton: .default(Text("확인")))
+        }
     }
 }
 
