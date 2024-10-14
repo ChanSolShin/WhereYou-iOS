@@ -20,7 +20,6 @@ struct iOS_ProjectApp: App {
     
     var body: some Scene {
         WindowGroup {
-            LoginView()
             if loginViewModel.isLoggedIn {
                           MainTabView() // 로그인된 경우 탭 뷰로 이동
             }else{
