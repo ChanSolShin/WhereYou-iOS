@@ -87,6 +87,7 @@ struct MeetingListView: View {
                         .cornerRadius(30)
                         .padding()
                 }
+                
             }
         }
     }
