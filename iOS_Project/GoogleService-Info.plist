@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyCsK4x_llYGEKNELJkPyaPukG3bDzPl0BU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>112211747880</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.chansol.iOS-Project</string>
+	<key>PROJECT_ID</key>
+	<string>meetingapp-2985d</string>
+	<key>STORAGE_BUCKET</key>
+	<string>meetingapp-2985d.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:112211747880:ios:cb07be6c285ebb9b91011d</string>
+</dict>
+</plist>
