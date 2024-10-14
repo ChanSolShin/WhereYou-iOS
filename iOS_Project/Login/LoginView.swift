@@ -13,6 +13,7 @@ struct LoginView: View {
     @StateObject private var viewModel = LoginViewModel()
     @State private var showPassword = false
     @State private var isLoggedIn = false
+    @State private var showAlert = false
     
     var body: some View {
         NavigationView {
@@ -69,15 +70,12 @@ struct LoginView: View {
                 // 로그인 및 회원가입 버튼
                 HStack(spacing: 80) {
                     Button("로그인") {
-                        // 로그인 성공 시
-                        isLoggedIn = true
+                        viewModel.login() //Firebase 로그인
+                        if viewModel.loginErrorMessage != nil{
+                            showAlert = true // 로그인 실패 시, 알림창
+                        }
                     }
-                    .fullScreenCover(isPresented: $isLoggedIn) {
-                        MainTabView() // 로그인 후 메인 화면으로 전환
-                        
-                            .foregroundColor(.blue)
-                            .opacity(!viewModel.isValidEmail || viewModel.isPasswordEmpty ? 0.5 : 1)
-                    }
+                    
                     .disabled(!viewModel.isValidEmail || viewModel.isPasswordEmpty)
                     // 이메일 형식이 맞지않거나, 패스워드가 비어있으면 로그인 버튼을 누를수 없음.
                     NavigationLink(destination: SignUpView()) {
@@ -88,6 +86,18 @@ struct LoginView: View {
                 .padding(.horizontal, 40)
                 
                 Spacer()
+            }
+            .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
+                MainTabView() // 로그인 후 메인 화면으로 전환
+                    .foregroundColor(.blue)
+                    .opacity(!viewModel.isValidEmail || viewModel.isPasswordEmpty ? 0.5 : 1)
+            }
+            .alert(isPresented: $showAlert){
+                Alert(
+                    title: Text("로그인 실패"),
+                    message: Text(" 로그인에 실패하였습니다."),
+                    dismissButton: .default(Text("확인"))
+                )
             }
         }
     }
