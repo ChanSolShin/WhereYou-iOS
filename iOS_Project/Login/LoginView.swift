@@ -23,7 +23,6 @@ struct LoginView: View {
                     .font(.largeTitle)
                     .padding(.top, 70)
                     .padding(.bottom, 70)
-                
                 // 이메일
                 Text("Email address")
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -91,6 +90,7 @@ struct LoginView: View {
                 MainTabView() // 로그인 후 메인 화면으로 전환
                     .foregroundColor(.blue)
                     .opacity(!viewModel.isValidEmail || viewModel.isPasswordEmpty ? 0.5 : 1)
+                    
             }
             .alert(isPresented: $showAlert){
                 Alert(

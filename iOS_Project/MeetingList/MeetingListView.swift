@@ -15,6 +15,7 @@ struct MeetingListView: View {
     var body: some View {
         NavigationView {
             ZStack(alignment: .bottomTrailing) {
+                
                 VStack {
                     HStack {
                         Text("모임")
@@ -41,38 +42,41 @@ struct MeetingListView: View {
                                 .padding(.leading, 10)
                             TextField("검색어를 입력하세요", text: $searchText)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .frame(width: 300)
                             Button(action: {
                                 searchText = ""
+                                withAnimation {
+                                    isSearching.toggle()
+                                }
                             }) {
-                                Image(systemName: "x.circle.fill")
+                                Text("취소")
                                     .font(.headline)
-                                    .foregroundColor(.gray)
-                                    .padding(.leading, -10)
                             }
-                                .padding()
-                           
-                            
-                            
                         }
                     }
-                    List(viewModel.meetings.filter { meeting in
-                        searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
-                    }) { meeting in
-                        HStack {
-                            NavigationLink(destination: MeetingView(meeting: meeting)) {
-                                Text(meeting.title)
-                                    .font(.headline)
+                    ScrollView {
+                        VStack(spacing: 10) {
+                            ForEach(viewModel.meetings.filter { meeting in
+                                searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
+                            }) { meeting in
+                                NavigationLink(destination: MeetingView(meeting: meeting)) {
+                                    HStack {
+                                        Text(meeting.title)
+                                            .font(.headline)
+                                            .padding()
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                        Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                    }
                                     .padding()
-                                    .foregroundColor(.black)
+                                }
+                                Divider()
                             }
-                            Spacer()
-                            Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
                         }
-                    }
+                        .padding(.horizontal)                    }
                 }
-                
                 // 모임생성 버튼
                 NavigationLink(destination: AddMeetingView()) {
                     Text(" + 모임생성")
@@ -84,9 +88,9 @@ struct MeetingListView: View {
                         .padding()
                 }
             }
-            
         }
     }
+    
     
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
