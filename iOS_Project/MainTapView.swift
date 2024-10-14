@@ -10,11 +10,14 @@ import SwiftUI
 struct MainTabView: View {
     var body: some View {
         TabView {
-            MeetingListView() // 첫 번째 탭: 모임 리스트
-                .tabItem {
-                    Image(systemName: "list.bullet")
-                    Text("모임")
-                }
+                MeetingListView() // 첫 번째 탭: 모임 리스트
+                    .tabItem {
+                        Image(systemName: "list.bullet")
+                        Text("모임")
+                    }
+                    .navigationBarHidden(true)
+            
+            
             
             FriendView() // 두 번째 탭: 친구 목록
                 .tabItem {

@@ -9,12 +9,16 @@ import SwiftUI
 
 struct FriendView: View {
     var body: some View {
-        Text("hi")
+        VStack{
+            Text("hi")
+            Text("hello")
+        }
+        .padding(.bottom, 700)
     }
 }
 
 struct FriendView_Previews: PreviewProvider {
     static var previews: some View {
-        MeetingListView()
+        FriendView()
     }
 }
