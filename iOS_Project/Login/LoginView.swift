@@ -83,17 +83,17 @@ struct LoginView: View {
                 .padding(.horizontal, 40)
                 Spacer()
             }
-        }
+            }
         .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
             MainTabView() // 로그인 후 메인 화면으로 전환
             
-                .alert(isPresented: $showAlert){
-                    Alert(
-                        title: Text("로그인 실패"),
-                        message: Text(" 로그인에 실패하였습니다."),
-                        dismissButton: .default(Text("확인"))
-                    )
-                }
+            .alert(isPresented: $showAlert){
+                Alert(
+                    title: Text("로그인 실패"),
+                    message: Text(" 로그인에 실패하였습니다."),
+                    dismissButton: .default(Text("확인"))
+                )
+            }
         }
     }
 }
