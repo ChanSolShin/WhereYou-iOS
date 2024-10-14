@@ -74,34 +74,30 @@ struct LoginView: View {
                             showAlert = true // 로그인 실패 시, 알림창
                         }
                     }
-                    
                     .disabled(!viewModel.isValidEmail || viewModel.isPasswordEmpty)
                     // 이메일 형식이 맞지않거나, 패스워드가 비어있으면 로그인 버튼을 누를수 없음.
                     NavigationLink(destination: SignUpView()) {
                         Text("회원가입")
-                            .foregroundColor(.blue)
                     }
                 }
                 .padding(.horizontal, 40)
-                
                 Spacer()
             }
-            .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
-                MainTabView() // 로그인 후 메인 화면으로 전환
-                    .foregroundColor(.blue)
-                    .opacity(!viewModel.isValidEmail || viewModel.isPasswordEmpty ? 0.5 : 1)
-                    
-            }
-            .alert(isPresented: $showAlert){
-                Alert(
-                    title: Text("로그인 실패"),
-                    message: Text(" 로그인에 실패하였습니다."),
-                    dismissButton: .default(Text("확인"))
-                )
-            }
+        }
+        .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
+            MainTabView() // 로그인 후 메인 화면으로 전환
+            
+                .alert(isPresented: $showAlert){
+                    Alert(
+                        title: Text("로그인 실패"),
+                        message: Text(" 로그인에 실패하였습니다."),
+                        dismissButton: .default(Text("확인"))
+                    )
+                }
         }
     }
 }
+
 
 // 프리뷰용 코드
 struct LoginView_Previews: PreviewProvider {
