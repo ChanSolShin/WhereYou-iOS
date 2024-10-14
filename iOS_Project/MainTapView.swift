@@ -15,9 +15,6 @@ struct MainTabView: View {
                         Image(systemName: "list.bullet")
                         Text("모임")
                     }
-                    .navigationBarHidden(true)
-            
-            
             
             FriendView() // 두 번째 탭: 친구 목록
                 .tabItem {
