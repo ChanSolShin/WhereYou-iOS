@@ -35,9 +35,30 @@
 		EABADF452CB9224100962A40 /* iOS_ProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOS_ProjectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F5FA831A2CBCD60800135073 /* Exceptions for "iOS_Project" folder in "iOS_ProjectTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"GoogleService-Info.plist",
+			);
+			target = EABADF3A2CB9224100962A40 /* iOS_ProjectTests */;
+		};
+		F5FA831B2CBCD60800135073 /* Exceptions for "iOS_Project" folder in "iOS_ProjectUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"GoogleService-Info.plist",
+			);
+			target = EABADF442CB9224100962A40 /* iOS_ProjectUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		EABADF2D2CB9223E00962A40 /* iOS_Project */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F5FA831A2CBCD60800135073 /* Exceptions for "iOS_Project" folder in "iOS_ProjectTests" target */,
+				F5FA831B2CBCD60800135073 /* Exceptions for "iOS_Project" folder in "iOS_ProjectUITests" target */,
+			);
 			path = iOS_Project;
 			sourceTree = "<group>";
 		};
