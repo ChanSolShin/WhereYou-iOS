@@ -2,15 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>LSMinimumSystemVersion</key>
-	<string>iOS 17.0</string>
-	<key>CFBundleSignature</key>
-	<string>AAPL</string>
-	<key>CFBundleVersion</key>
-	<string>1.0</string>
-	<key>CFBundleName</key>
-	<string>MeetingApp</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.chansol.iOS-Project</string>
+	<key>UIUserInterfaceStyle</key>
+	<string></string>
 </dict>
 </plist>
