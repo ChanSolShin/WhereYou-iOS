@@ -9,11 +9,7 @@ import SwiftUI
 
 struct FriendView: View {
     var body: some View {
-        VStack{
-            Text("hi")
-            Text("hello")
-        }
-        .padding(.bottom, 700)
+        Text("d")
     }
 }
 

@@ -11,7 +11,7 @@ import Combine
 import FirebaseAuth
 
 class LoginViewModel: ObservableObject {
-    @Published var user: SignUpModel = SignUpModel(username: "", password: "")
+    @Published var user: SignUpUserModel = SignUpUserModel(username: "", password: "")
     @Published var isLoggedIn: Bool = false
     @Published var loginErrorMessage: String?
     
