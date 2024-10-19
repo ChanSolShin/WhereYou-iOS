@@ -23,13 +23,14 @@ struct iOS_ProjectApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
+                
                 LoginView()
                     .onAppear{
                         coordinator.checkIfLocationServiceIsEnabled() // 앱 실행 시 위치 서비스 확인
                     }
                 if loginViewModel.isLoggedIn {
-                    MainTabView() // 로그인된 경우 탭 뷰로 이동
-                }
+                                    MainTabView() // 로그인 상태이면 MainTabView로 이동
+                                }
             }
     
         }
@@ -71,6 +72,7 @@ class LocationCoordinator: NSObject, CLLocationManagerDelegate {
         }
     }
 
+    
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch status {
         case .authorizedWhenInUse, .authorizedAlways:

@@ -15,9 +15,6 @@ class LoginViewModel: ObservableObject {
     @Published var isLoggedIn: Bool = false
     @Published var loginErrorMessage: String?
     
-    init() {
-            // 초기화 코드 (네트워크 요청, 데이터베이스 접근 등은 여기서 하지 않도록)
-        }
     // 이메일 유효성 검사
     var isValidEmail: Bool {
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}"
@@ -34,16 +31,17 @@ class LoginViewModel: ObservableObject {
     func login() {
         
         Auth.auth().signIn(withEmail: user.username, password: user.password) { [weak self] authResult, error in
+            // 로그인 성공 시
+            print("로그인 성공")
+            self?.isLoggedIn = true
+            self?.loginErrorMessage = nil
             if let error = error {
                 self?.loginErrorMessage = error.localizedDescription // 로그인 실패 시 오류 메시지 설정
                 self?.isLoggedIn = false
                 return
             }
-            
-            // 로그인 성공 시
-            self?.isLoggedIn = true
-            self?.loginErrorMessage = nil
         }
-    }    
+    }
 }
+
 

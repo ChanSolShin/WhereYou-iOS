@@ -22,9 +22,6 @@ class MeetingListViewModel: ObservableObject {
 //        MeetingListModel(title: "에니악 회식", date: createDate(year: 2024, month: 10, day: 22, hour: 18, minute: 30) ?? Date())
     ]
     
-    init() {
-            // 초기화 코드 (네트워크 요청, 데이터베이스 접근 등은 여기서 하지 않도록)
-        }
     
     static func createDate(year: Int, month: Int, day: Int, hour: Int, minute: Int) -> Date? {
         var dateComponents = DateComponents()

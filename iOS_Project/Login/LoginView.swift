@@ -83,11 +83,26 @@ struct LoginView: View {
                 // 로그인 및 회원가입 버튼
                 HStack(spacing: 80) {
                     Button("로그인") {
-                        viewModel.login() //Firebase 로그인
-                        if viewModel.loginErrorMessage != nil {
-                            showAlert = true // 로그인 실패 시, 알림창
+                        viewModel.login() // Firebase 로그인 호출
+                        showAlert = false // 새로운 시도를 할 때 알림창을 숨김
+                    }
+                    .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
+                        MainTabView() // 로그인 성공 시 MainTabView로 전환
+                    }
+                    .alert(isPresented: $showAlert) {
+                        Alert(
+                            title: Text("로그인 실패"),
+                            message: Text("로그인에 실패하였습니다."),
+                            dismissButton: .default(Text("확인"))
+                        )
+                    }
+                    .onChange(of: viewModel.loginErrorMessage) { errorMessage in
+                        if errorMessage != nil {
+                            showAlert = true // 로그인 실패 시 알림창 띄우기
+                            viewModel.loginErrorMessage = nil // 알림창을 다시 띄울 수 있도록 loginErrorMessage 초기화
                         }
                     }
+                    
                     .disabled(!viewModel.isValidEmail || viewModel.isPasswordEmpty)
                     // 이메일 형식이 맞지 않거나, 패스워드가 비어있으면 로그인 버튼을 누를 수 없음.
                     
@@ -97,27 +112,8 @@ struct LoginView: View {
                 }
                 .padding(.horizontal, 40)
                 Spacer()
+                
             }
-            .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
-                MainTabView() // 로그인 후 메인 화면으로 전환
-                    .alert(isPresented: $showAlert) {
-                        Alert(
-                            title: Text("로그인 실패"),
-                            message: Text("로그인에 실패하였습니다."),
-                            dismissButton: .default(Text("확인"))
-                        )
-                    }
-            }
-        }
-        .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
-            MainTabView() // 로그인 후 메인 화면으로 전환
-                .alert(isPresented: $showAlert) {
-                    Alert(
-                        title: Text("로그인 실패"),
-                        message: Text("로그인에 실패하였습니다."),
-                        dismissButton: .default(Text("확인"))
-                    )
-                }
         }
     }
 }
