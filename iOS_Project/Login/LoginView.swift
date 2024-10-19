@@ -7,6 +7,7 @@
 
 
 import SwiftUI
+import NMapsMap
 
 struct LoginView: View {
     
@@ -23,12 +24,14 @@ struct LoginView: View {
                     .font(.largeTitle)
                     .padding(.top, 70)
                     .padding(.bottom, 70)
+                
                 // 이메일
                 Text("Email address")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 25)
                     .font(.headline)
                     .padding(.horizontal, 10)
+                
                 HStack {
                     Image(systemName: "person")
                         .foregroundColor(.gray)
@@ -48,10 +51,21 @@ struct LoginView: View {
                     .font(.headline)
                     .padding(.horizontal, 10)
                     .padding(.top,20)
+                
                 HStack {
                     Image(systemName: "lock")
                         .foregroundColor(.gray)
-                    SecureField("비밀번호", text: $viewModel.user.password)
+                    
+                    if showPassword {
+                        TextField("비밀번호", text: $viewModel.user.password)
+                            .font(.system(size: 16))
+                            .autocapitalization(.none)
+                    } else {
+                        SecureField("비밀번호", text: $viewModel.user.password)
+                            .font(.system(size: 16))
+                            .autocapitalization(.none)
+                    }
+                    
                     Button(action: {
                         showPassword.toggle() // 비밀번호 가시성 토글
                     }) {
@@ -70,12 +84,13 @@ struct LoginView: View {
                 HStack(spacing: 80) {
                     Button("로그인") {
                         viewModel.login() //Firebase 로그인
-                        if viewModel.loginErrorMessage != nil{
+                        if viewModel.loginErrorMessage != nil {
                             showAlert = true // 로그인 실패 시, 알림창
                         }
                     }
                     .disabled(!viewModel.isValidEmail || viewModel.isPasswordEmpty)
-                    // 이메일 형식이 맞지않거나, 패스워드가 비어있으면 로그인 버튼을 누를수 없음.
+                    // 이메일 형식이 맞지 않거나, 패스워드가 비어있으면 로그인 버튼을 누를 수 없음.
+                    
                     NavigationLink(destination: SignUpView()) {
                         Text("회원가입")
                     }
@@ -83,21 +98,29 @@ struct LoginView: View {
                 .padding(.horizontal, 40)
                 Spacer()
             }
+            .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
+                MainTabView() // 로그인 후 메인 화면으로 전환
+                    .alert(isPresented: $showAlert) {
+                        Alert(
+                            title: Text("로그인 실패"),
+                            message: Text("로그인에 실패하였습니다."),
+                            dismissButton: .default(Text("확인"))
+                        )
+                    }
             }
+        }
         .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
             MainTabView() // 로그인 후 메인 화면으로 전환
-            
-            .alert(isPresented: $showAlert){
-                Alert(
-                    title: Text("로그인 실패"),
-                    message: Text(" 로그인에 실패하였습니다."),
-                    dismissButton: .default(Text("확인"))
-                )
-            }
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("로그인 실패"),
+                        message: Text("로그인에 실패하였습니다."),
+                        dismissButton: .default(Text("확인"))
+                    )
+                }
         }
     }
 }
-
 
 // 프리뷰용 코드
 struct LoginView_Previews: PreviewProvider {
@@ -105,4 +128,3 @@ struct LoginView_Previews: PreviewProvider {
         LoginView()
     }
 }
-

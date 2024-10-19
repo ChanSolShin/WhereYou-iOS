@@ -21,6 +21,10 @@ class SignUpViewModel: ObservableObject { // 이 항목들 서버로 보내서 �
     @Published var signUpErrorMessage: String?
     @Published var signUpSuccess: Bool = false
     
+    init() {
+            // 초기화 코드 (네트워크 요청, 데이터베이스 접근 등은 여기서 하지 않도록)
+        }
+    
     private var db = Firestore.firestore()
     
     // 회원가입 버튼이 정상적으로 눌려지기 위한 조건. 이 조건을 충족시키지 못할 경우 회원가입 버튼이 눌리지 않음.

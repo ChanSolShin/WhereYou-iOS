@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NMapsMap
 
 struct MeetingView: View {
     var meeting: MeetingListModel // 매개변수로 Meeting 객체를 받아옴

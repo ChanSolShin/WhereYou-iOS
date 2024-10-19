@@ -8,10 +8,12 @@
 import Foundation
 import CoreLocation
 import SwiftUI
+import NMapsMap
 
 struct AddMeetingModel {
-    var meetingName: String
-    var meetingDate: Date
-    var meetingLocation: CLLocationCoordinate2D
-    var meetingMemberID: [String] // 사용자 UID
+    var meetingName: String = " "
+    var meetingDate: Date = Date()
+    var meetingLocation: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 0.0, longitude: 0.0) // 좌표
+    var meetingAddress: String? = "" // 주소
+    var meetingMemberID: [String] = []
 }

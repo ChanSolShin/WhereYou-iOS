@@ -6,14 +6,17 @@
 //
 
 import SwiftUI
+import NMapsMap
 
 struct MeetingListView: View {
     @StateObject private var viewModel = MeetingListViewModel() // ViewModel 인스턴스 생성
     @State private var searchText = "" // 검색 텍스트
     @State private var isSearching = false // 검색 상태
     
+    
+    
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack(alignment: .bottomTrailing) {
                 
                 VStack {
@@ -22,6 +25,7 @@ struct MeetingListView: View {
                             .font(.largeTitle)
                             .foregroundColor(.black)
                             .padding()
+                            .padding(.top,15)
                         Spacer()
                         // 돋보기 버튼 추가
                         Button(action: {
@@ -34,6 +38,7 @@ struct MeetingListView: View {
                                 .font(.title)
                         }
                         .padding(.trailing)
+                        .padding(.top,15)
                     }
                     // 검색 상태에 따라 텍스트 필드 표시
                     if isSearching {
@@ -77,8 +82,9 @@ struct MeetingListView: View {
                         }
                         .padding(.horizontal)                    }
                 }
+                
                 // 모임생성 버튼
-                NavigationLink(destination: AddMeetingView()) {
+                NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel()), label: {
                     Text(" + 모임생성")
                         .font(.title2)
                         .foregroundColor(.white)
@@ -86,8 +92,7 @@ struct MeetingListView: View {
                         .background(Color.blue)
                         .cornerRadius(30)
                         .padding()
-                }
-                
+                })
             }
         }
     }
