@@ -6,17 +6,28 @@
 //
 
 import SwiftUI
-import Foundation
 import CoreLocation
+import NMapsMap
 
 class AddMeetingViewModel: ObservableObject {
-    @Published var meeting: AddMeetingModel = AddMeetingModel(
-            meetingName: "",
-            meetingDate: Date(), // 현재 날짜로 초기화
-            meetingLocation: CLLocationCoordinate2D(latitude: 0.0, longitude: 0.0), // 기본 좌표값
-            meetingMemberID: [] // 빈 배열로 초기화
+    @Published var meeting: AddMeetingModel = AddMeetingModel( // 이 정보들을 Firebase로 보내야함
+         
         )
+
+    struct Meeting {
+        var meetingName: String = ""
+        var meetingDate: Date = Date()
+        var meetingAddress: String? = nil
+        var meetingLocation: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 0, longitude: 0)
+    }
+    func updateMeetingLocation(coordinate: CLLocationCoordinate2D, address: String) {
+            // meeting의 속성을 직접 업데이트
+            meeting.meetingLocation = coordinate
+            meeting.meetingAddress = address
+        }
+    
+    
     func addMeeting() {
-        
+        // 파이어베이스로 속성 보내는 로직
     }
 }

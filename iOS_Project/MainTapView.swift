@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NMapsMap
 
 struct MainTabView: View {
     var body: some View {
