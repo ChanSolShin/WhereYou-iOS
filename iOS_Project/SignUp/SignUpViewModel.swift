@@ -21,9 +21,7 @@ class SignUpViewModel: ObservableObject { // 이 항목들 서버로 보내서 �
     @Published var signUpErrorMessage: String?
     @Published var signUpSuccess: Bool = false
     
-    init() {
-            // 초기화 코드 (네트워크 요청, 데이터베이스 접근 등은 여기서 하지 않도록)
-        }
+   
     
     private var db = Firestore.firestore()
     
