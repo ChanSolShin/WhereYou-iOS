@@ -11,7 +11,7 @@ import SwiftUI
 
 
 final class Coordinator: NSObject, ObservableObject, NMFMapViewCameraDelegate, NMFMapViewTouchDelegate, NMFMapViewOptionDelegate {
-    // Coordinator가 AddMeetingViewModel을 직접 받을 수 있도록 생성자를 수정합니다.
+    // Coordinator가 AddMeetingViewModel을 직접 받을 수 있도록 생성자를 수정
     var addMeetingViewModel: AddMeetingViewModel
     
     let view = NMFNaverMapView(frame: .zero)
@@ -28,7 +28,7 @@ final class Coordinator: NSObject, ObservableObject, NMFMapViewCameraDelegate, N
         view.mapView.isNightModeEnabled = true
         view.mapView.zoomLevel = 15
         view.mapView.minZoomLevel = 10
-        view.mapView.maxZoomLevel = 17
+        view.mapView.maxZoomLevel = 18
         view.showLocationButton = true
         view.showZoomControls = true
         view.showCompass = false

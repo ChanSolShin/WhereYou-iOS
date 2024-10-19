@@ -38,6 +38,7 @@ struct NaverMap: UIViewRepresentable {
         coordinator
     }
 
+    
     func makeUIView(context: Context) -> NMFNaverMapView {
         let naverMapView = context.coordinator.getNaverMapView()
         naverMapView.mapView.touchDelegate = context.coordinator
