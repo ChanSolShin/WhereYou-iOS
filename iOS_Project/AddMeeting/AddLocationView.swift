@@ -14,6 +14,7 @@ struct AddLocationView: View {
 
     var body: some View {
         Text("원하는 장소를 터치해주세요")
+            .padding(.top,10)
             .font(.headline)
         ZStack(alignment: .bottomTrailing) {
             MapView(isMarkerEnabled: true, viewModel: viewModel)
