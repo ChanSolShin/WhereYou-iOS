@@ -9,7 +9,7 @@ import Foundation
 
 // 테스트용 코드. if you want test, Comment this code
 class MeetingListViewModel: ObservableObject {
-    @Published var meetings: [MeetingListModel] = [
+    @Published var meetings: [MeetingListModel] = [ // Firebase에서 meeting의 정보를 가져와야함.
         MeetingListModel(title: "술", date: createDate(year: 2024, month: 10, day: 13, hour: 18, minute: 0) ?? Date()),
 //        MeetingListModel(title: "에니악모임", date: createDate(year: 2024, month: 10, day: 14, hour: 12, minute: 30) ?? Date()),
 //        MeetingListModel(title: "저녁 데이트", date: createDate(year: 2024, month: 10, day: 15, hour: 19, minute: 0) ?? Date()),
