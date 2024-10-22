@@ -28,6 +28,8 @@ class AddMeetingViewModel: ObservableObject {
     
     
     func addMeeting() {
-        // 파이어베이스로 속성 보내는 로직
+        // 파이어베이스로 속성 보내는 로직. 속성을 보내면 AddMeetingModel 초기화
     }
 }
+
+

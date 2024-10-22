@@ -9,7 +9,7 @@ import SwiftUI
 import NMapsMap
 
 struct MeetingView: View {
-    var meeting: MeetingListModel // 매개변수로 Meeting 객체를 받아옴
+    var meeting: MeetingListModel // 임시코드. Firebase에서 meeting의 정보를 가져와야함.
 
     var body: some View {
         VStack {
