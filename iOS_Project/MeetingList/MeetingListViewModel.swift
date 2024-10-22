@@ -31,14 +31,15 @@ class MeetingListViewModel: ObservableObject {
                         guard let title = data["meetingName"] as? String,
                               let timestamp = data["meetingDate"] as? Timestamp,
                               let address = data["meetingAddress"] as? String,
-                              let location = data["meetingLocation"] as? GeoPoint else {
+                              let location = data["meetingLocation"] as? GeoPoint,
+                              let memberIDs = data["meetingMembers"] as? [String] else { // ID 가져오기
                             return nil
                         }
                         
                         let date = timestamp.dateValue()
                         let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
                         
-                        return MeetingListModel(title: title, date: date, meetingAddress: address, meetingLocation: coordinate)
+                        return MeetingListModel(title: title, date: date, meetingAddress: address, meetingLocation: coordinate, meetingMemberIDs: memberIDs)
                     }
                     self.meetings.sort { $0.date < $1.date }
                 }
@@ -51,7 +52,7 @@ class MeetingListViewModel: ObservableObject {
         let meeting = meetings[index]
         
         // MeetingModel에 변환하여 MeetingViewModel에 전달
-        let meetingModel = MeetingModel(title: meeting.title, date: meeting.date, meetingAddress: meeting.meetingAddress, meetingLocation: meeting.meetingLocation)
+        let meetingModel = MeetingModel(title: meeting.title, date: meeting.date, meetingAddress: meeting.meetingAddress, meetingLocation: meeting.meetingLocation, meetingMemberIDs: meeting.meetingMemberIDs)
         meetingViewModel.selectMeeting(meeting: meetingModel)
     }
 }
