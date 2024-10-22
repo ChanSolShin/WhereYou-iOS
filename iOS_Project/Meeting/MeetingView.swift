@@ -16,11 +16,11 @@ import SwiftUI
 import NMapsMap
 
 struct MeetingView: View {
-    var meeting: MeetingListModel // 임시코드. Firebase에서 meeting의 정보를 가져와야함.
+    var meeting: MeetingListModel
 
     var body: some View {
         VStack {
-            //MapView(isMarkerEnabled: false, viewModel: viewModel) // 해당 meeting의 Location을 받아오고 초기값으로 설정
+            Text(meeting.meetingAddress)
         }
         .navigationTitle(meeting.title)
         .navigationBarTitleDisplayMode(.inline)
