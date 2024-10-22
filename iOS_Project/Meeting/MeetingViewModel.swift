@@ -7,11 +7,12 @@
 
 import Foundation
 import CoreLocation
+import FirebaseFirestore
 
 class MeetingViewModel: ObservableObject {
-    @Published var selectedMeeting: MeetingModel?
+    @Published var meetingLocation: CLLocationCoordinate2D?
 
     func selectMeeting(meeting: MeetingModel) {
-        self.selectedMeeting = meeting
+        self.meetingLocation = meeting.meetingLocation
     }
 }

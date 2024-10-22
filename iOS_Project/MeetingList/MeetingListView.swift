@@ -9,41 +9,41 @@ import SwiftUI
 import NMapsMap
 
 struct MeetingListView: View {
-    @StateObject private var meetingViewModel = MeetingViewModel() // MeetingViewModel 인스턴스 생성
-    @StateObject private var viewModel: MeetingListViewModel
+    @StateObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel())
+    // ViewModel 인스턴스 생성
+    @State private var searchText = "" // 검색 텍스트
+    @State private var isSearching = false // 검색 상태
     
-    @State private var searchText = ""
-    @State private var isSearching = false
     
-    init() {
-        let meetingViewModel = MeetingViewModel()
-        _viewModel = StateObject(wrappedValue: MeetingListViewModel(meetingViewModel: meetingViewModel))
-    }
     
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
+                
                 VStack {
                     HStack {
                         Text("모임")
                             .font(.largeTitle)
                             .foregroundColor(.black)
                             .padding()
-                            .padding(.top, 15)
+                            .padding(.top,15)
                         Spacer()
+                        // 돋보기 버튼 추가
                         Button(action: {
                             withAnimation {
                                 isSearching.toggle()
                             }
                         }) {
+                            
                             Image(systemName: "magnifyingglass")
                                 .font(.title)
                         }
                         .padding(.trailing)
-                        .padding(.top, 15)
+                        .padding(.top,15)
                     }
+                    // 검색 상태에 따라 텍스트 필드 표시
                     if isSearching {
-                        HStack {
+                        HStack{
                             Image(systemName: "magnifyingglass")
                                 .padding(.leading, 10)
                             TextField("검색어를 입력하세요", text: $searchText)
@@ -63,7 +63,7 @@ struct MeetingListView: View {
                     ScrollView {
                         VStack(spacing: 10) {
                             ForEach(viewModel.meetings.filter { meeting in
-                                searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText)
+                                searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
                             }) { meeting in
                                 NavigationLink(destination: MeetingView(meeting: meeting)) {
                                     HStack {
@@ -72,28 +72,25 @@ struct MeetingListView: View {
                                             .padding()
                                             .foregroundColor(.black)
                                         Spacer()
-                                        VStack(alignment: .trailing) {
-                                            Text("\(meeting.date, formatter: dateFormatter)")
+                                        VStack(alignment: .trailing) { // 텍스트 정렬을 오른쪽으로 설정
+                                            Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
                                                 .font(.subheadline)
                                                 .foregroundColor(.gray)
-                                            Text(meeting.meetingAddress)
+                                            Text(meeting.meetingAddress) // 오른쪽에 모임 장소 표시
                                                 .font(.subheadline)
                                                 .foregroundColor(.gray)
                                         }
                                         .padding()
                                     }
-                                }
-                                .onTapGesture {
-                                    if let index = viewModel.meetings.firstIndex(where: { $0.id == meeting.id }) {
-                                        viewModel.selectMeeting(at: index) // 선택한 모임 정보를 MeetingViewModel에 전달
-                                    }
+                                    
                                 }
                                 Divider()
                             }
                         }
-                        .padding(.horizontal)
-                    }
+                        .padding(.horizontal)                    }
                 }
+                
+                // 모임생성 버튼
                 NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel()), label: {
                     Text(" + 모임생성")
                         .font(.title2)
