@@ -36,6 +36,7 @@
 		EA86C1482CC2F7A100989E43 /* AddLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1472CC2F79A00989E43 /* AddLocationView.swift */; };
 		EA86C14C2CC2FBAD00989E43 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1492CC2FBAD00989E43 /* Coordinator.swift */; };
 		EA86C14D2CC2FBAD00989E43 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C14A2CC2FBAD00989E43 /* MapView.swift */; };
+		EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */; };
 		EAD481B02CBD7D4B0052D22B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EAD481AF2CBD7D4B0052D22B /* FirebaseAuth */; };
 		EAD481B22CBD7D4B0052D22B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EAD481B12CBD7D4B0052D22B /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
@@ -89,6 +90,7 @@
 		EA86C1472CC2F79A00989E43 /* AddLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLocationView.swift; sourceTree = "<group>"; };
 		EA86C1492CC2FBAD00989E43 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
 		EA86C14A2CC2FBAD00989E43 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
+		EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingMapView.swift; sourceTree = "<group>"; };
 		EABADF2B2CB9223E00962A40 /* iOS_Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOS_Project.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EABADF3B2CB9224100962A40 /* iOS_ProjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOS_ProjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EABADF452CB9224100962A40 /* iOS_ProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOS_ProjectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -172,6 +174,7 @@
 		EA86C10E2CC2F15700989E43 /* Meeting */ = {
 			isa = PBXGroup;
 			children = (
+				EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */,
 				EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */,
 				EA86C10D2CC2F15700989E43 /* MeetingView.swift */,
 				EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */,
@@ -468,6 +471,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA86C1212CC2F15700989E43 /* AddMeetingModel.swift in Sources */,
+				EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */,
 				EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */,
 				EA86C1232CC2F15700989E43 /* AddMeetingViewModel.swift in Sources */,
 				EA86C1242CC2F15700989E43 /* FriendView.swift in Sources */,
