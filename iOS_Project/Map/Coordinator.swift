@@ -27,7 +27,7 @@ final class Coordinator: NSObject, ObservableObject, NMFMapViewCameraDelegate, N
         view.mapView.positionMode = .direction
         view.mapView.isNightModeEnabled = true
         view.mapView.zoomLevel = 15
-        view.mapView.minZoomLevel = 10
+        view.mapView.minZoomLevel = 5
         view.mapView.maxZoomLevel = 18
         view.showLocationButton = true
         view.showZoomControls = true
