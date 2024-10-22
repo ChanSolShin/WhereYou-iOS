@@ -29,7 +29,6 @@ struct AddMeetingView: View {
                     .frame(width: 350, height: 40)
                     .keyboardType(.default) // 키보드 타입 변경
                     .background(Color.gray.opacity(0.2))
-                   // .padding(.top, 100) // 네비게이션 바와의 간격 조정
                 
                 // 날짜 선택 버튼과 선택된 날짜 표시
                 
@@ -78,6 +77,7 @@ struct AddMeetingView: View {
                 
                 // 추가하기 버튼
                 Button(action: {
+                    viewModel.addMeeting() // 파이어베이스로 미팅 정보 전송
                     presentationMode.wrappedValue.dismiss()
                     // 디버그 출력
                     print("모임 이름: \(viewModel.meeting.meetingName)")

@@ -6,10 +6,21 @@
 //
 
 import Foundation
+import CoreLocation
 
 struct MeetingListModel: Identifiable {
-    let id = UUID() // 고유 ID
-    var title: String // 모임 제목
-    var date: Date // 모임 날짜, 시간
-   // var Name: String // 모임 이름
+    var id: UUID // UUID로 정의
+    var title: String
+    var date: Date
+    var meetingAddress: String // 모임 주소
+    var meetingLocation: CLLocationCoordinate2D // 모임 좌표
+
+    // 초기화 메서드
+    init(title: String, date: Date, meetingAddress: String, meetingLocation: CLLocationCoordinate2D) {
+        self.id = UUID() // 새로운 UUID 생성
+        self.title = title
+        self.date = date
+        self.meetingAddress = meetingAddress
+        self.meetingLocation = meetingLocation
+    }
 }

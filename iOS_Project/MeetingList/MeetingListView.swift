@@ -71,11 +71,16 @@ struct MeetingListView: View {
                                             .padding()
                                             .foregroundColor(.black)
                                         Spacer()
-                                        Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
+                                        VStack(alignment: .trailing) { // 텍스트 정렬을 오른쪽으로 설정
+                                            Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                            Text(meeting.meetingAddress) // 오른쪽에 모임 장소 표시
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
+                                        .padding()
                                     }
-                                    .padding()
                                 }
                                 Divider()
                             }
@@ -95,14 +100,6 @@ struct MeetingListView: View {
                 })
             }
         }
-    }
-    
-    
-    private var dateFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        return formatter
     }
 }
 
