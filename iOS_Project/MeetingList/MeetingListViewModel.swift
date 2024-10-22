@@ -4,7 +4,6 @@
 //
 //  Created by 신찬솔 on 10/13/24.
 //
-
 import Foundation
 import FirebaseFirestore
 import Combine
@@ -14,8 +13,10 @@ class MeetingListViewModel: ObservableObject {
     @Published var meetings: [MeetingListModel] = []
     
     private var db = Firestore.firestore()
+    var meetingViewModel: MeetingViewModel // MeetingViewModel 인스턴스 추가
     
-    init() {
+    init(meetingViewModel: MeetingViewModel) {
+        self.meetingViewModel = meetingViewModel
         fetchMeetings()
     }
     
@@ -27,8 +28,6 @@ class MeetingListViewModel: ObservableObject {
                 if let snapshot = snapshot {
                     self.meetings = snapshot.documents.compactMap { document -> MeetingListModel? in
                         let data = document.data()
-                        
-                        // Firestore에서 meetingName, meetingDate, meetingAddress, meetingLocation 가져오기
                         guard let title = data["meetingName"] as? String,
                               let timestamp = data["meetingDate"] as? Timestamp,
                               let address = data["meetingAddress"] as? String,
@@ -36,20 +35,29 @@ class MeetingListViewModel: ObservableObject {
                             return nil
                         }
                         
-                        let date = timestamp.dateValue() // Firestore Timestamp를 Date로 변환
+                        let date = timestamp.dateValue()
                         let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
                         
-                        // MeetingListModel 초기화
                         return MeetingListModel(title: title, date: date, meetingAddress: address, meetingLocation: coordinate)
                     }
-                    self.meetings.sort { $0.date < $1.date } // 날짜 기준으로 오름차순 정렬
+                    self.meetings.sort { $0.date < $1.date }
                 }
             }
         }
     }
     
-    // Date 생성 함수는 그대로 유지
-    static func createDate(year: Int, month: Int, day: Int, hour: Int, minute: Int) -> Date? {
+    func selectMeeting(at index: Int) {
+        guard index < meetings.count else { return }
+        let meeting = meetings[index]
+        
+        // MeetingModel에 변환하여 MeetingViewModel에 전달
+        let meetingModel = MeetingModel(title: meeting.title, date: meeting.date, meetingAddress: meeting.meetingAddress, meetingLocation: meeting.meetingLocation)
+        meetingViewModel.selectMeeting(meeting: meetingModel)
+    }
+}
+
+    
+func createDate(year: Int, month: Int, day: Int, hour: Int, minute: Int) -> Date? {
         var dateComponents = DateComponents()
         dateComponents.year = year
         dateComponents.month = month
@@ -58,7 +66,7 @@ class MeetingListViewModel: ObservableObject {
         dateComponents.minute = minute
         return Calendar.current.date(from: dateComponents)
     }
-}
+
 var dateFormatter: DateFormatter {
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "ko_KR")
