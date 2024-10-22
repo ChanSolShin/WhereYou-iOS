@@ -5,6 +5,13 @@
 //  Created by 신찬솔 on 10/13/24.
 //
 
+//
+//  MeetingView.swift
+//  iOS_Project
+//
+//  Created by 신찬솔 on 10/13/24.
+//
+
 import SwiftUI
 import NMapsMap
 
@@ -13,7 +20,7 @@ struct MeetingView: View {
 
     var body: some View {
         VStack {
-          
+            //MapView(isMarkerEnabled: false, viewModel: viewModel) // 해당 meeting의 Location을 받아오고 초기값으로 설정
         }
         .navigationTitle(meeting.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -27,8 +34,3 @@ struct MeetingView: View {
     }
 }
 
-struct MeetingView_Previews: PreviewProvider {
-    static var previews: some View {
-        MeetingView(meeting: MeetingListModel(title: "Sample Meeting", date: Date()))
-    }
-}
