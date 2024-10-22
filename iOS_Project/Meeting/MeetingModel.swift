@@ -9,11 +9,12 @@ import Foundation
 import CoreLocation
 
 struct MeetingModel {
-    var id: UUID 
+    var id: UUID
     var title: String
     var date: Date
     var meetingAddress: String
     var meetingLocation: CLLocationCoordinate2D
+ 
 
     init(title: String, date: Date, meetingAddress: String, meetingLocation: CLLocationCoordinate2D) {
         self.id = UUID()
@@ -21,5 +22,6 @@ struct MeetingModel {
         self.date = date
         self.meetingAddress = meetingAddress
         self.meetingLocation = meetingLocation
+  
     }
 }

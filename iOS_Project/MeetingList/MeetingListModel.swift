@@ -12,14 +12,17 @@ struct MeetingListModel: Identifiable {
     var id: UUID
     var title: String
     var date: Date
-    var meetingAddress: String // 모임 주소
-    var meetingLocation: CLLocationCoordinate2D // 모임 좌표
+    var meetingAddress: String
+    var meetingLocation: CLLocationCoordinate2D
+    
 
+  
     init(title: String, date: Date, meetingAddress: String, meetingLocation: CLLocationCoordinate2D) {
-        self.id = UUID() // 새로운 UUID 생성
+        self.id = UUID() 
         self.title = title
         self.date = date
         self.meetingAddress = meetingAddress
         self.meetingLocation = meetingLocation
+   
     }
 }
