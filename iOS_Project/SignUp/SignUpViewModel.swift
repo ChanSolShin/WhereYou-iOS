@@ -27,7 +27,7 @@ class SignUpViewModel: ObservableObject { // 이 항목들 서버로 보내서 �
     
     // 회원가입 버튼이 정상적으로 눌려지기 위한 조건. 이 조건을 충족시키지 못할 경우 회원가입 버튼이 눌리지 않음.
     var successCreate: Bool {
-        return username.isEmpty || !isValidEmail || password.isEmpty || confirmPassword.isEmpty || !passwordMatches || realName.isEmpty || birthday.count != 8 || phoneNumber.count != 11
+        return username.isEmpty || !isValidEmail || password.count < 6 || confirmPassword.isEmpty || !passwordMatches || realName.isEmpty || birthday.count != 8 || phoneNumber.count != 11
     }
     
     var passwordMatches: Bool {
