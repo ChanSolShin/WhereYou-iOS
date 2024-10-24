@@ -19,7 +19,7 @@ class MeetingListViewModel: ObservableObject {
         self.meetingViewModel = meetingViewModel
         fetchMeetings()
     }
-    
+        
     func fetchMeetings() {
         db.collection("meetings").addSnapshotListener { (snapshot, error) in
             if let error = error {
@@ -32,14 +32,15 @@ class MeetingListViewModel: ObservableObject {
                               let timestamp = data["meetingDate"] as? Timestamp,
                               let address = data["meetingAddress"] as? String,
                               let location = data["meetingLocation"] as? GeoPoint,
-                              let memberIDs = data["meetingMembers"] as? [String] else { // ID 가져오기
+                              let memberIDs = data["meetingMembers"] as? [String],
+                              let masterID = data["meetingMaster"] as? String else { 
                             return nil
                         }
                         
                         let date = timestamp.dateValue()
                         let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
                         
-                        return MeetingListModel(title: title, date: date, meetingAddress: address, meetingLocation: coordinate, meetingMemberIDs: memberIDs)
+                        return MeetingListModel(title: title, date: date, meetingAddress: address, meetingLocation: coordinate, meetingMemberIDs: memberIDs, meetingMasterID: masterID)
                     }
                     self.meetings.sort { $0.date < $1.date }
                 }
@@ -52,7 +53,7 @@ class MeetingListViewModel: ObservableObject {
         let meeting = meetings[index]
         
         // MeetingModel에 변환하여 MeetingViewModel에 전달
-        let meetingModel = MeetingModel(title: meeting.title, date: meeting.date, meetingAddress: meeting.meetingAddress, meetingLocation: meeting.meetingLocation, meetingMemberIDs: meeting.meetingMemberIDs)
+        let meetingModel = MeetingModel(title: meeting.title, date: meeting.date, meetingAddress: meeting.meetingAddress, meetingLocation: meeting.meetingLocation, meetingMemberIDs: meeting.meetingMemberIDs, meetingMasterID: meeting.meetingMasterID)
         meetingViewModel.selectMeeting(meeting: meetingModel)
     }
 }
