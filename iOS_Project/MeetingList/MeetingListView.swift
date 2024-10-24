@@ -24,6 +24,7 @@ struct MeetingListView: View {
                     HStack {
                         Text("모임")
                             .font(.largeTitle)
+                            .fontWeight(.bold)
                             .foregroundColor(.black)
                             .padding()
                             .padding(.top,15)
