@@ -21,6 +21,10 @@ class AddMeetingViewModel: ObservableObject {
         var meetingMembers: [String] = [] 
     }
     
+    var successAddMeeting: Bool {
+        return meeting.meetingName.isEmpty || meeting.meetingAddress == nil 
+    }
+    
     func updateMeetingLocation(coordinate: CLLocationCoordinate2D, address: String) {
         meeting.meetingLocation = coordinate
         meeting.meetingAddress = address
