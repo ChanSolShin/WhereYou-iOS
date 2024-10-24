@@ -73,6 +73,7 @@ struct AddMeetingView: View {
                         .imageScale(.small)
                     Text(viewModel.meeting.meetingAddress ?? "선택된 장소 없음")
                         .font(.headline)
+                    
                 }
                 
                 // 추가하기 버튼

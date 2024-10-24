@@ -11,11 +11,12 @@ import NMapsMap
 struct AddLocationView: View {
     @ObservedObject var viewModel: AddMeetingViewModel
     @Environment(\.presentationMode) var presentationMode
-
+    
     var body: some View {
         Text("원하는 장소를 터치해주세요")
             .padding(.top,10)
             .font(.headline)
+            .fontWeight(.bold)
         ZStack(alignment: .bottomTrailing) {
             MapView(isMarkerEnabled: true, viewModel: viewModel)
                 .navigationBarHidden(true)
@@ -24,7 +25,9 @@ struct AddLocationView: View {
             VStack{
                 Text(viewModel.meeting.meetingAddress ?? "지정 된 장소 없음")
                     .font(.headline)
-                            .multilineTextAlignment(.center)
+                    .multilineTextAlignment(.center)
+                    .fontWeight(.bold)
+                
                 
                 HStack {
                     Button("선택") {
