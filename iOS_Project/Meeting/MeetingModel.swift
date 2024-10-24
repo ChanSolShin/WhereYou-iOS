@@ -15,13 +15,15 @@ struct MeetingModel {
     var meetingAddress: String
     var meetingLocation: CLLocationCoordinate2D
     var meetingMemberIDs: [String]
-
-    init(title: String, date: Date, meetingAddress: String, meetingLocation: CLLocationCoordinate2D, meetingMemberIDs: [String]) {
+    var meetingMasterID: String
+    
+    init(title: String, date: Date, meetingAddress: String, meetingLocation: CLLocationCoordinate2D, meetingMemberIDs: [String], meetingMasterID: String) {
         self.id = UUID()
         self.title = title
         self.date = date
         self.meetingAddress = meetingAddress
         self.meetingLocation = meetingLocation
         self.meetingMemberIDs = meetingMemberIDs
+        self.meetingMasterID = meetingMasterID
     }
 }
