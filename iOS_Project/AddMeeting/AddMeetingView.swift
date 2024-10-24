@@ -16,7 +16,7 @@ struct AddMeetingView: View {
     @State private var showDatePicker = false
     @State private var showLocationModal = false
     @Environment(\.presentationMode) var presentationMode
-
+    
     var body: some View {
         NavigationView{
             VStack(spacing: 20) {
@@ -32,19 +32,19 @@ struct AddMeetingView: View {
                 
                 // 날짜 선택 버튼과 선택된 날짜 표시
                 
-                    Button(action: {
-                        showDatePicker.toggle()
-                    }) {
-                        Text("날짜 선택")
-                            .font(.headline)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .frame(width: 100, height: 50)
-                    }
-                    // 선택된 날짜를 텍스트로 표시
+                Button(action: {
+                    showDatePicker.toggle()
+                }) {
+                    Text("날짜 선택")
+                        .font(.headline)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .frame(width: 100, height: 50)
+                }
+                // 선택된 날짜를 텍스트로 표시
                 HStack{
                     Image(systemName: "calendar")
                         .foregroundColor(.gray)
@@ -77,6 +77,10 @@ struct AddMeetingView: View {
                 
                 // 추가하기 버튼
                 Button(action: {
+                    // 햅틱 피드백 생성
+                    let generator = UIImpactFeedbackGenerator(style: .medium)
+                    generator.impactOccurred() // 햅틱 반응 발생
+                    
                     viewModel.addMeeting() // 파이어베이스로 미팅 정보 전송
                     presentationMode.wrappedValue.dismiss()
                     // 디버그 출력
@@ -91,10 +95,12 @@ struct AddMeetingView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
+                        .background(viewModel.successAddMeeting ? Color.gray : Color.blue)
                         .background(Color.blue)
                         .cornerRadius(30)
                         .frame(width: 150, height: 50)
                 }
+                .disabled(viewModel.successAddMeeting)
                 .padding(.horizontal, 20)
                 .padding(.top, 100)
             }
@@ -117,10 +123,10 @@ struct AddMeetingView: View {
                 AddLocationView(viewModel: viewModel)
             }
             
-                    }
+        }
         .navigationTitle("모임추가")
         .font(.largeTitle)
-
+        
     }
     var dateFormatter: DateFormatter {
         let formatter = DateFormatter()

@@ -92,13 +92,15 @@ struct MeetingListView: View {
                 
                 // 모임생성 버튼
                 NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel()), label: {
-                    Text(" + 모임생성")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                        .frame(width: 150, height: 50)
-                        .background(Color.blue)
-                        .cornerRadius(30)
+                    Image(systemName: "plus")
+                        .font(.largeTitle)
                         .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .clipShape(Circle())
+                        .shadow(radius: 5)
+                        .padding(.bottom, 20)
+                        .padding(.trailing, 20)
                 })
             }
         }

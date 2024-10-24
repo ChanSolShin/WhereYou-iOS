@@ -10,12 +10,12 @@ struct SignUpView: View {
     var body: some View {
         ScrollView {
             VStack {
-                Text("이름")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 25)
-                    .font(.caption)
-                    .padding(.horizontal, 10)
-                    .padding(.top, 50)
+                Text("MyApp")
+                    .font(.largeTitle)
+                    .padding(.top, 20)
+                    .padding(.bottom, 60)
+                    .fontWeight(.bold)
+                
                 HStack {
                     Image(systemName: "person.fill")
                         .foregroundColor(.gray)
@@ -27,12 +27,6 @@ struct SignUpView: View {
                 .background(Color.gray.opacity(0.2))
                 .cornerRadius(8)
                 .padding(.horizontal, 30)
-                
-                Text("생년월일")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 25)
-                    .font(.caption)
-                    .padding(.horizontal, 10)
                 HStack {
                     Image(systemName: "calendar")
                         .foregroundColor(.gray)
@@ -51,17 +45,12 @@ struct SignUpView: View {
                 .background(Color.gray.opacity(0.2))
                 .cornerRadius(8)
                 .padding(.horizontal, 30)
-                
-                Text("휴대폰번호")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 25)
-                    .font(.caption)
-                    .padding(.horizontal, 10)
+ 
                 HStack {
                     Image(systemName: "phone")
                         .foregroundColor(.gray)
                         .imageScale(.small)
-                    TextField("휴대폰번호 ( - 없이)", text: $viewModel.phoneNumber)
+                    TextField("휴대전화 ( - 없이)", text: $viewModel.phoneNumber)
                         .keyboardType(.numberPad)
                     // 글자수 제한
                         .onChange(of:  viewModel.phoneNumber) { newValue in
@@ -75,13 +64,7 @@ struct SignUpView: View {
                 .background(Color.gray.opacity(0.2))
                 .cornerRadius(8)
                 .padding(.horizontal, 30)
-                
-                // 이메일 입력 필드
-                Text("이메일")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 25)
-                    .font(.caption)
-                    .padding(.horizontal, 10)
+
                 HStack {
                     Image(systemName: "person")
                         .foregroundColor(.gray)
@@ -106,11 +89,6 @@ struct SignUpView: View {
                 }
                 
                 // 비밀번호 입력 필드
-                Text("비밀번호")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 25)
-                    .font(.caption)
-                    .padding(.horizontal, 10)
                 HStack {
                     Image(systemName: "lock")
                         .foregroundColor(.gray)
@@ -149,16 +127,12 @@ struct SignUpView: View {
                 }
                 
                 // 비밀번호 확인 입력 필드
-                Text("비밀번호확인")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 25)
-                    .font(.caption)
-                    .padding(.horizontal, 10)
+
                 HStack {
                     Image(systemName: "lock")
                         .foregroundColor(.gray)
                         .imageScale(.small)
-                    SecureField("비밀번호확인", text: $viewModel.confirmPassword)
+                    SecureField("비밀번호 확인", text: $viewModel.confirmPassword)
                         .font(.system(size: 16))
                         .autocapitalization(.none)
                     
@@ -179,23 +153,22 @@ struct SignUpView: View {
                 .cornerRadius(10)
                 .padding(.horizontal, 30)
                 
-                
-                // 버튼을 탭 했을때 서버로 텍스트박스 필드 내용 전송 하는 로직 구성 해야함
+            
                 Button(action: {
                     viewModel.signUp() // Firebase 회원가입 및 계정 추가 정보 Firestore 저장
                     //회원가입 성공 시, 로그인 화면으로
                     if viewModel.signUpSuccess{
                         presentationMode.wrappedValue.dismiss()
                     }
-                    
                 }) {
                     Text("회원가입")
-                        .padding(.leading, 250)
+                        .frame(width: 370, height: 50)
                         .font(.system(size: 20))
-                        .foregroundColor(.blue)
+                        .background(viewModel.successCreate ? Color.gray : Color.blue)
+                        .foregroundColor(.white)
+                        .fontWeight(.bold)
+                        .cornerRadius(40)
                         .padding()
-                        .cornerRadius(8)
-                        .opacity(viewModel.successCreate ? 0.5 : 1)
                 }
                 // 모든 텍스트 필드가 제대로 채워지지 않으면 회원가입 버튼을 누를 수 없음
                 .disabled(viewModel.successCreate)

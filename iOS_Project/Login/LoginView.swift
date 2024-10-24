@@ -22,20 +22,21 @@ struct LoginView: View {
                 // 앱 이름 표시
                 Text("MyApp")
                     .font(.largeTitle)
-                    .padding(.top, 70)
-                    .padding(.bottom, 70)
+                    .padding(.top, 60)
+                    .padding(.bottom, 10)
+                    .fontWeight(.bold)
                 
                 // 이메일
-                Text("Email address")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 25)
-                    .font(.headline)
-                    .padding(.horizontal, 10)
+                Text("로그인")
+                    .font(.title2)
+                    .padding(.bottom, 50)
+                    .fontWeight(.bold)
+
                 
                 HStack {
                     Image(systemName: "person")
                         .foregroundColor(.gray)
-                    TextField("이메일", text: $viewModel.user.username)
+                    TextField("이메일을 입력하세요", text: $viewModel.user.username)
                         .autocapitalization(.none)
                         .keyboardType(.emailAddress)
                 }
@@ -45,23 +46,18 @@ struct LoginView: View {
                 .padding(.horizontal, 30)
                 
                 // 비밀번호
-                Text("Password")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 25)
-                    .font(.headline)
-                    .padding(.horizontal, 10)
-                    .padding(.top,20)
+         
                 
                 HStack {
                     Image(systemName: "lock")
                         .foregroundColor(.gray)
                     
                     if showPassword {
-                        TextField("비밀번호", text: $viewModel.user.password)
+                        TextField("비밀번호번호를 입력하세요", text: $viewModel.user.password)
                             .font(.system(size: 16))
                             .autocapitalization(.none)
                     } else {
-                        SecureField("비밀번호", text: $viewModel.user.password)
+                        SecureField("비밀번호를 입력하세요", text: $viewModel.user.password)
                             .font(.system(size: 16))
                             .autocapitalization(.none)
                     }
@@ -78,37 +74,64 @@ struct LoginView: View {
                 .background(Color.gray.opacity(0.2))
                 .cornerRadius(8)
                 .padding(.horizontal, 30)
-                .padding(.bottom, 40)
+                .padding(.bottom, 5)
+                
+                
+                Text("비밀번호 찾기") // 비밀번호 찾기 구현해야함.
+                    .font(.system(size: 14))
+                    .padding(.leading, 300)
+                    .foregroundColor(.gray)
+                    .underline()
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 20)
                 
                 // 로그인 및 회원가입 버튼
-                HStack(spacing: 80) {
-                    Button("로그인") {
-                        viewModel.login() // Firebase 로그인 호출
-                        showAlert = false // 새로운 시도를 할 때 알림창을 숨김
+                NavigationLink(destination: MainTabView(), isActive: $viewModel.isLoggedIn) {
+                    Button(action: {
+                        viewModel.login()
+                        showAlert = false
+                    }) {
+                        Text("이메일로 로그인") // 버튼에 표시할 텍스트
+                            .frame(width: 350, height: 50)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .fontWeight(.bold)
+                            .cornerRadius(40)
                     }
-                    .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
-                        MainTabView() // 로그인 성공 시 MainTabView로 전환
+                    .contentShape(Rectangle())
+                }
+                .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
+                    MainTabView() // 로그인 성공 시 MainTabView로 전환
+                }
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("로그인 실패"),
+                        message: Text("이메일 또는 비밀번호가 일치하지 않습니다."),
+                        dismissButton: .default(Text("확인"))
+                    )
+                }
+                .onChange(of: viewModel.loginErrorMessage) { errorMessage in
+                    if errorMessage != nil {
+                        showAlert = true // 로그인 실패 시 알림창 띄우기
+                        viewModel.loginErrorMessage = nil // 알림창을 다시 띄울 수 있도록 loginErrorMessage 초기화
                     }
-                    .alert(isPresented: $showAlert) {
-                        Alert(
-                            title: Text("로그인 실패"),
-                            message: Text("로그인에 실패하였습니다."),
-                            dismissButton: .default(Text("확인"))
-                        )
-                    }
-                    .onChange(of: viewModel.loginErrorMessage) { errorMessage in
-                        if errorMessage != nil {
-                            showAlert = true // 로그인 실패 시 알림창 띄우기
-                            viewModel.loginErrorMessage = nil // 알림창을 다시 띄울 수 있도록 loginErrorMessage 초기화
-                        }
-                    }
-                    
-                    .disabled(!viewModel.isValidEmail || viewModel.isPasswordEmpty)
-                    // 이메일 형식이 맞지 않거나, 패스워드가 비어있으면 로그인 버튼을 누를 수 없음.
-                    
+                }
+                    .padding(.bottom,20)
+                
+                HStack {
                     NavigationLink(destination: SignUpView()) {
                         Text("회원가입")
+                            .foregroundColor(.black)
+                            .underline()
                     }
+                    Text("|")
+                        .foregroundColor(.gray)
+                        .underline()
+                        .padding(.horizontal, 15)
+                    
+                    Text("이메일 찾기") // 이메일찾기 구현해야함
+                        .foregroundColor(.black)
+                        .underline()
                 }
                 .padding(.horizontal, 40)
                 Spacer()
