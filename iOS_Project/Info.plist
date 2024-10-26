@@ -2,13 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>위치 정보를 항상 사용합니다.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>위치 정보를 사용합니다.</string>
 	<key>NMFClientId</key>
 	<string>9clr0szv6s</string>
-	<key>UIUserInterfaceStyle</key>
-	<string></string>
 </dict>
 </plist>
