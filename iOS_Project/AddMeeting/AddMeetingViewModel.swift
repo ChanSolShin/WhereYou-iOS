@@ -45,6 +45,7 @@ class AddMeetingViewModel: ObservableObject {
         // 현재 사용자의 UID를 추가하여 meetingMembers 배열 생성
         let currentUserUID = Auth.auth().currentUser?.uid ?? ""
         meeting.meetingMaster.append(currentUserUID) // 현재 사용자 UID 마스터로 추가
+        meeting.meetingMembers.append(currentUserUID) 
 
         let meetingData: [String: Any] = [
             "meetingName": meeting.meetingName,
