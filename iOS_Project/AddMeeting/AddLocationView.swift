@@ -27,6 +27,9 @@ struct AddLocationView: View {
                     .font(.headline)
                     .multilineTextAlignment(.center)
                     .fontWeight(.bold)
+                    .background(Color.black)
+                    .foregroundColor(.white)
+                    .cornerRadius(5)
                 
                 
                 HStack {
