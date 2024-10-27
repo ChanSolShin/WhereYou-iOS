@@ -82,6 +82,9 @@ struct MeetingListView: View {
                                                 Text(meeting.meetingAddress) // 오른쪽에 모임 장소 표시
                                                     .font(.subheadline)
                                                     .foregroundColor(.gray)
+                                                Text("\(meeting.meetingMemberIDs.count)명") // 모임에 속한 멤버의 수
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
                                             }
                                             .padding()
                                         }
