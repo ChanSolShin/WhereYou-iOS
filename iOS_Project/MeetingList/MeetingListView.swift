@@ -66,7 +66,7 @@ struct MeetingListView: View {
                             ForEach(viewModel.meetings.filter { meeting in
                                 searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
                             }) { meeting in
-                                NavigationLink(destination: MeetingView(meeting: meeting, meetingViewModel: MeetingViewModel())
+                                NavigationLink(destination: MeetingView(meeting: meeting,  meetingViewModel: viewModel.meetingViewModel)
                                     .onAppear(){isTabBarHidden = true}
                                     .onDisappear(){isTabBarHidden = false}) {
                                         HStack {
