@@ -35,7 +35,7 @@ struct MeetingView: View {
             
             Button(action: {
                 title = "모임장소"
-                // 모임장소의 위치를 Map에 업데이트
+                // 이곳에 모임장소의 위치를 Map에 업데이트하는 코드
             }) {
                 Text("모임장소")
                     .padding()
@@ -53,7 +53,7 @@ struct MeetingView: View {
                             let memberID = meeting.meetingMemberIDs[index]
                             Button(action: {
                                 title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치"
-                                // 버튼에 해당하는 사람의 현재위치정보를 Map에 업데이트 해야함
+                                // 이곳에 버튼에 해당하는 사람의 현재위치정보를 Map에 업데이트하는 코드
                                 
                             }) {
                                 Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
