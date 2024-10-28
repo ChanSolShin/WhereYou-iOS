@@ -126,7 +126,7 @@ class FriendListViewModel: ObservableObject {
         db.collection("users").whereField("email", isEqualTo: email).getDocuments { (snapshot, error) in
             guard let document = snapshot?.documents.first else {
                 DispatchQueue.main.async {
-                    self.alertMessage = "가입된 회원이 아닙니다."
+                    self.alertMessage = "회원정보를 찾을 수 없습니다."
                     self.showAlert = true
                 }
                 return
@@ -141,7 +141,7 @@ class FriendListViewModel: ObservableObject {
                 .getDocuments { (snapshot, error) in
                     if let documents = snapshot?.documents, !documents.isEmpty {
                         DispatchQueue.main.async {
-                            self.alertMessage = "친구 요청을 이미 보냈습니다."
+                            self.alertMessage = "해당 사용자에게 친구 요청을 보낸 상태입니다."
                             self.showAlert = true
                         }
                         return
@@ -155,7 +155,7 @@ class FriendListViewModel: ObservableObject {
                         .getDocuments { (snapshot, error) in
                             if let documents = snapshot?.documents, !documents.isEmpty {
                                 DispatchQueue.main.async {
-                                    self.alertMessage = "해당 사용자에게 친구 요청이 이미 와 있습니다."
+                                    self.alertMessage = "해당 사용자에게 친구 요청이 온 상태입니다."
                                     self.showAlert = true
                                 }
                                 return
