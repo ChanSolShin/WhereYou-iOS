@@ -66,31 +66,40 @@ struct MeetingListView: View {
                             ForEach(viewModel.meetings.filter { meeting in
                                 searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
                             }) { meeting in
-                                NavigationLink(destination: MeetingView(meeting: meeting,  meetingViewModel: viewModel.meetingViewModel)
-                                    .onAppear(){isTabBarHidden = true}
-                                    .onDisappear(){isTabBarHidden = false}) {
-                                        HStack {
-                                            Text(meeting.title)
-                                                .font(.headline)
-                                                .padding()
-                                                .foregroundColor(.black)
-                                            Spacer()
-                                            VStack(alignment: .trailing) { // 텍스트 정렬을 오른쪽으로 설정
-                                                Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.gray)
-                                                Text(meeting.meetingAddress) // 오른쪽에 모임 장소 표시
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.gray)
-                                                Text("\(meeting.meetingMemberIDs.count)명") // 모임에 속한 멤버의 수
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.gray)
-                                            }
+                                NavigationLink(destination: MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
+                                    .onAppear { isTabBarHidden = true }
+                                    .onDisappear { isTabBarHidden = false }
+                                ) {
+                                    HStack {
+                                        Text(meeting.title)
+                                            .font(.headline)
                                             .padding()
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                        VStack(alignment: .trailing) { // 텍스트 정렬을 오른쪽으로 설정
+                                            Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                            Text(meeting.meetingAddress) // 오른쪽에 모임 장소 표시
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                            Text("\(meeting.meetingMemberIDs.count)명") // 모임에 속한 멤버의 수
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
                                         }
-                                        
+                                        .padding()
                                     }
+                                    .padding(.vertical, 8)
+                                    .background(Color.white)
+                                    .cornerRadius(8)
+                                    .shadow(radius: 2)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.blue, lineWidth: 2)
+                                    )
+                                }
                                 Divider()
+                                    .padding(.vertical, 2)
                             }
                         }
                         .padding(.horizontal)
