@@ -13,7 +13,7 @@
 		EA86C1212CC2F15700989E43 /* AddMeetingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1032CC2F15700989E43 /* AddMeetingModel.swift */; };
 		EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1042CC2F15700989E43 /* AddMeetingView.swift */; };
 		EA86C1232CC2F15700989E43 /* AddMeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1052CC2F15700989E43 /* AddMeetingViewModel.swift */; };
-		EA86C1242CC2F15700989E43 /* FriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1072CC2F15700989E43 /* FriendView.swift */; };
+		EA86C1242CC2F15700989E43 /* FriendListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1072CC2F15700989E43 /* FriendListView.swift */; };
 		EA86C1252CC2F15700989E43 /* LoginUserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1092CC2F15700989E43 /* LoginUserModel.swift */; };
 		EA86C1262CC2F15700989E43 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C10A2CC2F15700989E43 /* LoginView.swift */; };
 		EA86C1272CC2F15700989E43 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C10B2CC2F15700989E43 /* LoginViewModel.swift */; };
@@ -37,6 +37,11 @@
 		EA86C14C2CC2FBAD00989E43 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1492CC2FBAD00989E43 /* Coordinator.swift */; };
 		EA86C14D2CC2FBAD00989E43 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C14A2CC2FBAD00989E43 /* MapView.swift */; };
 		EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */; };
+		EAB9CBC02CCFEC7400BFA8DD /* FriendListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBBF2CCFEC6C00BFA8DD /* FriendListViewModel.swift */; };
+		EAB9CBC42CCFEDD400BFA8DD /* FriendModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBC32CCFEDCF00BFA8DD /* FriendModel.swift */; };
+		EAB9CBC62CCFF18900BFA8DD /* FriendRequestListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBC52CCFF17200BFA8DD /* FriendRequestListView.swift */; };
+		EAB9CBC82CCFF2B700BFA8DD /* FriendRequestModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBC72CCFF2B600BFA8DD /* FriendRequestModel.swift */; };
+		EAB9CBCE2CD0037300BFA8DD /* AddFriendModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBCD2CD0036D00BFA8DD /* AddFriendModal.swift */; };
 		EAD481B02CBD7D4B0052D22B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EAD481AF2CBD7D4B0052D22B /* FirebaseAuth */; };
 		EAD481B22CBD7D4B0052D22B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EAD481B12CBD7D4B0052D22B /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
@@ -66,7 +71,7 @@
 		EA86C1032CC2F15700989E43 /* AddMeetingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMeetingModel.swift; sourceTree = "<group>"; };
 		EA86C1042CC2F15700989E43 /* AddMeetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMeetingView.swift; sourceTree = "<group>"; };
 		EA86C1052CC2F15700989E43 /* AddMeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMeetingViewModel.swift; sourceTree = "<group>"; };
-		EA86C1072CC2F15700989E43 /* FriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendView.swift; sourceTree = "<group>"; };
+		EA86C1072CC2F15700989E43 /* FriendListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendListView.swift; sourceTree = "<group>"; };
 		EA86C1092CC2F15700989E43 /* LoginUserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginUserModel.swift; sourceTree = "<group>"; };
 		EA86C10A2CC2F15700989E43 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		EA86C10B2CC2F15700989E43 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
@@ -91,6 +96,11 @@
 		EA86C1492CC2FBAD00989E43 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
 		EA86C14A2CC2FBAD00989E43 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingMapView.swift; sourceTree = "<group>"; };
+		EAB9CBBF2CCFEC6C00BFA8DD /* FriendListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendListViewModel.swift; sourceTree = "<group>"; };
+		EAB9CBC32CCFEDCF00BFA8DD /* FriendModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendModel.swift; sourceTree = "<group>"; };
+		EAB9CBC52CCFF17200BFA8DD /* FriendRequestListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRequestListView.swift; sourceTree = "<group>"; };
+		EAB9CBC72CCFF2B600BFA8DD /* FriendRequestModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRequestModel.swift; sourceTree = "<group>"; };
+		EAB9CBCD2CD0036D00BFA8DD /* AddFriendModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendModal.swift; sourceTree = "<group>"; };
 		EABADF2B2CB9223E00962A40 /* iOS_Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOS_Project.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EABADF3B2CB9224100962A40 /* iOS_ProjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOS_ProjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EABADF452CB9224100962A40 /* iOS_ProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOS_ProjectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -156,7 +166,12 @@
 		EA86C1082CC2F15700989E43 /* Friend */ = {
 			isa = PBXGroup;
 			children = (
-				EA86C1072CC2F15700989E43 /* FriendView.swift */,
+				EAB9CBCD2CD0036D00BFA8DD /* AddFriendModal.swift */,
+				EAB9CBC72CCFF2B600BFA8DD /* FriendRequestModel.swift */,
+				EAB9CBC52CCFF17200BFA8DD /* FriendRequestListView.swift */,
+				EAB9CBC32CCFEDCF00BFA8DD /* FriendModel.swift */,
+				EAB9CBBF2CCFEC6C00BFA8DD /* FriendListViewModel.swift */,
+				EA86C1072CC2F15700989E43 /* FriendListView.swift */,
 			);
 			path = Friend;
 			sourceTree = "<group>";
@@ -474,9 +489,10 @@
 				EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */,
 				EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */,
 				EA86C1232CC2F15700989E43 /* AddMeetingViewModel.swift in Sources */,
-				EA86C1242CC2F15700989E43 /* FriendView.swift in Sources */,
+				EA86C1242CC2F15700989E43 /* FriendListView.swift in Sources */,
 				EA86C1252CC2F15700989E43 /* LoginUserModel.swift in Sources */,
 				EA86C14C2CC2FBAD00989E43 /* Coordinator.swift in Sources */,
+				EAB9CBC42CCFEDD400BFA8DD /* FriendModel.swift in Sources */,
 				EA86C14D2CC2FBAD00989E43 /* MapView.swift in Sources */,
 				EA86C1262CC2F15700989E43 /* LoginView.swift in Sources */,
 				EA28F4F82CC83C64004827A3 /* MeetingModel.swift in Sources */,
@@ -490,8 +506,12 @@
 				EA86C12E2CC2F15700989E43 /* SignUpView.swift in Sources */,
 				EA86C12F2CC2F15700989E43 /* SignUpViewModel.swift in Sources */,
 				EA28F4FA2CC83C6D004827A3 /* MeetingViewModel.swift in Sources */,
+				EAB9CBC02CCFEC7400BFA8DD /* FriendListViewModel.swift in Sources */,
+				EAB9CBC62CCFF18900BFA8DD /* FriendRequestListView.swift in Sources */,
 				EA86C1482CC2F7A100989E43 /* AddLocationView.swift in Sources */,
 				EA86C1302CC2F15700989E43 /* iOS_ProjectApp.swift in Sources */,
+				EAB9CBCE2CD0037300BFA8DD /* AddFriendModal.swift in Sources */,
+				EAB9CBC82CCFF2B700BFA8DD /* FriendRequestModel.swift in Sources */,
 				EA86C1312CC2F15700989E43 /* MainTapView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
