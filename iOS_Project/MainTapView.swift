@@ -30,7 +30,7 @@ struct CustomTabView: UIViewControllerRepresentable {
         let meetingListView = UIHostingController(rootView: MeetingListView(isTabBarHidden: $isTabBarHidden))
         meetingListView.tabBarItem = UITabBarItem(title: "모임", image: UIImage(systemName: "list.bullet"), tag: 0)
         
-        let friendView = UIHostingController(rootView: FriendView())
+        let friendView = UIHostingController(rootView: FriendListView())
         friendView.tabBarItem = UITabBarItem(title: "친구", image: UIImage(systemName: "person.3"), tag: 1)
         
         let profileView = UIHostingController(rootView: ProfileView())
@@ -43,12 +43,5 @@ struct CustomTabView: UIViewControllerRepresentable {
     
     func updateUIViewController(_ uiViewController: UITabBarController, context: Context) {
         uiViewController.tabBar.isHidden = isTabBarHidden
-    }
-}
-
-
-struct MainTabView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainTabView()
     }
 }
