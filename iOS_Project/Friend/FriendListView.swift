@@ -12,32 +12,41 @@ struct FriendListView: View {
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(viewModel.friends) { friend in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(friend.name)
-                                .font(.headline)
-                            Text(friend.email)
-                                .font(.subheadline)
-                            Text("Phone: \(friend.phoneNumber)")
-                                .font(.subheadline)
-                            Text("Birthday: \(friend.birthday)")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+            VStack {
+                if viewModel.friends.isEmpty {
+                    Text("+ 버튼을 눌러서 새로운 친구를 추가하세요!")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                        .padding()
+                } else {
+                    List {
+                        ForEach(viewModel.friends) { friend in
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(friend.name)
+                                        .font(.headline)
+                                    Text(friend.email)
+                                        .font(.subheadline)
+                                    Text("Phone: \(friend.phoneNumber)")
+                                        .font(.subheadline)
+                                    Text("Birthday: \(friend.birthday)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                Spacer()
+                            }
+                            .swipeActions {
+                                Button {
+                                    viewModel.removeFriend(friendID: friend.id)
+                                } label: {
+                                    Text("삭제")
+                                }
+                                .tint(.red)
+                            }
                         }
-                        Spacer()
-                    }
-                    .swipeActions {
-                        Button {
-                            viewModel.removeFriend(friendID: friend.id)
-                        } label: {
-                            Text("삭제")
-                        }
-                        .tint(.red)
+                        .onDelete(perform: deleteFriend)
                     }
                 }
-                .onDelete(perform: deleteFriend)
             }
             .navigationTitle("친구 목록")
             .toolbar {
