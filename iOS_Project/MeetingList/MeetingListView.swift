@@ -16,49 +16,55 @@ struct MeetingListView: View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
                 VStack {
-                    
-                    ScrollView {
-                        VStack(spacing: 10) {
-                            ForEach(viewModel.meetings.filter { meeting in
-                                searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
-                            }) { meeting in
-                                NavigationLink(destination: MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
-                                    .onAppear { isTabBarHidden = true }
-                                    .onDisappear { isTabBarHidden = false }
-                                ) {
-                                    HStack {
-                                        Text(meeting.title)
-                                            .font(.headline)
+                    if viewModel.meetings.isEmpty {
+                        Text("+ 버튼을 눌러서 새로운 모임을 생성하세요!")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                            .padding()
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 10) {
+                                ForEach(viewModel.meetings.filter { meeting in
+                                    searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
+                                }) { meeting in
+                                    NavigationLink(destination: MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
+                                        .onAppear { isTabBarHidden = true }
+                                        .onDisappear { isTabBarHidden = false }
+                                    ) {
+                                        HStack {
+                                            Text(meeting.title)
+                                                .font(.headline)
+                                                .padding()
+                                                .foregroundColor(.black)
+                                            Spacer()
+                                            VStack(alignment: .trailing) {
+                                                Text("\(meeting.date, formatter: dateFormatter)")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                                Text(meeting.meetingAddress)
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                                Text("\(meeting.meetingMemberIDs.count)명")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                            }
                                             .padding()
-                                            .foregroundColor(.black)
-                                        Spacer()
-                                        VStack(alignment: .trailing) {
-                                            Text("\(meeting.date, formatter: dateFormatter)")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                            Text(meeting.meetingAddress)
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                            Text("\(meeting.meetingMemberIDs.count)명")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
                                         }
-                                        .padding()
+                                        .padding(.vertical, 8)
+                                        .background(Color.white)
+                                        .cornerRadius(8)
+                                        .shadow(radius: 2)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.blue, lineWidth: 2)
+                                        )
                                     }
-                                    .padding(.vertical, 8)
-                                    .background(Color.white)
-                                    .cornerRadius(8)
-                                    .shadow(radius: 2)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.blue, lineWidth: 2)
-                                    )
+                                    Divider()
+                                        .padding(.vertical, 2)
                                 }
-                                Divider()
-                                    .padding(.vertical, 2)
                             }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
                     }
                 }
                 
