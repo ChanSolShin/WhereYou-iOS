@@ -11,37 +11,48 @@ struct FriendRequestListView: View {
     @ObservedObject var viewModel: FriendListViewModel
 
     var body: some View {
-        List {
-            ForEach(viewModel.pendingRequests) { request in
-                HStack {
-                    Spacer()
-                    VStack {
-                        Text(request.fromUserName)
-                            .font(.headline)
-                            .multilineTextAlignment(.center)
-                            .padding(.bottom, 5)
-                        HStack(spacing: 30) {
-                            Button("수락") {
-                                acceptRequest(request)
+        VStack {
+            if viewModel.pendingRequests.isEmpty {
+                // 친구 요청이 없을 때 표시할 텍스트
+                Text("받은 친구 요청이 없습니다.")
+                    .font(.headline)
+                    .foregroundColor(.gray)
+                    .padding()
+            } else {
+                // 친구 요청이 있을 경우 List 표시
+                List {
+                    ForEach(viewModel.pendingRequests) { request in
+                        HStack {
+                            Spacer()
+                            VStack {
+                                Text(request.fromUserName)
+                                    .font(.headline)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.bottom, 5)
+                                HStack(spacing: 30) {
+                                    Button("수락") {
+                                        acceptRequest(request)
+                                    }
+                                    .buttonStyle(BorderlessButtonStyle())
+                                    
+                                    Button("거절") {
+                                        rejectRequest(request)
+                                    }
+                                    .buttonStyle(BorderlessButtonStyle())
+                                }
                             }
-                            .buttonStyle(BorderlessButtonStyle())
-                            
-                            Button("거절") {
-                                rejectRequest(request)
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
+                            Spacer()
                         }
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(8)
+                        .shadow(radius: 2)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.green, lineWidth: 2)
+                        )
                     }
-                    Spacer()
                 }
-                .padding()
-                .background(Color.white)
-                .cornerRadius(8)
-                .shadow(radius: 2)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.green, lineWidth: 2)
-                )
             }
         }
         .navigationTitle("친구 요청 목록")
