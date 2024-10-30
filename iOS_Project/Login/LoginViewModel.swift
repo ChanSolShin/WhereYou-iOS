@@ -15,6 +15,10 @@ class LoginViewModel: ObservableObject {
     @Published var isLoggedIn: Bool = false
     @Published var loginErrorMessage: String?
     
+    init(){
+        checkAutoLogin()
+    }
+    
     // 이메일 유효성 검사
     var isValidEmail: Bool {
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}"
@@ -40,8 +44,24 @@ class LoginViewModel: ObservableObject {
                 self?.isLoggedIn = false
                 return
             }
+            //로그인 성공 시, 자동 로그인
+            self?.isLoggedIn = true
+            self?.loginErrorMessage = nil
+            UserDefaults.standard.set(true, forKey: "isLoggedIn")
         }
     }
+    
+    //앱 시작 시 자동 로그인 상태 확인
+    private func checkAutoLogin() {
+        if Auth.auth().currentUser != nil || UserDefaults.standard.bool(forKey: "isLoggedIn") {
+            self.isLoggedIn = true
+        }else{
+            self.isLoggedIn = false
+        }
+        
+    }
+    
+    
 }
 
 
