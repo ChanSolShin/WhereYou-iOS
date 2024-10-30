@@ -1,14 +1,14 @@
 //
-//  MeetinfListModel.swift
+//  MeetingModel.swift
 //  iOS_Project
 //
-//  Created by 신찬솔 on 10/13/24.
+//  Created by 신찬솔 on 10/23/24.
 //
 
 import Foundation
 import CoreLocation
 
-struct MeetingListModel: Identifiable {
+struct MeetingModel {
     var id: UUID
     var title: String
     var date: Date
@@ -16,9 +16,7 @@ struct MeetingListModel: Identifiable {
     var meetingLocation: CLLocationCoordinate2D
     var meetingMemberIDs: [String]
     var meetingMasterID: String
-
-
-  
+    
     init(title: String, date: Date, meetingAddress: String, meetingLocation: CLLocationCoordinate2D, meetingMemberIDs: [String], meetingMasterID: String) {
         self.id = UUID()
         self.title = title

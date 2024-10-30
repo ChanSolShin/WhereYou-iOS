@@ -9,10 +9,11 @@ import SwiftUI
 import NMapsMap
 
 struct MeetingListView: View {
-    @StateObject private var viewModel = MeetingListViewModel() // ViewModel 인스턴스 생성
+    @StateObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel())
+    // ViewModel 인스턴스 생성
     @State private var searchText = "" // 검색 텍스트
     @State private var isSearching = false // 검색 상태
-    
+    @Binding var isTabBarHidden: Bool
     
     
     var body: some View {
@@ -23,6 +24,7 @@ struct MeetingListView: View {
                     HStack {
                         Text("모임")
                             .font(.largeTitle)
+                            .fontWeight(.bold)
                             .foregroundColor(.black)
                             .padding()
                             .padding(.top,15)
@@ -64,50 +66,63 @@ struct MeetingListView: View {
                             ForEach(viewModel.meetings.filter { meeting in
                                 searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
                             }) { meeting in
-                                NavigationLink(destination: MeetingView(meeting: meeting)) {
+                                NavigationLink(destination: MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
+                                    .onAppear { isTabBarHidden = true }
+                                    .onDisappear { isTabBarHidden = false }
+                                ) {
                                     HStack {
                                         Text(meeting.title)
                                             .font(.headline)
                                             .padding()
                                             .foregroundColor(.black)
                                         Spacer()
-                                        Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
+                                        VStack(alignment: .trailing) { // 텍스트 정렬을 오른쪽으로 설정
+                                            Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                            Text(meeting.meetingAddress) // 오른쪽에 모임 장소 표시
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                            Text("\(meeting.meetingMemberIDs.count)명") // 모임에 속한 멤버의 수
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
+                                        .padding()
                                     }
-                                    .padding()
+                                    .padding(.vertical, 8)
+                                    .background(Color.white)
+                                    .cornerRadius(8)
+                                    .shadow(radius: 2)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.blue, lineWidth: 2)
+                                    )
                                 }
                                 Divider()
+                                    .padding(.vertical, 2)
                             }
                         }
-                        .padding(.horizontal)                    }
+                        .padding(.horizontal)
+                    }
                 }
                 
-                // 모임생성 버튼
-                NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel()), label: {
-                    Text(" + 모임생성")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                        .frame(width: 150, height: 50)
-                        .background(Color.blue)
-                        .cornerRadius(30)
+                // 모임 생성 버튼
+                NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel())
+                    .onAppear { isTabBarHidden = true }
+                    .onDisappear { isTabBarHidden = false }
+                ) {
+                    Image(systemName: "plus")
+                        .font(.largeTitle)
                         .padding()
-                })
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .clipShape(Circle())
+                        .shadow(radius: 5)
+                        .padding(.bottom, 20)
+                        .padding(.trailing, 20)
+                }
             }
         }
     }
-    
-    
-    private var dateFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        return formatter
-    }
 }
 
-struct MeetingListView_Previews: PreviewProvider {
-    static var previews: some View {
-        MeetingListView()
-    }
-}

@@ -27,7 +27,7 @@ final class Coordinator: NSObject, ObservableObject, NMFMapViewCameraDelegate, N
         view.mapView.positionMode = .direction
         view.mapView.isNightModeEnabled = true
         view.mapView.zoomLevel = 15
-        view.mapView.minZoomLevel = 10
+        view.mapView.minZoomLevel = 5
         view.mapView.maxZoomLevel = 18
         view.showLocationButton = true
         view.showZoomControls = true
@@ -45,6 +45,7 @@ final class Coordinator: NSObject, ObservableObject, NMFMapViewCameraDelegate, N
         currentMarker?.mapView = nil
 
         // 새로운 마커 생성
+        
         let marker = NMFMarker()
         marker.position = coord
         marker.iconImage = NMF_MARKER_IMAGE_BLUE
@@ -58,6 +59,8 @@ final class Coordinator: NSObject, ObservableObject, NMFMapViewCameraDelegate, N
 
         // 주소 정보 가져오기
         reverseGeocodeCoordinate(CLLocationCoordinate2D(latitude: coord.lat, longitude: coord.lng))
+        
+        
     }
 
     // MARK: - 좌표에서 주소 정보 가져오기
@@ -97,7 +100,7 @@ final class Coordinator: NSObject, ObservableObject, NMFMapViewCameraDelegate, N
             // ViewModel에 위치 정보 업데이트
             self.addMeetingViewModel.meeting.meetingLocation = coordinate
             self.addMeetingViewModel.meeting.meetingAddress = fullAddress // AddMeetingModel에 전체 주소 저장
-            print("Updated Meeting Address: \(self.addMeetingViewModel.meeting.meetingAddress)")
+            print("Updated Meeting Address: \(String(describing: self.addMeetingViewModel.meeting.meetingAddress))")
         }
     }    
 

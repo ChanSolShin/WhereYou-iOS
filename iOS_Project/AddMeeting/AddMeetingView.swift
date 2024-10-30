@@ -16,7 +16,7 @@ struct AddMeetingView: View {
     @State private var showDatePicker = false
     @State private var showLocationModal = false
     @Environment(\.presentationMode) var presentationMode
-
+    
     var body: some View {
         NavigationView{
             VStack(spacing: 20) {
@@ -29,23 +29,22 @@ struct AddMeetingView: View {
                     .frame(width: 350, height: 40)
                     .keyboardType(.default) // 키보드 타입 변경
                     .background(Color.gray.opacity(0.2))
-                   // .padding(.top, 100) // 네비게이션 바와의 간격 조정
                 
                 // 날짜 선택 버튼과 선택된 날짜 표시
                 
-                    Button(action: {
-                        showDatePicker.toggle()
-                    }) {
-                        Text("날짜 선택")
-                            .font(.headline)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .frame(width: 100, height: 50)
-                    }
-                    // 선택된 날짜를 텍스트로 표시
+                Button(action: {
+                    showDatePicker.toggle()
+                }) {
+                    Text("날짜 선택")
+                        .font(.headline)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .frame(width: 100, height: 50)
+                }
+                // 선택된 날짜를 텍스트로 표시
                 HStack{
                     Image(systemName: "calendar")
                         .foregroundColor(.gray)
@@ -74,10 +73,16 @@ struct AddMeetingView: View {
                         .imageScale(.small)
                     Text(viewModel.meeting.meetingAddress ?? "선택된 장소 없음")
                         .font(.headline)
+                    
                 }
                 
                 // 추가하기 버튼
                 Button(action: {
+                    // 햅틱 피드백 생성
+                    let generator = UIImpactFeedbackGenerator(style: .medium)
+                    generator.impactOccurred() // 햅틱 반응 발생
+                    
+                    viewModel.addMeeting() // 파이어베이스로 미팅 정보 전송
                     presentationMode.wrappedValue.dismiss()
                     // 디버그 출력
                     print("모임 이름: \(viewModel.meeting.meetingName)")
@@ -91,10 +96,12 @@ struct AddMeetingView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
+                        .background(viewModel.successAddMeeting ? Color.gray : Color.blue)
                         .background(Color.blue)
                         .cornerRadius(30)
                         .frame(width: 150, height: 50)
                 }
+                .disabled(viewModel.successAddMeeting)
                 .padding(.horizontal, 20)
                 .padding(.top, 100)
             }
@@ -117,10 +124,10 @@ struct AddMeetingView: View {
                 AddLocationView(viewModel: viewModel)
             }
             
-                    }
+        }
         .navigationTitle("모임추가")
         .font(.largeTitle)
-
+        
     }
     var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
