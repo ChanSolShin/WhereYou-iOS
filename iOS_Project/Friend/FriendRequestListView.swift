@@ -54,7 +54,7 @@ struct FriendRequestListView: View {
         viewModel.acceptFriendRequest(requestID: request.id, fromUserID: request.fromUserID)
         
         // 친구 목록 갱신
-        viewModel.fetchFriends()
+        viewModel.observeFriends()
         
         // 요청 삭제 후 UI 업데이트
         deleteRequest(request)
