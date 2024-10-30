@@ -18,11 +18,11 @@ class FriendListViewModel: ObservableObject {
     private var currentUserID: String? {
         return Auth.auth().currentUser?.uid
     }
-    private var currentUserName: String? // 사용자 이름을 저장할 변수
-    private var friendListener: ListenerRegistration? // 리스너 등록 변수
+    private var currentUserName: String?
+    private var friendListener: ListenerRegistration?
     
     init() {
-        fetchCurrentUserName() // 사용자 이름 가져오기
+        fetchCurrentUserName()
         observeFriends()
         fetchPendingRequests()
     }
@@ -33,7 +33,7 @@ class FriendListViewModel: ObservableObject {
         db.collection("users").document(userID).getDocument { (document, error) in
             if let document = document, document.exists {
                 let data = document.data()
-                self.currentUserName = data?["name"] as? String // 사용자 이름 가져오기
+                self.currentUserName = data?["name"] as? String
             } else {
                 print("현재 사용자 정보 가져오기 실패: \(error?.localizedDescription ?? "Unknown error")")
             }
