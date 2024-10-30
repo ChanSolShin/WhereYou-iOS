@@ -4,105 +4,67 @@
 //
 //  Created by 신찬솔 on 10/11/24.
 //
-
 import SwiftUI
 import NMapsMap
 
 struct MeetingListView: View {
     @StateObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel())
-    // ViewModel 인스턴스 생성
     @State private var searchText = "" // 검색 텍스트
-    @State private var isSearching = false // 검색 상태
     @Binding var isTabBarHidden: Bool
-    
-    
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
-                
                 VStack {
-                    HStack {
-                        Text("모임")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.black)
+                    if viewModel.meetings.isEmpty {
+                        Text("+ 버튼을 눌러서 새로운 모임을 생성하세요!")
+                            .font(.headline)
+                            .foregroundColor(.gray)
                             .padding()
-                            .padding(.top,15)
-                        Spacer()
-                        // 돋보기 버튼 추가
-                        Button(action: {
-                            withAnimation {
-                                isSearching.toggle()
-                            }
-                        }) {
-                            
-                            Image(systemName: "magnifyingglass")
-                                .font(.title)
-                        }
-                        .padding(.trailing)
-                        .padding(.top,15)
-                    }
-                    // 검색 상태에 따라 텍스트 필드 표시
-                    if isSearching {
-                        HStack{
-                            Image(systemName: "magnifyingglass")
-                                .padding(.leading, 10)
-                            TextField("검색어를 입력하세요", text: $searchText)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .frame(width: 300)
-                            Button(action: {
-                                searchText = ""
-                                withAnimation {
-                                    isSearching.toggle()
-                                }
-                            }) {
-                                Text("취소")
-                                    .font(.headline)
-                            }
-                        }
-                    }
-                    ScrollView {
-                        VStack(spacing: 10) {
-                            ForEach(viewModel.meetings.filter { meeting in
-                                searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
-                            }) { meeting in
-                                NavigationLink(destination: MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
-                                    .onAppear { isTabBarHidden = true }
-                                    .onDisappear { isTabBarHidden = false }
-                                ) {
-                                    HStack {
-                                        Text(meeting.title)
-                                            .font(.headline)
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 10) {
+                                ForEach(viewModel.meetings.filter { meeting in
+                                    searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
+                                }) { meeting in
+                                    NavigationLink(destination: MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
+                                        .onAppear { isTabBarHidden = true }
+                                        .onDisappear { isTabBarHidden = false }
+                                    ) {
+                                        HStack {
+                                            Text(meeting.title)
+                                                .font(.headline)
+                                                .padding()
+                                                .foregroundColor(.black)
+                                            Spacer()
+                                            VStack(alignment: .trailing) {
+                                                Text("\(meeting.date, formatter: dateFormatter)")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                                Text(meeting.meetingAddress)
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                                Text("\(meeting.meetingMemberIDs.count)명")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                            }
                                             .padding()
-                                            .foregroundColor(.black)
-                                        Spacer()
-                                        VStack(alignment: .trailing) { // 텍스트 정렬을 오른쪽으로 설정
-                                            Text("\(meeting.date, formatter: dateFormatter)") // 오른쪽에 날짜 표시
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                            Text(meeting.meetingAddress) // 오른쪽에 모임 장소 표시
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                            Text("\(meeting.meetingMemberIDs.count)명") // 모임에 속한 멤버의 수
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
                                         }
-                                        .padding()
+                                        .padding(.vertical, 8)
+                                        .background(Color.white)
+                                        .cornerRadius(8)
+                                        .shadow(radius: 2)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.blue, lineWidth: 2)
+                                        )
                                     }
-                                    .padding(.vertical, 8)
-                                    .background(Color.white)
-                                    .cornerRadius(8)
-                                    .shadow(radius: 2)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.blue, lineWidth: 2)
-                                    )
+                                    Divider()
+                                        .padding(.vertical, 2)
                                 }
-                                Divider()
-                                    .padding(.vertical, 2)
                             }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
                     }
                 }
                 
@@ -122,7 +84,8 @@ struct MeetingListView: View {
                         .padding(.trailing, 20)
                 }
             }
+            .navigationTitle("모임")
+            .searchable(text: $searchText, prompt: "검색어를 입력하세요")
         }
     }
 }
-
