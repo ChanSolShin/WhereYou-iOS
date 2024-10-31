@@ -11,7 +11,7 @@ struct MeetingListView: View {
     @StateObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel())
     @State private var searchText = "" // 검색 텍스트
     @Binding var isTabBarHidden: Bool
-
+    
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
@@ -86,6 +86,23 @@ struct MeetingListView: View {
             }
             .navigationTitle("모임")
             .searchable(text: $searchText, prompt: "검색어를 입력하세요")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)) {
+                        HStack {
+                            Image(systemName: "bell")
+                            if viewModel.meetingViewModel.pendingMeetingRequests.count > 0 {
+                                Text("\(viewModel.meetingViewModel.pendingMeetingRequests.count)")
+                                    .font(.caption)
+                                    .foregroundColor(.white)
+                                    .padding(3)
+                                    .background(Color.red)
+                                    .clipShape(Circle())
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
