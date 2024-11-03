@@ -15,6 +15,8 @@ class MeetingViewModel: ObservableObject {
     @Published var meetingLocation: CLLocationCoordinate2D?
     @Published var meetingMemberNames: [String: String] = [:]
     @Published var pendingMeetingRequests: [MeetingRequestModel] = []
+    @Published var showAlert: Bool = false
+    @Published var errorMessage: String?
 
     func selectMeeting(meeting: MeetingModel) {
         self.meetingLocation = meeting.meetingLocation
@@ -45,44 +47,64 @@ class MeetingViewModel: ObservableObject {
         let db = Firestore.firestore()
         
         for userID in toUserIDs {
-            let request = MeetingRequestModel(id: UUID().uuidString, fromUserID: fromUserID, fromUserName: fromUserName, toUserID: userID, meetingName: meetingName, status: "pending")
-            
-            db.collection("meetingRequests").document(request.id).setData([
-                "fromUserID": request.fromUserID,
-                "fromUserName": request.fromUserName,
-                "toUserID": request.toUserID,
-                "meetingName": request.meetingName,
-                "status": request.status
-            ]) { error in
-                if let error = error {
-                    print("Error sending meeting request: \(error)")
+            db.collection("meetingRequests")
+                .whereField("fromUserID", isEqualTo: fromUserID)
+                .whereField("toUserID", isEqualTo: userID)
+                .whereField("meetingName", isEqualTo: meetingName)
+                .whereField("status", isEqualTo: "pending")
+                .getDocuments { (snapshot, error) in
+                    if let error = error {
+                        print("Error checking existing requests: \(error)")
+                        return
+                    }
+                    
+                    if let documents = snapshot?.documents, !documents.isEmpty {
+                        DispatchQueue.main.async {
+                            self.errorMessage = "해당 사용자에게 모임 초대 요청을 보낸 상태입니다." // 동작하지 않음
+                            self.showAlert = true
+                        }
+                        return
+                    }
                 }
-            }
         }
     }
-
     // 수락 및 거절 요청 처리
     func acceptMeetingRequest(requestID: String, fromUserID: String) {
-        // 요청을 수락하고 필요한 로직 추가
-        // 예: 해당 요청을 "accepted"로 업데이트하고, 모임 멤버로 추가
         let db = Firestore.firestore()
+        // 요청을 수락하고 필요한 로직 추가
         db.collection("meetingRequests").document(requestID).updateData(["status": "accepted"]) { error in
             if let error = error {
                 print("Error accepting meeting request: \(error)")
             } else {
                 // 수락 후 추가 로직 구현
+                self.deleteMeetingRequest(requestID: requestID) // 요청 삭제
             }
         }
     }
 
     func rejectMeetingRequest(requestID: String) {
-        // 요청을 거절하고 필요한 로직 추가
         let db = Firestore.firestore()
+        // 요청을 거절하고 필요한 로직 추가
         db.collection("meetingRequests").document(requestID).updateData(["status": "rejected"]) { error in
             if let error = error {
                 print("Error rejecting meeting request: \(error)")
             } else {
-                // 거절 후 추가 로직 구현
+                self.deleteMeetingRequest(requestID: requestID)
+            }
+        }
+    }
+
+    // 요청 삭제
+    private func deleteMeetingRequest(requestID: String) {
+        let db = Firestore.firestore()
+        db.collection("meetingRequests").document(requestID).delete { error in
+            if let error = error {
+                print("Error deleting meeting request: \(error)")
+            } else {
+                print("Successfully deleted meeting request with ID: \(requestID)")
+                if let index = self.pendingMeetingRequests.firstIndex(where: { $0.id == requestID }) {
+                    self.pendingMeetingRequests.remove(at: index)
+                }
             }
         }
     }

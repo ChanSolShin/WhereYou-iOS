@@ -91,7 +91,7 @@ struct MeetingListView: View {
                     NavigationLink(destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)) {
                         HStack {
                             Image(systemName: "bell")
-                            if viewModel.meetingViewModel.pendingMeetingRequests.count > 0 {
+                            if viewModel.meetingViewModel.pendingMeetingRequests.count > 0 { // 제대로 동작 하지않음
                                 Text("\(viewModel.meetingViewModel.pendingMeetingRequests.count)")
                                     .font(.caption)
                                     .foregroundColor(.white)
