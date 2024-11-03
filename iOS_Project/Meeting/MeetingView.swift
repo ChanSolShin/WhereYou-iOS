@@ -14,7 +14,11 @@ struct MeetingView: View {
     var meeting: MeetingListModel
     @ObservedObject var meetingViewModel: MeetingViewModel
     @State private var title: String = "모임장소"
-    @State private var showingAddFriendModal = false // 모달 표시 상태
+    @State private var showingAddFriendModal = false
+    
+    // Alert 관련 상태 변수 추가
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
     
     var body: some View {
         VStack {
@@ -78,18 +82,27 @@ struct MeetingView: View {
         }
         .navigationTitle(meeting.title)
         .navigationBarTitleDisplayMode(.inline)
-        
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
-                    showingAddFriendModal = true // 모달 표시
+                    showingAddFriendModal = true
                 }) {
                     Image(systemName: "person.badge.plus")
                 }
             }
         }
         .sheet(isPresented: $showingAddFriendModal) {
-            AddSelectedFriend(viewModel: FriendListViewModel()) // 친구 목록을 가져오는 ViewModel 전달
+            AddSelectedFriend(meeting: meeting)
+        }
+        
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text("알림"), message: Text(alertMessage), dismissButton: .default(Text("확인")))
+        }
+        .onReceive(meetingViewModel.$errorMessage) { message in
+            if let message = message {
+                alertMessage = message
+                showAlert = true
+            }
         }
     }
 }
