@@ -13,13 +13,11 @@ struct MeetingRequestListView: View {
     var body: some View {
         VStack {
             if viewModel.pendingMeetingRequests.isEmpty {
-                // 받은 모임 초대가 없을 때 표시할 텍스트
                 Text("받은 모임 초대가 없습니다.")
                     .font(.headline)
                     .foregroundColor(.gray)
                     .padding()
             } else {
-                // 모임 초대 요청이 있을 경우 List 표시
                 List {
                     ForEach(viewModel.pendingMeetingRequests) { request in
                         HStack {
