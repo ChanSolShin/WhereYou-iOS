@@ -75,7 +75,9 @@ struct AddSelectedFriend: View {
         
         let db = Firestore.firestore()
         var failedInvitations = [String]()
-        
+        let totalFriendsCount = selectedFriends.count
+        var completedRequests = 0 // 요청 완료된 수
+    
         for friendID in selectedFriends {
             // 이미 보낸 요청이 있는지 확인
             db.collection("meetingRequests")
@@ -100,9 +102,8 @@ struct AddSelectedFriend: View {
                             "toUserID": friendID,
                             "meetingName": meeting.title,
                             "status": "pending",
-                            "id": UUID().uuidString
+                            "meetingID": meeting.id
                         ]
-                        
                         db.collection("meetingRequests").addDocument(data: invitationData) { error in
                             if let error = error {
                                 print("모임 초대 요청 전송 실패: \(error)")
@@ -111,8 +112,10 @@ struct AddSelectedFriend: View {
                                 print("\(friendID)에게 모임 초대 요청 성공적으로 전송")
                             }
                             
+                            completedRequests += 1 // 요청 완료 수 증가
+                            
                             // 모든 요청이 완료된 후 알림 메시지 설정
-                            if friendID == selectedFriends.last {
+                            if completedRequests == totalFriendsCount {
                                 if failedInvitations.isEmpty {
                                     alertMessage = "모임 초대 요청이 성공적으로 전송되었습니다!"
                                 } else {
@@ -125,27 +128,28 @@ struct AddSelectedFriend: View {
                 }
         }
     }
-    struct FriendRow: View {
-        var friend: FriendModel
-        var isSelected: Bool
-        var onTap: () -> Void
-        
-        var body: some View {
-            VStack(alignment: .leading) {
-                Text(friend.name).font(.headline)
-                Text(friend.email).font(.subheadline)
-                Text("Phone: \(friend.phoneNumber)")
-                Text("Birthday: \(friend.birthday)")
-            }
-            .padding()
-            .background(Color.white)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
-            )
-            .onTapGesture {
-                onTap()
-            }
+}
+
+struct FriendRow: View {
+    var friend: FriendModel
+    var isSelected: Bool
+    var onTap: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(friend.name).font(.headline)
+            Text(friend.email).font(.subheadline)
+            Text("Phone: \(friend.phoneNumber)")
+            Text("Birthday: \(friend.birthday)")
+        }
+        .padding()
+        .background(Color.white)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+        )
+        .onTapGesture {
+            onTap()
         }
     }
 }

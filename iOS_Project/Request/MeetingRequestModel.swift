@@ -14,4 +14,5 @@ struct MeetingRequestModel: Identifiable {
     var toUserID: String
     var meetingName: String
     var status: String
+    var meetingID: String
 }
