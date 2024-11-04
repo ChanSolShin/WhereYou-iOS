@@ -32,7 +32,6 @@
 		EA86C1312CC2F15700989E43 /* MainTapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C11F2CC2F15700989E43 /* MainTapView.swift */; };
 		EA86C1322CC2F15700989E43 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA86C1132CC2F15700989E43 /* Preview Assets.xcassets */; };
 		EA86C1332CC2F15700989E43 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA86C11B2CC2F15700989E43 /* Assets.xcassets */; };
-		EA86C1342CC2F15700989E43 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EA86C11C2CC2F15700989E43 /* GoogleService-Info.plist */; };
 		EA86C1382CC2F15A00989E43 /* iOS_ProjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1362CC2F15A00989E43 /* iOS_ProjectTests.swift */; };
 		EA86C13C2CC2F15C00989E43 /* iOS_ProjectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1392CC2F15C00989E43 /* iOS_ProjectUITests.swift */; };
 		EA86C13D2CC2F15C00989E43 /* iOS_ProjectUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C13A2CC2F15C00989E43 /* iOS_ProjectUITestsLaunchTests.swift */; };
@@ -47,6 +46,18 @@
 		EAB9CBCE2CD0037300BFA8DD /* AddFriendModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBCD2CD0036D00BFA8DD /* AddFriendModal.swift */; };
 		EAD481B02CBD7D4B0052D22B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EAD481AF2CBD7D4B0052D22B /* FirebaseAuth */; };
 		EAD481B22CBD7D4B0052D22B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EAD481B12CBD7D4B0052D22B /* FirebaseFirestore */; };
+		F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */; };
+		F50FDDBC2CD3AA12006E96B2 /* FindEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */; };
+		F50FDDBE2CD3AA2C006E96B2 /* FindEmailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */; };
+		F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FF62CD3CC5D00520042 /* FindPasswordModel.swift */; };
+		F52E2FF92CD3CC9000520042 /* FindPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */; };
+		F52E2FFB2CD3CEB500520042 /* FindPasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */; };
+		F52E2FFD2CD3DDC000520042 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F52E2FFC2CD3DDC000520042 /* GoogleService-Info.plist */; };
+		F5ADB1D02CD90DAA00A1011C /* ProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1CF2CD90DA500A1011C /* ProfileModel.swift */; };
+		F5ADB1D42CD9296400A1011C /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1D32CD9295E00A1011C /* ProfileViewModel.swift */; };
+		F5ADB1D62CD92B0000A1011C /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1D52CD92AF600A1011C /* EditProfileView.swift */; };
+		F5C779FA2CD9576D00E5EC08 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5C779F92CD9576700E5EC08 /* ReportView.swift */; };
+		F5C779FC2CD9578B00E5EC08 /* ReportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5C779FB2CD9578700E5EC08 /* ReportViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,7 +102,6 @@
 		EA86C1182CC2F15700989E43 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		EA86C1192CC2F15700989E43 /* SignUpViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpViewModel.swift; sourceTree = "<group>"; };
 		EA86C11B2CC2F15700989E43 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		EA86C11C2CC2F15700989E43 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		EA86C11D2CC2F15700989E43 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOS_ProjectApp.swift; sourceTree = "<group>"; };
 		EA86C11F2CC2F15700989E43 /* MainTapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTapView.swift; sourceTree = "<group>"; };
@@ -110,6 +120,18 @@
 		EABADF2B2CB9223E00962A40 /* iOS_Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOS_Project.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EABADF3B2CB9224100962A40 /* iOS_ProjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOS_ProjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EABADF452CB9224100962A40 /* iOS_ProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOS_ProjectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailModel.swift; sourceTree = "<group>"; };
+		F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailView.swift; sourceTree = "<group>"; };
+		F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailViewModel.swift; sourceTree = "<group>"; };
+		F52E2FF62CD3CC5D00520042 /* FindPasswordModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordModel.swift; sourceTree = "<group>"; };
+		F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordView.swift; sourceTree = "<group>"; };
+		F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordViewModel.swift; sourceTree = "<group>"; };
+		F52E2FFC2CD3DDC000520042 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		F5ADB1CF2CD90DA500A1011C /* ProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileModel.swift; sourceTree = "<group>"; };
+		F5ADB1D32CD9295E00A1011C /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
+		F5ADB1D52CD92AF600A1011C /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
+		F5C779F92CD9576700E5EC08 /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
+		F5C779FB2CD9578700E5EC08 /* ReportViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportViewModel.swift; sourceTree = "<group>"; };
 		FB3FFC42D97330368AC296CF /* Pods-iOS_Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS_Project.debug.xcconfig"; path = "Target Support Files/Pods-iOS_Project/Pods-iOS_Project.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -234,7 +256,12 @@
 		EA86C1162CC2F15700989E43 /* Profile */ = {
 			isa = PBXGroup;
 			children = (
+				F5ADB1CF2CD90DA500A1011C /* ProfileModel.swift */,
 				EA86C1152CC2F15700989E43 /* ProfileView.swift */,
+				F5ADB1D32CD9295E00A1011C /* ProfileViewModel.swift */,
+				F5ADB1D52CD92AF600A1011C /* EditProfileView.swift */,
+				F5C779F92CD9576700E5EC08 /* ReportView.swift */,
+				F5C779FB2CD9578700E5EC08 /* ReportViewModel.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -252,6 +279,8 @@
 		EA86C1202CC2F15700989E43 /* iOS_Project */ = {
 			isa = PBXGroup;
 			children = (
+
+				F50FDDB72CD3A814006E96B2 /* FindAuth */,
 				EA6EE1DF2CD39BBB002961A9 /* Request */,
 				EA86C14B2CC2FBAD00989E43 /* Map */,
 				EA86C1062CC2F15700989E43 /* AddMeeting */,
@@ -263,7 +292,6 @@
 				EA86C1162CC2F15700989E43 /* Profile */,
 				EA86C11A2CC2F15700989E43 /* SignUp */,
 				EA86C11B2CC2F15700989E43 /* Assets.xcassets */,
-				EA86C11C2CC2F15700989E43 /* GoogleService-Info.plist */,
 				EA86C11D2CC2F15700989E43 /* Info.plist */,
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
@@ -306,6 +334,7 @@
 				EABADF2C2CB9223E00962A40 /* Products */,
 				4A1660C73D95E0486C1E6CCE /* Pods */,
 				74498F7C58CCF60D6CF737A6 /* Frameworks */,
+				F52E2FFC2CD3DDC000520042 /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -317,6 +346,19 @@
 				EABADF452CB9224100962A40 /* iOS_ProjectUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F50FDDB72CD3A814006E96B2 /* FindAuth */ = {
+			isa = PBXGroup;
+			children = (
+				F52E2FF62CD3CC5D00520042 /* FindPasswordModel.swift */,
+				F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */,
+				F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */,
+				F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */,
+				F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */,
+				F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */,
+			);
+			path = FindAuth;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -435,7 +477,7 @@
 			files = (
 				EA86C1322CC2F15700989E43 /* Preview Assets.xcassets in Resources */,
 				EA86C1332CC2F15700989E43 /* Assets.xcassets in Resources */,
-				EA86C1342CC2F15700989E43 /* GoogleService-Info.plist in Resources */,
+				F52E2FFD2CD3DDC000520042 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -502,7 +544,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F52E2FF92CD3CC9000520042 /* FindPasswordView.swift in Sources */,
 				EA86C1212CC2F15700989E43 /* AddMeetingModel.swift in Sources */,
+				F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */,
 				EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */,
 				EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */,
 				EA86C1232CC2F15700989E43 /* AddMeetingViewModel.swift in Sources */,
@@ -512,22 +556,31 @@
 				EAB9CBC42CCFEDD400BFA8DD /* FriendModel.swift in Sources */,
 				EA86C14D2CC2FBAD00989E43 /* MapView.swift in Sources */,
 				EA86C1262CC2F15700989E43 /* LoginView.swift in Sources */,
+				F5C779FC2CD9578B00E5EC08 /* ReportViewModel.swift in Sources */,
 				EA28F4F82CC83C64004827A3 /* MeetingModel.swift in Sources */,
 				EA86C1272CC2F15700989E43 /* LoginViewModel.swift in Sources */,
+				F52E2FFB2CD3CEB500520042 /* FindPasswordViewModel.swift in Sources */,
+				F5ADB1D02CD90DAA00A1011C /* ProfileModel.swift in Sources */,
 				EA86C1282CC2F15700989E43 /* MeetingView.swift in Sources */,
+				F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */,
 				EA6EE1DD2CD39B07002961A9 /* MeetingRequestModel.swift in Sources */,
 				EA86C1292CC2F15700989E43 /* MeetingListModel.swift in Sources */,
 				EA86C12A2CC2F15700989E43 /* MeetingListView.swift in Sources */,
+				F50FDDBC2CD3AA12006E96B2 /* FindEmailView.swift in Sources */,
 				EA86C12B2CC2F15700989E43 /* MeetingListViewModel.swift in Sources */,
 				EA86C12C2CC2F15700989E43 /* ProfileView.swift in Sources */,
 				EA86C12D2CC2F15700989E43 /* SignUpUserModel.swift in Sources */,
 				EA86C12E2CC2F15700989E43 /* SignUpView.swift in Sources */,
 				EA86C12F2CC2F15700989E43 /* SignUpViewModel.swift in Sources */,
+				F5ADB1D62CD92B0000A1011C /* EditProfileView.swift in Sources */,
 				EA28F4FA2CC83C6D004827A3 /* MeetingViewModel.swift in Sources */,
 				EAB9CBC02CCFEC7400BFA8DD /* FriendListViewModel.swift in Sources */,
 				EAB9CBC62CCFF18900BFA8DD /* FriendRequestListView.swift in Sources */,
 				EA6EE1D92CD39060002961A9 /* AddSelectedFriend.swift in Sources */,
 				EA86C1482CC2F7A100989E43 /* AddLocationView.swift in Sources */,
+				F5ADB1D42CD9296400A1011C /* ProfileViewModel.swift in Sources */,
+				F5C779FA2CD9576D00E5EC08 /* ReportView.swift in Sources */,
+				F50FDDBE2CD3AA2C006E96B2 /* FindEmailViewModel.swift in Sources */,
 				EA86C1302CC2F15700989E43 /* iOS_ProjectApp.swift in Sources */,
 				EA6EE1DB2CD39AE9002961A9 /* MeetingRequestListView.swift in Sources */,
 				EAB9CBCE2CD0037300BFA8DD /* AddFriendModal.swift in Sources */,
@@ -701,12 +754,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS_Project/Preview Content\"";
-				DEVELOPMENT_TEAM = L93NL52T89;
+				DEVELOPMENT_TEAM = 52AU86437A;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = /Users/sinchansol/Desktop/iOS_Project/iOS_Project/Info.plist;
+				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/iOS_Project/iOS_Project/Info.plist";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "위치 정보를 항상 사용합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "위치 정보를 사용합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -720,7 +773,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.chansol.iOS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yonghun.iOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -737,12 +790,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS_Project/Preview Content\"";
-				DEVELOPMENT_TEAM = L93NL52T89;
+				DEVELOPMENT_TEAM = 52AU86437A;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = /Users/sinchansol/Desktop/iOS_Project/iOS_Project/Info.plist;
+				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/iOS_Project/iOS_Project/Info.plist";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "위치 정보를 항상 사용합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "위치 정보를 사용합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -756,7 +809,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.chansol.iOS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yonghun.iOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
