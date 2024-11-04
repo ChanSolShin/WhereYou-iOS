@@ -16,6 +16,11 @@ class ReportViewModel: ObservableObject {
     private let db = Firestore.firestore()
     
     func submitReport() {
+        guard reportContent.count >= 10 else {
+            submissionStatus = "신고 내용을 10자 이상 입력해 주세요."
+            return
+        }
+        
         guard let userEmail = Auth.auth().currentUser?.email else {
             submissionStatus = "로그인이 필요합니다."
             return
@@ -34,7 +39,7 @@ class ReportViewModel: ObservableObject {
                 self.submissionStatus = "신고 제출 실패: \(error.localizedDescription)"
             } else {
                 self.submissionStatus = "신고가 성공적으로 제출되었습니다."
-                self.reportContent = "" 
+                self.reportContent = ""
             }
         }
     }

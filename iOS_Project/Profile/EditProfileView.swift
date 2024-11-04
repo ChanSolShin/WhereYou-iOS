@@ -19,7 +19,7 @@ struct EditProfileView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
-            Text("계정 정보")
+            Text("내 정보 수정")
                 .font(.title2)
                 .bold()
                 .padding(.top, 20)
