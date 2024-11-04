@@ -77,36 +77,54 @@ struct AddSelectedFriend: View {
         var failedInvitations = [String]()
         
         for friendID in selectedFriends {
-            let invitationData: [String: Any] = [
-                "fromUserID": currentUserID,
-                "fromUserName": currentUserName,
-                "toUserID": friendID,
-                "meetingName": meeting.title,
-                "status": "pending",
-                "id": UUID().uuidString
-            ]
-            
-            db.collection("meetingRequests").addDocument(data: invitationData) { error in
-                if let error = error {
-                    print("모임 초대 요청 전송 실패: \(error)")
-                    failedInvitations.append(friendID)
-                } else {
-                    print("\(friendID)에게 모임 초대 요청 성공적으로 전송")
-                }
-                
-                // 모든 요청이 완료된 후 알림 메시지 설정
-                if friendID == selectedFriends.last {
-                    if failedInvitations.isEmpty {
-                        alertMessage = "모임 초대 요청이 성공적으로 전송되었습니다!"
-                    } else {
-                        alertMessage = "\(failedInvitations.count)명에게 초대 요청 전송에 실패했습니다."
+            // 이미 보낸 요청이 있는지 확인
+            db.collection("meetingRequests")
+                .whereField("fromUserID", isEqualTo: currentUserID)
+                .whereField("toUserID", isEqualTo: friendID)
+                .whereField("meetingName", isEqualTo: meeting.title)
+                .getDocuments { snapshot, error in
+                    if let error = error {
+                        print("요청 확인 중 오류 발생: \(error)")
+                        return
                     }
-                    showAlert = true 
+                    
+                    if let documents = snapshot?.documents, !documents.isEmpty {
+                        // 이미 요청이 있는 경우
+                        alertMessage = "모임 요청을 이미 보낸 상태입니다."
+                        showAlert = true
+                    } else {
+                        // 요청이 없는 경우 새 요청 생성
+                        let invitationData: [String: Any] = [
+                            "fromUserID": currentUserID,
+                            "fromUserName": currentUserName,
+                            "toUserID": friendID,
+                            "meetingName": meeting.title,
+                            "status": "pending",
+                            "id": UUID().uuidString
+                        ]
+                        
+                        db.collection("meetingRequests").addDocument(data: invitationData) { error in
+                            if let error = error {
+                                print("모임 초대 요청 전송 실패: \(error)")
+                                failedInvitations.append(friendID)
+                            } else {
+                                print("\(friendID)에게 모임 초대 요청 성공적으로 전송")
+                            }
+                            
+                            // 모든 요청이 완료된 후 알림 메시지 설정
+                            if friendID == selectedFriends.last {
+                                if failedInvitations.isEmpty {
+                                    alertMessage = "모임 초대 요청이 성공적으로 전송되었습니다!"
+                                } else {
+                                    alertMessage = "\(failedInvitations.count)명에게 초대 요청 전송에 실패했습니다."
+                                }
+                                showAlert = true
+                            }
+                        }
+                    }
                 }
-            }
         }
     }
-    
     struct FriendRow: View {
         var friend: FriendModel
         var isSelected: Bool
