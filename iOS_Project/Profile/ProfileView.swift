@@ -11,6 +11,7 @@ struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
     @State private var isLoggedIn = true // 로그인 상태 관리
     @State private var showLogoutAlert = false // 로그아웃 알림 상태
+    @Binding var isTabBarHidden: Bool
     
     var body: some View {
         NavigationView {
@@ -26,7 +27,9 @@ struct ProfileView: View {
                                 .foregroundColor(.gray)
                         }
                         Spacer()
-                        NavigationLink(destination: EditProfileView(viewModel: viewModel), isActive: $viewModel.isEditing) {
+                        NavigationLink(destination: EditProfileView(viewModel: viewModel)
+                            .onAppear { isTabBarHidden = true }
+                            .onDisappear { isTabBarHidden = false }, isActive: $viewModel.isEditing) {
                             Button(action: {
                                 viewModel.isEditing = true
                             }) {
@@ -66,7 +69,9 @@ struct ProfileView: View {
                     .padding(.vertical, 8)
                     
                     
-                    NavigationLink(destination: ReportView()) {
+                    NavigationLink(destination: ReportView()
+                        .onAppear { isTabBarHidden = true }
+                        .onDisappear { isTabBarHidden = false }) {
                         HStack {
                             Image(systemName: "message")
                                 .font(.title2)

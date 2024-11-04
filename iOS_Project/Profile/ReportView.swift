@@ -31,7 +31,7 @@ struct ReportView: View {
                 .background(Color.white)
                 .frame(height: 200)
                 .overlay(
-                    Text(viewModel.reportContent.isEmpty ? "ex) 신고내용을 입력해주세요." : "")
+                    Text(viewModel.reportContent.isEmpty ? "ex) 신고내용을 입력해주세요. (10자 이상)" : "")
                         .foregroundColor(.gray)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 25),
