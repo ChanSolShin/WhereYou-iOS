@@ -9,7 +9,7 @@ import SwiftUI
 struct FriendListView: View {
     @ObservedObject var viewModel = FriendListViewModel()
     @State private var showAddFriendModal = false
-
+    @Binding var isTabBarHidden: Bool
     var body: some View {
         NavigationView {
             VStack {
@@ -50,7 +50,9 @@ struct FriendListView: View {
             }
             .navigationTitle("친구 목록")
             .toolbar {
-                NavigationLink(destination: FriendRequestListView(viewModel: viewModel)) {
+                NavigationLink(destination: FriendRequestListView(viewModel: viewModel)
+                    .onAppear { isTabBarHidden = true }
+                    .onDisappear { isTabBarHidden = false }) {
                     HStack {
                         Image(systemName: "bell")
                         if viewModel.pendingRequests.count > 0 { // 요청이 온 수 만큼 숫자로 표시
