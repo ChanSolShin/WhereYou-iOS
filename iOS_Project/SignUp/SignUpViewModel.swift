@@ -21,7 +21,7 @@ class SignUpViewModel: ObservableObject { // 이 항목들 서버로 보내서 �
     @Published var signUpErrorMessage: String?
     @Published var signUpSuccess: Bool = false
     
-   
+    
     
     private var db = Firestore.firestore()
     
@@ -41,29 +41,32 @@ class SignUpViewModel: ObservableObject { // 이 항목들 서버로 보내서 �
     }
     
     func signUp() {
-            Auth.auth().createUser(withEmail: username, password: password) { [weak self] authResult, error in
-                if let error = error {
-                    if let errCode = AuthErrorCode(rawValue: error._code) {
-                        switch errCode {
-                        case .emailAlreadyInUse:
-                            self?.signUpErrorMessage = "이미 가입된 이메일입니다."
-                        default:
-                            self?.signUpErrorMessage = error.localizedDescription
-                        }
+        
+        signUpErrorMessage = nil
+        
+        Auth.auth().createUser(withEmail: username, password: password) { [weak self] authResult, error in
+            if let error = error {
+                if let errCode = AuthErrorCode(rawValue: error._code) {
+                    switch errCode {
+                    case .emailAlreadyInUse:
+                        self?.signUpErrorMessage = "이미 가입된 이메일입니다."
+                    default:
+                        self?.signUpErrorMessage = error.localizedDescription
                     }
-                    self?.signUpSuccess = false
-                    return
                 }
-                
-                guard let user = authResult?.user else {
-                    self?.signUpErrorMessage = "사용자 정보를 가져올 수 없습니다."
-                    return
-                }
-                
-                // Firestore에 사용자 정보 저장
-                self?.saveUserDataToFirestore(uid: user.uid)
+                self?.signUpSuccess = false
+                return
             }
+            
+            guard let user = authResult?.user else {
+                self?.signUpErrorMessage = "사용자 정보를 가져올 수 없습니다."
+                return
+            }
+            
+            // Firestore에 사용자 정보 저장
+            self?.saveUserDataToFirestore(uid: user.uid)
         }
+    }
     
     // Firestore에 사용자 정보를 저장하는 메서드
     private func saveUserDataToFirestore(uid: String) {
