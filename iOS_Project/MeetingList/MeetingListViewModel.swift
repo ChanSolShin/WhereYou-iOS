@@ -25,42 +25,42 @@ class MeetingListViewModel: ObservableObject {
     }
         
     func fetchMeetings() {
-          db.collection("meetings").addSnapshotListener { (snapshot, error) in
-              if let error = error {
-                  print("Error fetching meetings: \(error)")
-              } else {
-                  if let snapshot = snapshot {
-                      self.meetings = snapshot.documents.compactMap { document -> MeetingListModel? in
-                          let data = document.data()
-                          guard let title = data["meetingName"] as? String,
-                                let timestamp = data["meetingDate"] as? Timestamp,
-                                let address = data["meetingAddress"] as? String,
-                                let location = data["meetingLocation"] as? GeoPoint,
-                                let memberIDs = data["meetingMembers"] as? [String],
-                                let masterID = data["meetingMaster"] as? String else {
-                              return nil
-                          }
-                          
-                          // 현재 사용자 UID 확인
-                          guard let currentUserUID = self.currentUserUID else {
-                              return nil
-                          }
-                          
-                          // 현재 사용자가 meetingMembers에 포함되는지 확인
-                          if !memberIDs.contains(currentUserUID) {
-                              return nil
-                          }
-                          
-                          let date = timestamp.dateValue()
-                          let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
-                          
-                          return MeetingListModel(title: title, date: date, meetingAddress: address, meetingLocation: coordinate, meetingMemberIDs: memberIDs, meetingMasterID: masterID)
-                      }
-                      self.meetings.sort { $0.date < $1.date }
-                  }
-              }
-          }
-      }
+        db.collection("meetings").addSnapshotListener { (snapshot, error) in
+            if let error = error {
+                print("Error fetching meetings: \(error)")
+            } else {
+                if let snapshot = snapshot {
+                    self.meetings = snapshot.documents.compactMap { document -> MeetingListModel? in
+                        let data = document.data()
+                        guard let title = data["meetingName"] as? String,
+                              let timestamp = data["meetingDate"] as? Timestamp,
+                              let address = data["meetingAddress"] as? String,
+                              let location = data["meetingLocation"] as? GeoPoint,
+                              let memberIDs = data["meetingMembers"] as? [String],
+                              let masterID = data["meetingMaster"] as? String else {
+                            return nil
+                        }
+
+                        // 현재 사용자 UID 확인
+                        guard let currentUserUID = self.currentUserUID else {
+                            return nil
+                        }
+                        
+                        // 현재 사용자가 meetingMembers에 포함되는지 확인
+                        if !memberIDs.contains(currentUserUID) {
+                            return nil
+                        }
+                        
+                        let date = timestamp.dateValue()
+                        let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+                        
+                        return MeetingListModel(id: document.documentID, title: title, date: date, meetingAddress: address, meetingLocation: coordinate, meetingMemberIDs: memberIDs, meetingMasterID: masterID)
+                    }
+                    self.meetings.sort { $0.date < $1.date }
+                }
+            }
+        }
+    }
       
     
     func selectMeeting(at index: Int) {
