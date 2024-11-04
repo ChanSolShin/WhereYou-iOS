@@ -67,7 +67,7 @@ struct MeetingRequestListView: View {
     }
     
     private func rejectRequest(_ request: MeetingRequestModel) {
-        viewModel.rejectMeetingRequest(requestID: request.id)
+        viewModel.rejectMeetingRequest(requestID: request.id) 
         
         // 요청 삭제 후 UI 업데이트
         deleteRequest(request)
