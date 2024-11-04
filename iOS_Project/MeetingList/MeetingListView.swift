@@ -8,7 +8,7 @@ import SwiftUI
 import NMapsMap
 
 struct MeetingListView: View {
-    @StateObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel())
+    @ObservedObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel())
     @State private var searchText = "" // 검색 텍스트
     @Binding var isTabBarHidden: Bool
     
@@ -25,7 +25,7 @@ struct MeetingListView: View {
                         ScrollView {
                             VStack(spacing: 10) {
                                 ForEach(viewModel.meetings.filter { meeting in
-                                    searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText) // 검색 필터링
+                                    searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText)
                                 }) { meeting in
                                     NavigationLink(destination: MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
                                         .onAppear { isTabBarHidden = true }
@@ -91,7 +91,7 @@ struct MeetingListView: View {
                     NavigationLink(destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)) {
                         HStack {
                             Image(systemName: "bell")
-                            if viewModel.meetingViewModel.pendingMeetingRequests.count > 0 { // 제대로 동작 하지않음
+                            if viewModel.meetingViewModel.pendingMeetingRequests.count > 0 {
                                 Text("\(viewModel.meetingViewModel.pendingMeetingRequests.count)")
                                     .font(.caption)
                                     .foregroundColor(.white)
@@ -103,6 +103,10 @@ struct MeetingListView: View {
                     }
                 }
             }
+        }
+        .onAppear {
+            // 대기 중인 요청을 실시간으로 받아오도록 설정
+            viewModel.meetingViewModel.fetchPendingMeetingRequests()
         }
     }
 }
