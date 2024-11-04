@@ -31,7 +31,7 @@ struct LoginView: View {
                     .font(.title2)
                     .padding(.bottom, 50)
                     .fontWeight(.bold)
-
+                
                 
                 HStack {
                     Image(systemName: "person")
@@ -46,14 +46,12 @@ struct LoginView: View {
                 .padding(.horizontal, 30)
                 
                 // 비밀번호
-         
-                
                 HStack {
                     Image(systemName: "lock")
                         .foregroundColor(.gray)
                     
                     if showPassword {
-                        TextField("비밀번호번호를 입력하세요", text: $viewModel.user.password)
+                        TextField("비밀번호를 입력하세요", text: $viewModel.user.password)
                             .font(.system(size: 16))
                             .autocapitalization(.none)
                     } else {
@@ -75,15 +73,19 @@ struct LoginView: View {
                 .cornerRadius(8)
                 .padding(.horizontal, 30)
                 .padding(.bottom, 5)
+                .padding(.top,10)
                 
                 
-                Text("비밀번호 찾기") // 비밀번호 찾기 구현해야함.
-                    .font(.system(size: 14))
-                    .padding(.leading, 300)
-                    .foregroundColor(.gray)
-                    .underline()
-                    .padding(.horizontal, 10)
-                    .padding(.bottom, 20)
+                NavigationLink(destination: FindPasswordView()){
+                    Text("비밀번호 찾기")
+                }
+                .font(.system(size: 14))
+                .padding(.leading, 250)
+                .foregroundColor(.gray)
+                .underline()
+                .padding(.horizontal, 10)
+                .padding(.bottom, 15)
+                
                 
                 // 로그인 및 회원가입 버튼
                 NavigationLink(destination: MainTabView(), isActive: $viewModel.isLoggedIn) {
@@ -116,7 +118,7 @@ struct LoginView: View {
                         viewModel.loginErrorMessage = nil // 알림창을 다시 띄울 수 있도록 loginErrorMessage 초기화
                     }
                 }
-                    .padding(.bottom,20)
+                .padding(.bottom,20)
                 
                 HStack {
                     NavigationLink(destination: SignUpView()) {
@@ -129,9 +131,12 @@ struct LoginView: View {
                         .underline()
                         .padding(.horizontal, 15)
                     
-                    Text("이메일 찾기") // 이메일찾기 구현해야함
-                        .foregroundColor(.black)
-                        .underline()
+                    NavigationLink(destination: FindEmailView()){
+                        Text("이메일 찾기")
+                            .foregroundColor(.black)
+                            .underline()
+                    }
+                    
                 }
                 .padding(.horizontal, 40)
                 Spacer()
