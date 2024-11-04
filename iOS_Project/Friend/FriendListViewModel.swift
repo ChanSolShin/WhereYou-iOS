@@ -18,7 +18,7 @@ class FriendListViewModel: ObservableObject {
     private var currentUserID: String? {
         return Auth.auth().currentUser?.uid
     }
-    private var currentUserName: String?
+    var currentUserName: String?
     private var friendListener: ListenerRegistration?
     
     init() {
