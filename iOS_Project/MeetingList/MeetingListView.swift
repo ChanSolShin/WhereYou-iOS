@@ -88,7 +88,9 @@ struct MeetingListView: View {
             .searchable(text: $searchText, prompt: "검색어를 입력하세요")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)) {
+                    NavigationLink(destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
+                        .onAppear { isTabBarHidden = true }
+                        .onDisappear { isTabBarHidden = false }) {
                         HStack {
                             Image(systemName: "bell")
                             if viewModel.meetingViewModel.pendingMeetingRequests.count > 0 {
