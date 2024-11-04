@@ -44,41 +44,62 @@ class MeetingViewModel: ObservableObject {
             }
         }
     }
-    
-    // 친구들에게 모임 초대 요청 보내기
-    func sendMeetingRequest(toUserIDs: [String], meetingName: String, fromUserID: String, fromUserName: String) {
+    private func fetchMeetingDocumentID(for meetingName: String, completion: @escaping (String?) -> Void) {
         let db = Firestore.firestore()
         
-        for userID in toUserIDs {
-            let requestReference = db.collection("meetingRequests")
-                .whereField("fromUserID", isEqualTo: fromUserID)
-                .whereField("toUserID", isEqualTo: userID)
-                .whereField("meetingName", isEqualTo: meetingName)
-                .whereField("status", isEqualTo: "pending")
-            
-            requestReference.getDocuments { (snapshot, error) in
-                if let error = error {
-                    print("Error checking existing requests: \(error)")
-                    return
-                }
-                
-                // 요청이 존재하지 않는 경우 새로운 요청을 추가합니다.
-                if let documents = snapshot?.documents, documents.isEmpty {
-                    self.createMeetingRequest(toUserID: userID, meetingName: meetingName, fromUserID: fromUserID, fromUserName: fromUserName)
-                } else {
-                    print("Request already exists for \(userID)")
-                }
+        db.collection("meetings").whereField("meetingName", isEqualTo: meetingName).getDocuments { (snapshot, error) in
+            if let error = error {
+                print("Error fetching meeting document ID: \(error)")
+                completion(nil)
+            } else if let document = snapshot?.documents.first {
+                // 첫 번째 문서의 ID 반환
+                completion(document.documentID)
+            } else {
+                completion(nil)
             }
         }
     }
     
-    private func createMeetingRequest(toUserID: String, meetingName: String, fromUserID: String, fromUserName: String) {
+    // 친구들에게 모임 초대 요청 보내기
+    func sendMeetingRequest(toUserIDs: [String], meetingName: String, fromUserID: String, fromUserName: String) {
+        fetchMeetingDocumentID(for: meetingName) { [weak self] meetingID in
+            guard let meetingID = meetingID else {
+                print("Meeting document ID를 찾을 수 없습니다.")
+                return
+            }
+            
+            for userID in toUserIDs {
+                let requestReference = Firestore.firestore().collection("meetingRequests")
+                    .whereField("fromUserID", isEqualTo: fromUserID)
+                    .whereField("toUserID", isEqualTo: userID)
+                    .whereField("meetingName", isEqualTo: meetingName)
+                    .whereField("status", isEqualTo: "pending")
+                    .whereField("meetingID", isEqualTo: meetingID)
+                
+                requestReference.getDocuments { (snapshot, error) in
+                    if let error = error {
+                        print("Error checking existing requests: \(error)")
+                        return
+                    }
+                    
+                    // 요청이 없는 경우 새 요청 생성
+                    if let documents = snapshot?.documents, documents.isEmpty {
+                        self?.createMeetingRequest(toUserID: userID, meetingID: meetingID, meetingName: meetingName, fromUserID: fromUserID, fromUserName: fromUserName)
+                    } else {
+                        print("이미 \(userID)에게 보낸 요청이 있습니다.")
+                    }
+                }
+            }
+        }
+    }
+    private func createMeetingRequest(toUserID: String, meetingID: String, meetingName: String, fromUserID: String, fromUserName: String) {
         let db = Firestore.firestore()
         let newRequest: [String: Any] = [
             "fromUserID": fromUserID,
             "fromUserName": fromUserName,
             "toUserID": toUserID,
             "meetingName": meetingName,
+            "meetingID": meetingID,
             "status": "pending"
         ]
         
@@ -86,20 +107,45 @@ class MeetingViewModel: ObservableObject {
             if let error = error {
                 print("Error creating meeting request: \(error)")
             } else {
-                print("Successfully created meeting request to \(toUserID)")
+                print("Successfully created meeting request to \(toUserID) with meetingID: \(meetingID)")
             }
         }
     }
     
-    func acceptMeetingRequest(requestID: String, fromUserID: String) {
+    func acceptMeetingRequest(requestID: String, toUserID: String) {
         let db = Firestore.firestore()
-        db.collection("meetingRequests").document(requestID).updateData(["status": "accepted"]) { [weak self] error in
+        
+        // 요청 문서 가져오기
+        db.collection("meetingRequests").document(requestID).getDocument { [weak self] document, error in
+            guard let self = self else { return }
+            
             if let error = error {
-                print("Error accepting meeting request: \(error)")
+                print("Error fetching meeting request: \(error)")
+                return
+            }
+            
+            if let document = document, document.exists {
+                let meetingID = document.data()?["meetingID"] as? String ?? ""
+                // 수락 요청 상태 업데이트
+                self.updateMeetingRequestStatus(requestID: requestID, status: "accepted")
+                
+                // Meeting에 사용자 추가
+                self.addUserToMeeting(meetingID: meetingID, userID: toUserID)
+            }
+        }
+    }
+
+    private func addUserToMeeting(meetingID: String, userID: String) {
+        let db = Firestore.firestore()
+        
+        // meetings 컬렉션의 해당 문서 업데이트
+        db.collection("meetings").document(meetingID).updateData([
+            "meetingMembers": FieldValue.arrayUnion([userID])  // 사용자 ID 추가
+        ]) { error in
+            if let error = error {
+                print("Error adding user to meeting: \(error)")
             } else {
-                self?.deleteMeetingRequest(requestID: requestID)
-                // 요청 삭제 후 최신 요청 목록 불러오기
-                self?.fetchPendingMeetingRequests()
+                print("Successfully added user \(userID) to meeting with ID: \(meetingID)")
             }
         }
     }
@@ -169,10 +215,10 @@ class MeetingViewModel: ObservableObject {
                                 fromUserName: data["fromUserName"] as? String ?? "",
                                 toUserID: data["toUserID"] as? String ?? "",
                                 meetingName: data["meetingName"] as? String ?? "",
-                                status: data["status"] as? String ?? ""
+                                status: data["status"] as? String ?? "",
+                                meetingID: data["meetingID"] as? String ?? ""  // meetingID 추가
                             )
                         } ?? []
                     }
                 }
-            }
-    }}
+            }    }}
