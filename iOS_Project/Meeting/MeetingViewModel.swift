@@ -57,14 +57,6 @@ class MeetingViewModel: ObservableObject {
                         print("Error checking existing requests: \(error)")
                         return
                     }
-                    
-                    if let documents = snapshot?.documents, !documents.isEmpty {
-                        DispatchQueue.main.async {
-                            self.errorMessage = "해당 사용자에게 모임 초대 요청을 보낸 상태입니다." // 동작하지 않음
-                            self.showAlert = true
-                        }
-                        return
-                    }
                 }
         }
     }
