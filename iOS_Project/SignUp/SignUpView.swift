@@ -10,6 +10,7 @@ struct SignUpView: View {
     var body: some View {
         ScrollView {
             VStack {
+                
                 Text("MyApp")
                     .font(.largeTitle)
                     .padding(.top, 20)
