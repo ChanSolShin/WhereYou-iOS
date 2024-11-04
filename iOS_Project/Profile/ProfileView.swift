@@ -66,15 +66,18 @@ struct ProfileView: View {
                     .padding(.vertical, 8)
                     
                     
-                    HStack {
-                        Image(systemName: "message")
-                            .font(.title2)
-                        Text("문의하기")
-                            .font(.body)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
+                    NavigationLink(destination: ReportView()) {
+                        HStack {
+                            Image(systemName: "message")
+                                .font(.title2)
+                            Text("오류신고")
+                                .font(.body)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                        }
                     }
+                    .buttonStyle(PlainButtonStyle())
                     .padding(.vertical, 8)
                     
                     HStack {
@@ -132,12 +135,5 @@ struct ProfileView: View {
                 LoginView() // 로그아웃 시 표시될 로그인 화면
             }
         }
-    }
-}
-
-// 미리보기용 코드
-struct ProfileView_Previews: PreviewProvider {
-    static var previews: some View {
-        ProfileView()
     }
 }
