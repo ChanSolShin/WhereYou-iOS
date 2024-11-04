@@ -30,7 +30,7 @@ struct CustomTabView: UIViewControllerRepresentable {
         let meetingListView = UIHostingController(rootView: MeetingListView(isTabBarHidden: $isTabBarHidden))
         meetingListView.tabBarItem = UITabBarItem(title: "모임", image: UIImage(systemName: "list.bullet"), tag: 0)
         
-        let friendView = UIHostingController(rootView: FriendListView())
+        let friendView = UIHostingController(rootView: FriendListView(isTabBarHidden: $isTabBarHidden))
         friendView.tabBarItem = UITabBarItem(title: "친구", image: UIImage(systemName: "person.3"), tag: 1)
         
         let profileView = UIHostingController(rootView: ProfileView())

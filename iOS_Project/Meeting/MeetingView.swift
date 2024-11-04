@@ -13,11 +13,15 @@ import FirebaseFirestore
 struct MeetingView: View {
     var meeting: MeetingListModel
     @ObservedObject var meetingViewModel: MeetingViewModel
-    @State private var title: String = "모임장소" //
+    @State private var title: String = "모임장소"
+    @State private var showingAddFriendModal = false
+    
+    // Alert 관련 상태 변수 추가
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
     
     var body: some View {
         VStack {
-            
             Text(title)
                 .font(.title2)
             
@@ -35,7 +39,6 @@ struct MeetingView: View {
             
             Button(action: {
                 title = "모임장소"
-                // 이곳에 모임장소의 위치를 Map에 업데이트하는 코드
             }) {
                 Text("모임장소")
                     .padding()
@@ -43,17 +46,15 @@ struct MeetingView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
-            // 멤버 버튼을 가로 3개씩 배치
+            
             ForEach(0..<meeting.meetingMemberIDs.count/3 + (meeting.meetingMemberIDs.count % 3 > 0 ? 1 : 0), id: \.self) { rowIndex in
                 HStack {
-                    // 각 행에서 3개의 버튼 생성
                     ForEach(0..<3) { columnIndex in
                         let index = rowIndex * 3 + columnIndex
                         if index < meeting.meetingMemberIDs.count {
                             let memberID = meeting.meetingMemberIDs[index]
                             Button(action: {
                                 title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치"
-                                // 이곳에 버튼에 해당하는 사람의 현재위치정보를 Map에 업데이트하는 코드
                                 
                             }) {
                                 Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
@@ -81,5 +82,27 @@ struct MeetingView: View {
         }
         .navigationTitle(meeting.title)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    showingAddFriendModal = true
+                }) {
+                    Image(systemName: "person.badge.plus")
+                }
+            }
+        }
+        .sheet(isPresented: $showingAddFriendModal) {
+            AddSelectedFriend(meeting: meeting)
+        }
+        
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text("알림"), message: Text(alertMessage), dismissButton: .default(Text("확인")))
+        }
+        .onReceive(meetingViewModel.$errorMessage) { message in
+            if let message = message {
+                alertMessage = message
+                showAlert = true
+            }
+        }
     }
 }
