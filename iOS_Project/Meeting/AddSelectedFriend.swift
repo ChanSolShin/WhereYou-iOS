@@ -41,7 +41,7 @@ struct AddSelectedFriend: View {
                 .navigationTitle("멤버 추가")
                 
                 VStack {
-                    Spacer() // 상단에 빈 공간을 추가하여 버튼을 하단에 위치하게 함
+                    Spacer()
                     Button(action: sendMeetingInvitations) {
                         Image(systemName: "plus")
                             .font(.largeTitle)
@@ -51,7 +51,7 @@ struct AddSelectedFriend: View {
                             .clipShape(Circle())
                             .shadow(radius: 5)
                     }
-                    .padding(.bottom, 20) // 하단에서 약간의 여백 추가
+                    .padding(.bottom, 20) 
                 }
             }
             .alert(isPresented: $showAlert) {
