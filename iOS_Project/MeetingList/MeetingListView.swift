@@ -16,7 +16,6 @@ struct MeetingListView: View {
         NavigationStack {
             ZStack {
                 VStack {
-                    // 모임이 없을 때와 있을 때 다른 레이아웃
                     if viewModel.meetings.isEmpty {
                         VStack {
                             Spacer()
