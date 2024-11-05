@@ -27,7 +27,7 @@ struct MeetingListView: View {
                             Spacer()
                         }
                     } else {
-                        // 모임이 있을 때 ScrollView 표시
+                        
                         ScrollView {
                             VStack(spacing: 10) {
                                 ForEach(viewModel.meetings.filter { meeting in
@@ -71,6 +71,7 @@ struct MeetingListView: View {
                             }
                             .padding(.horizontal)
                         }
+                        .padding(.top, 10)
                     }
                 }
                 
