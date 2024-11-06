@@ -9,18 +9,16 @@ import SwiftUI
 import FirebaseFirestore
 
 class FindEmailViewModel: ObservableObject {
-    @Published var name = ""
-    @Published var birthday = ""
-    @Published var phoneNumber = ""
+    @Published var model = FindEmailModel(name: "", birthday: "", phoneNumber: "")
     @Published var foundEmail: String?
     @Published var errorMessage: String?
     
     func findEmail(completion: @escaping (Bool) -> Void) {
         let db = Firestore.firestore()
         db.collection("users")
-            .whereField("name", isEqualTo: name)
-            .whereField("birthday", isEqualTo: birthday)
-            .whereField("phoneNumber", isEqualTo: phoneNumber)
+            .whereField("name", isEqualTo: model.name)
+            .whereField("birthday", isEqualTo: model.birthday)
+            .whereField("phoneNumber", isEqualTo: model.phoneNumber)
             .getDocuments { snapshot, error in
                 if let error = error {
                     self.errorMessage = error.localizedDescription
