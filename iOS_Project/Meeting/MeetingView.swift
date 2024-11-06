@@ -11,10 +11,12 @@ import FirebaseAuth
 import FirebaseFirestore
 
 struct MeetingView: View {
+    @Environment(\.dismiss) var dismiss
     var meeting: MeetingListModel
     @ObservedObject var meetingViewModel: MeetingViewModel
     @State private var title: String = "모임장소"
     @State private var showingAddFriendModal = false
+    @State private var leaderSelctionModal = false
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
     @State private var showActionSheet = false
@@ -35,6 +37,7 @@ struct MeetingView: View {
                 )
             )
             .frame(height: 300)
+            
             
             Button(action: {
                 title = "모임장소"
@@ -83,14 +86,12 @@ struct MeetingView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
-                    // 친구 추가 버튼
                     Button(action: {
                         showingAddFriendModal = true
                     }) {
                         Image(systemName: "person.badge.plus")
                     }
 
-                    // 모임 관리 버튼 (가장 오른쪽)
                     Button(action: {
                         showActionSheet = true
                     }) {
@@ -114,21 +115,49 @@ struct MeetingView: View {
             }
         }
         .actionSheet(isPresented: $showActionSheet) {
-            ActionSheet(
+            var buttons: [ActionSheet.Button] = [
+                .destructive(Text("나가기")) {
+                    meetingViewModel.leaveMeeting(meetingID: meeting.id)
+                    dismiss()
+                },
+                .cancel(Text("취소"))
+            ]
+
+
+            if let currentUserID = Auth.auth().currentUser?.uid {
+                if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID) {
+                    buttons.insert(.default(Text("모임정보 수정")) {
+                        // 모임 수정 액션 추가
+                    }, at: 0)
+                } else {
+                    buttons.insert(.default(Text("모임 정보 수정")) {
+                        alertMessage = "모임장만 사용할 수 있는 기능입니다"
+                        showAlert = true
+                    }, at: 0)
+                }
+            }
+            if let currentUserID = Auth.auth().currentUser?.uid {
+                if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID) {
+                    buttons.insert(.default(Text("모임장 변경")) {
+                        leaderSelctionModal = true
+                    }, at: 1)
+                } else {
+                    buttons.insert(.default(Text("모임장 변경")) {
+                        alertMessage = "모임장만 사용할 수 있는 기능입니다"
+                        showAlert = true
+                    }, at: 1)
+                }
+            }
+
+            // ActionSheet 반환
+            return ActionSheet(
                 title: Text("모임 관리"),
                 message: Text("원하는 작업을 선택하세요."),
-                buttons: [
-                    .default(Text("모임수정")) {
-                        // 모임 수정 액션 추가
-                        print("모임 수정 선택됨")
-                    },
-                    .destructive(Text("나가기")) {
-                        // 모임 나가기 액션 추가
-                        print("모임 나가기 선택됨")
-                    },
-                    .cancel(Text("취소"))
-                ]
+                buttons: buttons
             )
+        }
+        .sheet(isPresented: $leaderSelctionModal) {
+            LeaderSelectionView(meetingID: meeting.id, currentUserID: Auth.auth().currentUser?.uid ?? "")
         }
     }
 }
