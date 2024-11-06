@@ -15,10 +15,9 @@ struct MeetingView: View {
     @ObservedObject var meetingViewModel: MeetingViewModel
     @State private var title: String = "모임장소"
     @State private var showingAddFriendModal = false
-    
-    // Alert 관련 상태 변수 추가
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
+    @State private var showActionSheet = false
     
     var body: some View {
         VStack {
@@ -55,7 +54,6 @@ struct MeetingView: View {
                             let memberID = meeting.meetingMemberIDs[index]
                             Button(action: {
                                 title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치"
-                                
                             }) {
                                 Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
                                     .padding()
@@ -84,17 +82,28 @@ struct MeetingView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    showingAddFriendModal = true
-                }) {
-                    Image(systemName: "person.badge.plus")
+                HStack {
+                    // 친구 추가 버튼
+                    Button(action: {
+                        showingAddFriendModal = true
+                    }) {
+                        Image(systemName: "person.badge.plus")
+                    }
+
+                    // 모임 관리 버튼 (가장 오른쪽)
+                    Button(action: {
+                        showActionSheet = true
+                    }) {
+                        Image(systemName: "ellipsis")
+                            .rotationEffect(.degrees(90))
+                            .imageScale(.large)
+                    }
                 }
             }
         }
         .sheet(isPresented: $showingAddFriendModal) {
             AddSelectedFriend(meeting: meeting)
         }
-        
         .alert(isPresented: $showAlert) {
             Alert(title: Text("알림"), message: Text(alertMessage), dismissButton: .default(Text("확인")))
         }
@@ -103,6 +112,23 @@ struct MeetingView: View {
                 alertMessage = message
                 showAlert = true
             }
+        }
+        .actionSheet(isPresented: $showActionSheet) {
+            ActionSheet(
+                title: Text("모임 관리"),
+                message: Text("원하는 작업을 선택하세요."),
+                buttons: [
+                    .default(Text("모임수정")) {
+                        // 모임 수정 액션 추가
+                        print("모임 수정 선택됨")
+                    },
+                    .destructive(Text("나가기")) {
+                        // 모임 나가기 액션 추가
+                        print("모임 나가기 선택됨")
+                    },
+                    .cancel(Text("취소"))
+                ]
+            )
         }
     }
 }
