@@ -8,5 +8,5 @@
 import Foundation
 
 struct FindPasswordModel {
-    let email: String
+    var email: String
 }
