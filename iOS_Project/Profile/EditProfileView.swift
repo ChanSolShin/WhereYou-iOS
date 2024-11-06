@@ -11,7 +11,6 @@ struct EditProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var showDeleteAlert = false
-    @State private var showAlert = false
     @State private var name = ""
     @State private var email = ""
     @State private var phoneNumber = ""
@@ -62,6 +61,7 @@ struct EditProfileView: View {
                 Spacer()
                 Button(action: {
                     showDeleteAlert = true
+                    print("showDeleteAlert:", showDeleteAlert)
                 }) {
                     Text("탈퇴하기")
                         .foregroundColor(.red)
@@ -72,7 +72,6 @@ struct EditProfileView: View {
                         message: Text("계정이 영구적으로 삭제됩니다."),
                         primaryButton: .destructive(Text("탈퇴"), action: {
                             viewModel.deleteAccount()
-                            presentationMode.wrappedValue.dismiss()
                         }),
                         secondaryButton: .cancel(Text("취소"))
                     )
@@ -87,19 +86,19 @@ struct EditProfileView: View {
             phoneNumber = viewModel.profile?.phoneNumber ?? ""
             birthday = viewModel.profile?.birthday ?? ""
         }
+        .fullScreenCover(isPresented: .constant(!viewModel.isLoggedIn)) {
+                    LoginView() // 회원탈퇴 시, 로그인 화면으로 이동
+                }
         
         .navigationBarItems(
             trailing: Button("완료") {
                 if viewModel.updateProfileData(newName: name, newEmail: email, newPhoneNumber: phoneNumber, newBirthday: birthday) {
                     presentationMode.wrappedValue.dismiss()
                 } else {
-                    showAlert = true
+                    
                 }
             }
         )
-        .alert(isPresented: $showAlert) {
-            Alert(title: Text("입력 오류"), message: Text(viewModel.errorMessage ?? "알 수 없는 오류"), dismissButton: .default(Text("확인")))
-        }
     }
 }
 

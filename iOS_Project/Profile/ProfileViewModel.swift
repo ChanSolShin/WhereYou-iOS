@@ -99,7 +99,7 @@ class ProfileViewModel: ObservableObject {
         guard let user = Auth.auth().currentUser else { return }
         
         let uid = user.uid
-        db.collection("users").document(uid).delete { error in
+        db.collection("users").document(uid).delete { [weak self] error in
             if let error = error {
                 print("Error deleting Firestore data: \(error)")
                 return
@@ -110,7 +110,7 @@ class ProfileViewModel: ObservableObject {
                     print("Error deleting user: \(error)")
                 } else {
                     UserDefaults.standard.set(false, forKey: "isLoggedIn")
-                    self.isLoggedIn = false
+                    self?.isLoggedIn = false
                 }
             }
         }
