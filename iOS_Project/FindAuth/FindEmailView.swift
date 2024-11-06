@@ -25,7 +25,7 @@ struct FindEmailView: View {
                         Image(systemName: "person.fill")
                             .foregroundColor(.gray)
                             .imageScale(.small)
-                        TextField("이름을 입력하세요", text: $viewModel.name)
+                        TextField("이름을 입력하세요", text: $viewModel.model.name)
                         
                     }
                     .padding()
@@ -38,11 +38,11 @@ struct FindEmailView: View {
                         Image(systemName: "calendar")
                             .foregroundColor(.gray)
                             .imageScale(.small)
-                        TextField("생년월일(8자리)", text: $viewModel.birthday)
+                        TextField("생년월일(8자리)", text: $viewModel.model.birthday)
                             .keyboardType(.numberPad)
-                            .onChange(of: viewModel.birthday) { newValue in
+                            .onChange(of: viewModel.model.birthday) { newValue in
                                 if newValue.count > 8 {
-                                    viewModel.birthday = String(newValue.prefix(8))
+                                    viewModel.model.birthday = String(newValue.prefix(8))
                                 }
                             }
                             .font(.system(size: 16))
@@ -57,7 +57,7 @@ struct FindEmailView: View {
                         Image(systemName: "phone")
                             .foregroundColor(.gray)
                             .imageScale(.small)
-                        TextField("전화번호를 입력하세요 ( - 없이 )", text:$viewModel.phoneNumber)
+                        TextField("전화번호를 입력하세요 ( - 없이 )", text:$viewModel.model.phoneNumber)
                             .keyboardType(.numberPad)
                     }
                     .padding()

@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 
 struct FindEmailModel {
-    let name: String
-    let birthday: String
-    let phoneNumber: String
+    var name: String
+    var birthday: String
+    var phoneNumber: String
 }
