@@ -25,7 +25,7 @@ struct FindPasswordView: View {
                     Image(systemName: "person")
                         .foregroundColor(.gray)
                         .imageScale(.small)
-                    TextField("이메일을 입력하세요", text: $viewModel.email)
+                    TextField("이메일을 입력하세요", text: $viewModel.model.email)
                         .autocapitalization(.none)
                         .keyboardType(.emailAddress)
                 }
