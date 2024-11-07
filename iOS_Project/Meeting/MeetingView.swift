@@ -160,7 +160,7 @@ struct MeetingView: View {
             }
             .fullScreenCover(isPresented: $showingEditMeetingModal) {
                 NavigationStack {
-                    EditMeetingView()
+                    EditMeetingView(meetingID: meeting.id)
                 }
             }
             .sheet(isPresented: $leaderSelctionModal) {
