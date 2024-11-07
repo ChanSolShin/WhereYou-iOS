@@ -20,6 +20,7 @@ struct MeetingView: View {
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
     @State private var showActionSheet = false
+    @State private var showingEditMeetingModal = false
     
     var body: some View {
         VStack {
@@ -128,6 +129,7 @@ struct MeetingView: View {
                 if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID) {
                     buttons.insert(.default(Text("모임정보 수정")) {
                         // 모임 수정 액션 추가
+                        showingEditMeetingModal = true
                     }, at: 0)
                 } else {
                     buttons.insert(.default(Text("모임 정보 수정")) {
@@ -158,6 +160,9 @@ struct MeetingView: View {
         }
         .sheet(isPresented: $leaderSelctionModal) {
             LeaderSelectionView(meetingID: meeting.id, currentUserID: Auth.auth().currentUser?.uid ?? "")
+        }
+        .sheet(isPresented: $showingEditMeetingModal) {
+            EditMeetingView(viewModel: EditMeetingViewModel(meeting: meeting))
         }
     }
 }

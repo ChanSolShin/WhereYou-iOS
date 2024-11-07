@@ -12,14 +12,6 @@ import CoreLocation
 
 class AddMeetingViewModel: ObservableObject {
     @Published var meeting: AddMeetingModel = AddMeetingModel()
-
-    struct Meeting {
-        var meetingName: String = ""
-        var meetingDate: Date = Date()
-        var meetingAddress: String? = nil
-        var meetingLocation: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 0, longitude: 0)
-        var meetingMembers: [String] = [] 
-    }
     
     var successAddMeeting: Bool {
         return meeting.meetingName.isEmpty || meeting.meetingAddress == nil 
