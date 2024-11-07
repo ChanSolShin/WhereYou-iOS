@@ -89,7 +89,16 @@ struct MeetingView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         Button(action: {
-                            showingAddFriendModal = true
+                            if let currentUserID = Auth.auth().currentUser?.uid {
+                                if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID){
+                                    showingAddFriendModal = true
+                                }
+                                else {
+                                    alertMessage = "모임장만 멤버 초대를 할 수 있습니다."
+                                    showAlert = true
+                                }
+
+                            }
                         }) {
                             Image(systemName: "person.badge.plus")
                         }
