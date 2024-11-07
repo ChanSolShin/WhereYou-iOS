@@ -50,7 +50,3 @@ struct AddLocationView: View {
         }
     }
 }
-
-#Preview {
-    AddLocationView(viewModel: AddMeetingViewModel())
-}

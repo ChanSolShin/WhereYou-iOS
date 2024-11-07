@@ -17,7 +17,6 @@
 		EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1042CC2F15700989E43 /* AddMeetingView.swift */; };
 		EA86C1232CC2F15700989E43 /* AddMeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1052CC2F15700989E43 /* AddMeetingViewModel.swift */; };
 		EA86C1242CC2F15700989E43 /* FriendListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1072CC2F15700989E43 /* FriendListView.swift */; };
-		EA86C1252CC2F15700989E43 /* LoginUserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1092CC2F15700989E43 /* LoginUserModel.swift */; };
 		EA86C1262CC2F15700989E43 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C10A2CC2F15700989E43 /* LoginView.swift */; };
 		EA86C1272CC2F15700989E43 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C10B2CC2F15700989E43 /* LoginViewModel.swift */; };
 		EA86C1282CC2F15700989E43 /* MeetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C10D2CC2F15700989E43 /* MeetingView.swift */; };
@@ -42,6 +41,10 @@
 		EAA9ACE32CDC18B0002F2C79 /* LeaderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE22CDC18AE002F2C79 /* LeaderSelectionView.swift */; };
 		EAA9ACE52CDC18BF002F2C79 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE42CDC18BD002F2C79 /* User.swift */; };
 		EAA9ACE82CDC1E2F002F2C79 /* LeaderSelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE72CDC1E2A002F2C79 /* LeaderSelectionViewModel.swift */; };
+		EAA9ACEA2CDC39DE002F2C79 /* EditMeetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE92CDC39D3002F2C79 /* EditMeetingView.swift */; };
+		EAA9ACED2CDC3B20002F2C79 /* EditMeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACEC2CDC3B19002F2C79 /* EditMeetingViewModel.swift */; };
+		EAA9ACEF2CDC3B51002F2C79 /* EditMeetingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACEE2CDC3B4C002F2C79 /* EditMeetingModel.swift */; };
+		EAA9ACF12CDC457F002F2C79 /* EditLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACF02CDC4576002F2C79 /* EditLocationView.swift */; };
 		EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */; };
 		EAB9CBC02CCFEC7400BFA8DD /* FriendListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBBF2CCFEC6C00BFA8DD /* FriendListViewModel.swift */; };
 		EAB9CBC42CCFEDD400BFA8DD /* FriendModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBC32CCFEDCF00BFA8DD /* FriendModel.swift */; };
@@ -92,7 +95,6 @@
 		EA86C1042CC2F15700989E43 /* AddMeetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMeetingView.swift; sourceTree = "<group>"; };
 		EA86C1052CC2F15700989E43 /* AddMeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMeetingViewModel.swift; sourceTree = "<group>"; };
 		EA86C1072CC2F15700989E43 /* FriendListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendListView.swift; sourceTree = "<group>"; };
-		EA86C1092CC2F15700989E43 /* LoginUserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginUserModel.swift; sourceTree = "<group>"; };
 		EA86C10A2CC2F15700989E43 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		EA86C10B2CC2F15700989E43 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		EA86C10D2CC2F15700989E43 /* MeetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingView.swift; sourceTree = "<group>"; };
@@ -118,6 +120,10 @@
 		EAA9ACE22CDC18AE002F2C79 /* LeaderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderSelectionView.swift; sourceTree = "<group>"; };
 		EAA9ACE42CDC18BD002F2C79 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		EAA9ACE72CDC1E2A002F2C79 /* LeaderSelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderSelectionViewModel.swift; sourceTree = "<group>"; };
+		EAA9ACE92CDC39D3002F2C79 /* EditMeetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMeetingView.swift; sourceTree = "<group>"; };
+		EAA9ACEC2CDC3B19002F2C79 /* EditMeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMeetingViewModel.swift; sourceTree = "<group>"; };
+		EAA9ACEE2CDC3B4C002F2C79 /* EditMeetingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMeetingModel.swift; sourceTree = "<group>"; };
+		EAA9ACF02CDC4576002F2C79 /* EditLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditLocationView.swift; sourceTree = "<group>"; };
 		EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingMapView.swift; sourceTree = "<group>"; };
 		EAB9CBBF2CCFEC6C00BFA8DD /* FriendListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendListViewModel.swift; sourceTree = "<group>"; };
 		EAB9CBC32CCFEDCF00BFA8DD /* FriendModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendModel.swift; sourceTree = "<group>"; };
@@ -222,9 +228,9 @@
 		EA86C10C2CC2F15700989E43 /* Login */ = {
 			isa = PBXGroup;
 			children = (
-				EA86C1092CC2F15700989E43 /* LoginUserModel.swift */,
 				EA86C10A2CC2F15700989E43 /* LoginView.swift */,
 				EA86C10B2CC2F15700989E43 /* LoginViewModel.swift */,
+				EAA9ACEB2CDC3B06002F2C79 /* EditMeeting */,
 			);
 			path = Login;
 			sourceTree = "<group>";
@@ -340,6 +346,17 @@
 				EAA9ACE42CDC18BD002F2C79 /* User.swift */,
 			);
 			path = LeaderSelction;
+			sourceTree = "<group>";
+		};
+		EAA9ACEB2CDC3B06002F2C79 /* EditMeeting */ = {
+			isa = PBXGroup;
+			children = (
+				EAA9ACF02CDC4576002F2C79 /* EditLocationView.swift */,
+				EAA9ACEE2CDC3B4C002F2C79 /* EditMeetingModel.swift */,
+				EAA9ACEC2CDC3B19002F2C79 /* EditMeetingViewModel.swift */,
+				EAA9ACE92CDC39D3002F2C79 /* EditMeetingView.swift */,
+			);
+			path = EditMeeting;
 			sourceTree = "<group>";
 		};
 		EABADF222CB9223E00962A40 = {
@@ -567,7 +584,7 @@
 				EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */,
 				EA86C1232CC2F15700989E43 /* AddMeetingViewModel.swift in Sources */,
 				EA86C1242CC2F15700989E43 /* FriendListView.swift in Sources */,
-				EA86C1252CC2F15700989E43 /* LoginUserModel.swift in Sources */,
+				EAA9ACED2CDC3B20002F2C79 /* EditMeetingViewModel.swift in Sources */,
 				EA86C14C2CC2FBAD00989E43 /* Coordinator.swift in Sources */,
 				EAB9CBC42CCFEDD400BFA8DD /* FriendModel.swift in Sources */,
 				EA86C14D2CC2FBAD00989E43 /* MapView.swift in Sources */,
@@ -576,12 +593,15 @@
 				EA28F4F82CC83C64004827A3 /* MeetingModel.swift in Sources */,
 				EA86C1272CC2F15700989E43 /* LoginViewModel.swift in Sources */,
 				F52E2FFB2CD3CEB500520042 /* FindPasswordViewModel.swift in Sources */,
+				EAA9ACEF2CDC3B51002F2C79 /* EditMeetingModel.swift in Sources */,
+				EAA9ACF12CDC457F002F2C79 /* EditLocationView.swift in Sources */,
 				F5ADB1D02CD90DAA00A1011C /* ProfileModel.swift in Sources */,
 				EA86C1282CC2F15700989E43 /* MeetingView.swift in Sources */,
 				F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */,
 				EA6EE1DD2CD39B07002961A9 /* MeetingRequestModel.swift in Sources */,
 				EA86C1292CC2F15700989E43 /* MeetingListModel.swift in Sources */,
 				EA86C12A2CC2F15700989E43 /* MeetingListView.swift in Sources */,
+				EAA9ACEA2CDC39DE002F2C79 /* EditMeetingView.swift in Sources */,
 				F50FDDBC2CD3AA12006E96B2 /* FindEmailView.swift in Sources */,
 				EA86C12B2CC2F15700989E43 /* MeetingListViewModel.swift in Sources */,
 				EA86C12C2CC2F15700989E43 /* ProfileView.swift in Sources */,
