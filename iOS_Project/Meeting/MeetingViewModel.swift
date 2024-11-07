@@ -32,6 +32,7 @@ class MeetingViewModel: ObservableObject {
         }
     }
     
+    
     private func fetchUserName(byID userID: String, completion: @escaping (String) -> Void) {
         let db = Firestore.firestore()
         db.collection("users").document(userID).getDocument { (document, error) in
