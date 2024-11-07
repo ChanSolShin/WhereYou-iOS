@@ -52,7 +52,7 @@ struct EditMeetingView: View {
                 Button(action: {
                     showLocationModal.toggle()
                 }) {
-                    Text("장소 수정")
+                    Text("장소 선택")
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
