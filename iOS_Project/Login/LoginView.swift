@@ -145,10 +145,3 @@ struct LoginView: View {
         }
     }
 }
-
-// 프리뷰용 코드
-struct LoginView_Previews: PreviewProvider {
-    static var previews: some View {
-        LoginView()
-    }
-}
