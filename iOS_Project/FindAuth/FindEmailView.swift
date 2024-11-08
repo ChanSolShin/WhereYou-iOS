@@ -95,10 +95,3 @@ struct FindEmailView: View {
         
     }
 }
-// 프리뷰용 코드
-struct FindEmailView_Previews: PreviewProvider {
-    static var previews: some View {
-        FindEmailView()
-    }
-}
-

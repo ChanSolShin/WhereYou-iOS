@@ -17,7 +17,7 @@ struct LeaderSelectionView: View {
     @State private var meeting: MeetingModel? // meeting 모델 상태 추가
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
-
+    
     func updateLeader() {
         guard let newLeader = selectedLeader else { return }
         
@@ -30,15 +30,14 @@ struct LeaderSelectionView: View {
             if let error = error {
                 print("모임장 변경 실패: \(error.localizedDescription)")
             } else {
-                // Firestore 업데이트가 성공하면 로컬 모델에서도 meetingMaster 업데이트
                 meeting?.meetingMasterID = newLeader.id
                 print("모임장 변경 성공")
-                alertMessage = "모임장을 변경했습니다!"
+                alertMessage = "\(newLeader.name)님이 새로운 모임장으로 변경되었습니다!" 
                 showAlert = true
             }
         }
     }
-
+    
     var body: some View {
         VStack {
             Text("모임장 변경")
@@ -94,7 +93,7 @@ struct LeaderSelectionView: View {
                 title: Text("알림"),
                 message: Text(alertMessage),
                 dismissButton: .default(Text("확인"), action: {
-                    dismiss() // 확인 버튼을 누르면 dismiss 실행
+                    dismiss()
                 })
             )
         }
