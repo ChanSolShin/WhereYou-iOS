@@ -15,6 +15,8 @@ struct EditMeetingView: View {
     var meetingID: String
     @State private var showDatePicker = false
     @State private var showLocationModal = false
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
     
     var body: some View {
         NavigationStack {
@@ -61,27 +63,19 @@ struct EditMeetingView: View {
                         .cornerRadius(10)
                         .frame(width: 100, height: 50)
                 }
-                HStack{
+                HStack {
                     Image(systemName: "map")
                         .foregroundColor(.gray)
                         .imageScale(.small)
                     Text(viewModel.meetingAddress)
                         .font(.headline)
                 }
-                // 추가하기 버튼
+                
                 Button(action: {
-                    // 햅틱 피드백 생성
-                    let generator = UIImpactFeedbackGenerator(style: .medium)
-                    generator.impactOccurred() // 햅틱 반응 발생
-                    
                     viewModel.updateMeetingData(meetingID: meetingID)
-                    dismiss()
-                    // 디버그 출력
-                    print("모임 이름: \(viewModel.meetingName)")
-                    print("모임 날짜: \(viewModel.meetingDate)")
-                    print("모임 주소: \(viewModel.meetingAddress)")
-                    let location = viewModel.meetingLocation
-                    print("모임 좌표: \(location.latitude), \(location.longitude)")
+                    alertMessage = "모임 정보가 수정되었습니다!"
+                    showAlert = true
+                    
                 }) {
                     Text("수정하기")
                         .font(.title2)
@@ -94,8 +88,6 @@ struct EditMeetingView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 100)
-                
-                
             }
             .padding(.vertical, 20)
             .sheet(isPresented: $showLocationModal) {
@@ -117,6 +109,15 @@ struct EditMeetingView: View {
             }
             .onAppear {
                 viewModel.fetchMeetingData(meetingID: meetingID)
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("알림"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("확인"), action: {
+                        dismiss()
+                    })
+                )
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
