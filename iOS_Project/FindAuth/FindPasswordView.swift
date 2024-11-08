@@ -54,10 +54,3 @@ struct FindPasswordView: View {
         .navigationTitle("비밀번호 재설정")
     }
 }
-
-// 프리뷰용 코드
-struct FindPasswordView_Previews: PreviewProvider {
-    static var previews: some View {
-        FindPasswordView()
-    }
-}

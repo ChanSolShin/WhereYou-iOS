@@ -12,6 +12,8 @@ import FirebaseFirestore
 struct EditLocationView: View {
     @ObservedObject var viewModel: EditMeetingViewModel
     @Environment(\.presentationMode) var presentationMode
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
     
     var body: some View {
         Text("원하는 장소를 터치하여 수정해주세요")
