@@ -60,18 +60,25 @@ struct MeetingView: View {
                                 Button(action: {
                                     title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치"
                                 }) {
-                                    Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
-                                        .padding()
-                                        .background(Color.blue)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(10)
+                                    ZStack {
+                                        Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
+                                            .padding()
+                                            .background(Color.blue)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(10)
+                                        
+                                        if memberID == meeting.meetingMasterID {
+                                            Image(systemName: "crown.fill")
+                                                .foregroundColor(.yellow)
+                                                .offset(x: 0, y: -40) 
+                                        }
+                                    }
                                 }
                                 .padding(.vertical, 2)
                             }
                         }
                     }
                 }
-                
             }
             .onAppear {
                 meetingViewModel.selectMeeting(meeting: MeetingModel(
