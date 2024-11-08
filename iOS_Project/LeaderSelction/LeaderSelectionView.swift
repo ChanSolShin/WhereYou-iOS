@@ -15,6 +15,8 @@ struct LeaderSelectionView: View {
     @StateObject private var viewModel = LeaderSelectionViewModel() // ViewModel 사용
     @State private var selectedLeader: User?
     @State private var meeting: MeetingModel? // meeting 모델 상태 추가
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
 
     func updateLeader() {
         guard let newLeader = selectedLeader else { return }
@@ -31,7 +33,8 @@ struct LeaderSelectionView: View {
                 // Firestore 업데이트가 성공하면 로컬 모델에서도 meetingMaster 업데이트
                 meeting?.meetingMasterID = newLeader.id
                 print("모임장 변경 성공")
-                dismiss()
+                alertMessage = "모임장을 변경했습니다!"
+                showAlert = true
             }
         }
     }
@@ -85,6 +88,15 @@ struct LeaderSelectionView: View {
         .onAppear {
             // 모임의 멤버를 불러오기
             viewModel.fetchMeetingMembers(meetingID: meetingID)
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text("알림"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("확인"), action: {
+                    dismiss() // 확인 버튼을 누르면 dismiss 실행
+                })
+            )
         }
     }
 }
