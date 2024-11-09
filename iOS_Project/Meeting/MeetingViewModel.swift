@@ -17,6 +17,8 @@ class MeetingViewModel: ObservableObject {
     @Published var pendingMeetingRequests: [MeetingRequestModel] = []
     @Published var showAlert: Bool = false
     @Published var errorMessage: String?
+    @Published var members: [User] = []
+    @Published var meetingMasterID: String?
     
     func selectMeeting(meeting: MeetingModel) {
         self.meetingLocation = meeting.meetingLocation
@@ -29,6 +31,7 @@ class MeetingViewModel: ObservableObject {
             }
         }
     }
+    
     
     private func fetchUserName(byID userID: String, completion: @escaping (String) -> Void) {
         let db = Firestore.firestore()
@@ -110,8 +113,7 @@ class MeetingViewModel: ObservableObject {
                 print("Successfully created meeting request to \(toUserID) with meetingID: \(meetingID)")
             }
         }
-    }
-    
+    }    
     func acceptMeetingRequest(requestID: String, toUserID: String) {
         let db = Firestore.firestore()
         
@@ -134,7 +136,7 @@ class MeetingViewModel: ObservableObject {
             }
         }
     }
-
+    
     private func addUserToMeeting(meetingID: String, userID: String) {
         let db = Firestore.firestore()
         
@@ -173,6 +175,9 @@ class MeetingViewModel: ObservableObject {
             }
         }
     }
+    func isMeetingMaster(meetingID: String, currentUserID: String, meetingMasterID: String) -> Bool {
+            return meetingMasterID == currentUserID
+        }
     
     // 요청 삭제
     private func deleteMeetingRequest(requestID: String) {
@@ -185,6 +190,85 @@ class MeetingViewModel: ObservableObject {
                 if let index = self.pendingMeetingRequests.firstIndex(where: { $0.id == requestID }) {
                     self.pendingMeetingRequests.remove(at: index)
                 }
+            }
+        }
+    }
+    
+    // 모임 나가기 기능
+    func leaveMeeting(meetingID: String) {
+        guard let currentUserID = Auth.auth().currentUser?.uid else { return }
+        
+        let db = Firestore.firestore()
+        
+        db.collection("meetings").document(meetingID).getDocument { [weak self] document, error in
+            if let error = error {
+                print("Error fetching meeting: \(error)")
+                return
+            }
+            
+            if let document = document, document.exists {
+                var meetingMasterID = document.data()?["meetingMaster"] as? String ?? ""
+                let meetingMembers = document.data()?["meetingMembers"] as? [String] ?? []
+                
+                // 현재 사용자가 meetingMaster인 경우
+                if meetingMasterID == currentUserID && meetingMembers.count > 1 {
+                    // 모임장이므로, 랜덤으로 다른 멤버에게 모임장 권한 부여
+                    if let newMeetingMaster = self?.getRandomOtherMember(currentUserID: currentUserID, members: meetingMembers) {
+                        meetingMasterID = newMeetingMaster
+                        db.collection("meetings").document(meetingID).updateData([
+                            "meetingMaster": meetingMasterID
+                        ]) { error in
+                            if let error = error {
+                                print("Error updating meeting master: \(error)")
+                            } else {
+                                print("Meeting master changed successfully to \(newMeetingMaster).")
+                            }
+                        }
+                    }
+                }
+                
+                // 만약 모임의 멤버가 1명이면 모임 자체를 삭제
+                if meetingMembers.count == 1 {
+                    db.collection("meetings").document(meetingID).delete { error in
+                        if let error = error {
+                            print("Error deleting meeting: \(error)")
+                        } else {
+                            print("Meeting deleted successfully.")
+                        }
+                    }
+                    return
+                }
+                
+                // 그 외의 경우는 모임에서 현재 사용자를 제거
+                self?.removeUserFromMeeting(meetingID: meetingID, userID: currentUserID)
+            }
+        }
+    }
+
+    // 랜덤한 다른 멤버를 선택하는 함수
+    func getRandomOtherMember(currentUserID: String, members: [String]) -> String? {
+        // 현재 사용자가 모임 멤버 목록에 포함되어 있을 경우, 이를 제외한 나머지 멤버들 중에서 랜덤 선택
+        let otherMembers = members.filter { $0 != currentUserID }
+        
+        // 만약 다른 멤버가 있다면, 랜덤으로 선택
+        if let randomMember = otherMembers.randomElement() {
+            return randomMember
+        }
+        
+        return nil
+    }
+    
+    // meetingMembers에서 사용자 ID 삭제
+    private func removeUserFromMeeting(meetingID: String, userID: String) {
+        let db = Firestore.firestore()
+        
+        db.collection("meetings").document(meetingID).updateData([
+            "meetingMembers": FieldValue.arrayRemove([userID])
+        ]) { error in
+            if let error = error {
+                print("Error removing user \(error)")
+            } else {
+                print("Successfully removed user \(userID) from meeting with ID: \(meetingID)")
             }
         }
     }
