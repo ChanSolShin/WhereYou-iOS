@@ -149,20 +149,21 @@ struct AddSelectedFriend: View {
         var friend: FriendModel
         var isSelected: Bool
         var onTap: () -> Void
-        
+
         var body: some View {
-            VStack(alignment: .leading) {
-                Text(friend.name).font(.headline)
-                Text(friend.email).font(.subheadline)
-                Text("Phone: \(friend.phoneNumber)")
-                Text("Birthday: \(friend.birthday)")
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(friend.name).font(.headline)
+                    Text(friend.email).font(.subheadline)
+                }
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.blue)
+                }
             }
             .padding()
             .background(Color.white)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
-            )
             .onTapGesture {
                 onTap()
             }
