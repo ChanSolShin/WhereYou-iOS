@@ -14,7 +14,8 @@ import NMapsMap
 @main
 struct iOS_ProjectApp: App {
     @StateObject private var loginViewModel = LoginViewModel()
-    private let coordinator = LocationCoordinator()
+    @StateObject private var locationCoordinator = AppLocationCoordinator() // 위치 권한 관리
+    @State private var showAlert = false
     
     init() {
         FirebaseApp.configure()
@@ -23,68 +24,38 @@ struct iOS_ProjectApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                
-                LoginView()
-                    .onAppear{
-                        coordinator.checkIfLocationServiceIsEnabled() // 앱 실행 시 위치 서비스 확인
+                if locationCoordinator.authorizationStatus == .authorizedAlways {
+                    if loginViewModel.isLoggedIn {
+                        MainTabView()
+                    }else{
+                        LoginView()
                     }
-                if loginViewModel.isLoggedIn {
-                                    MainTabView() // 로그인 상태이면 MainTabView로 이동
-                                }
+                }
             }
-    
-        }
-    }
-}
-
-class LocationCoordinator: NSObject, CLLocationManagerDelegate {
-    private let locationManager = CLLocationManager()
-
-    override init() {
-        super.init()
-        locationManager.delegate = self
-    }
-
-    func checkIfLocationServiceIsEnabled() {
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.requestWhenInUseAuthorization() // 위치 권한 요청
-        } else {
-            // 위치 서비스가 비활성화된 경우 사용자에게 알림 후 앱 종료
-            showAlertAndExit()
-        }
-    }
-    
-    private func showAlertAndExit() {
-        // 경고 창을 표시하고 앱을 종료하는 함수
-        DispatchQueue.main.async {
-            // UIAlertController를 사용하여 경고창 표시
-            let alert = UIAlertController(title: "위치 서비스 비활성화",
-                                          message: "위치 서비스가 비활성화되어 있습니다. 앱을 종료합니다.",
-                                          preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "확인", style: .default) { _ in
-                exit(0) // 위치서비스를 허용하지 않으면, 앱 종료
-            })
-
-            // 현재 최상위 뷰 컨트롤러에 경고창을 표시
-            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
-                rootViewController.present(alert, animated: true, completion: nil)
+            .onAppear(){
+                if locationCoordinator.authorizationStatus != .authorizedAlways {
+                    showAlert = true // 권한이 항상 허용이 아닐 경우 알림 표시
+                }
+            }.alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("위치 권한이 필요합니다"),
+                    message: Text("앱이 정상적으로 작동하려면 위치 권한을 항상 허용으로 설정해야 합니다."),
+                    primaryButton: .default(Text("설정으로 이동")) {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    },
+                    secondaryButton: .cancel(Text("취소")){
+                        exitApp() // 취소 버튼 클릭 시, 앱 종료
+                    }
+                )
             }
         }
     }
-
-    
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        switch status {
-        case .authorizedWhenInUse, .authorizedAlways:
-            print("위치 권한이 허용되었습니다.")
-        case .denied:
-            print("위치 권한이 거부되었습니다.")
-        case .restricted:
-            print("위치 권한이 제한되었습니다.")
-        case .notDetermined:
-            print("위치 권한이 아직 결정되지 않았습니다.")
-        default:
-            break
+    private func exitApp() {
+            UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                exit(0)
+            }
         }
-    }
 }
