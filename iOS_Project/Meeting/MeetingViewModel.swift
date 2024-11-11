@@ -113,7 +113,7 @@ class MeetingViewModel: ObservableObject {
                 print("Successfully created meeting request to \(toUserID) with meetingID: \(meetingID)")
             }
         }
-    }    
+    }
     func acceptMeetingRequest(requestID: String, toUserID: String) {
         let db = Firestore.firestore()
         
