@@ -20,7 +20,7 @@ struct AddSelectedFriend: View {
     
     var body: some View {
         NavigationView {
-            ZStack(alignment: .bottom) {
+            ZStack(alignment: .center) {
                 VStack {
                     if friendListViewModel.friends.isEmpty {
                         Text("친구 목록이 없습니다.")
@@ -40,16 +40,18 @@ struct AddSelectedFriend: View {
                 }
                 .navigationTitle("멤버 추가")
                 
-                Button(action: sendMeetingInvitations) {
-                    Image(systemName: "plus")
-                        .font(.largeTitle)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .clipShape(Circle())
-                        .shadow(radius: 5)
-                        .padding(.bottom, 20)
-                        .padding(.trailing, 20)
+                VStack {
+                    Spacer()
+                    Button(action: sendMeetingInvitations) {
+                        Image(systemName: "plus")
+                            .font(.largeTitle)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .clipShape(Circle())
+                            .shadow(radius: 5)
+                    }
+                    .padding(.bottom, 20) 
                 }
             }
             .alert(isPresented: $showAlert) {
@@ -68,6 +70,7 @@ struct AddSelectedFriend: View {
             selectedFriends.append(friend.id)
         }
     }
+    
     func sendMeetingInvitations() {
         guard let currentUserID = Auth.auth().currentUser?.uid,
               let currentUserName = friendListViewModel.currentUserName else { return }
@@ -78,7 +81,6 @@ struct AddSelectedFriend: View {
         var completedRequests = 0 // 요청 완료된 수
         
         for friendID in selectedFriends {
-            // 모임에 이미 참여하고 있는지 확인
             db.collection("meetings").document(meeting.id).getDocument { document, error in
                 if let error = error {
                     print("모임 참여 여부 확인 중 오류 발생: \(error)")
@@ -89,15 +91,13 @@ struct AddSelectedFriend: View {
                     let meetingMembers = document.data()?["meetingMembers"] as? [String] ?? []
                     
                     if meetingMembers.contains(friendID) {
-                        // 이미 모임의 멤버인 경우 알림
                         alertMessage = "이미 해당 모임의 멤버인 친구입니다."
                         showAlert = true
-                        completedRequests += 1 // 요청 완료 수 증가
+                        completedRequests += 1
                         return
                     }
                 }
                 
-                // 요청이 없는 경우 새 요청 생성
                 db.collection("meetingRequests")
                     .whereField("fromUserID", isEqualTo: currentUserID)
                     .whereField("toUserID", isEqualTo: friendID)
@@ -109,11 +109,9 @@ struct AddSelectedFriend: View {
                         }
                         
                         if let documents = snapshot?.documents, !documents.isEmpty {
-                            // 이미 요청이 있는 경우
                             alertMessage = "모임 요청을 이미 보낸 상태입니다."
                             showAlert = true
                         } else {
-                            // 요청이 없는 경우 새 요청 생성
                             let invitationData: [String: Any] = [
                                 "fromUserID": currentUserID,
                                 "fromUserName": currentUserName,
@@ -130,9 +128,8 @@ struct AddSelectedFriend: View {
                                     print("\(friendID)에게 모임 초대 요청 성공적으로 전송")
                                 }
                                 
-                                completedRequests += 1 // 요청 완료 수 증가
+                                completedRequests += 1
                                 
-                                // 모든 요청이 완료된 후 알림 메시지 설정
                                 if completedRequests == totalFriendsCount {
                                     if failedInvitations.isEmpty {
                                         alertMessage = "모임 초대 요청이 성공적으로 전송되었습니다!"

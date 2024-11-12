@@ -11,17 +11,22 @@ struct MeetingListView: View {
     @ObservedObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel())
     @State private var searchText = "" // 검색 텍스트
     @Binding var isTabBarHidden: Bool
-    
+
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottomTrailing) {
+            ZStack {
                 VStack {
                     if viewModel.meetings.isEmpty {
-                        Text("+ 버튼을 눌러서 새로운 모임을 생성하세요!")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                            .padding()
+                        VStack {
+                            Spacer()
+                            Text("+ 버튼을 눌러서 새로운 모임을 생성하세요!")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                                .padding()
+                            Spacer()
+                        }
                     } else {
+                        
                         ScrollView {
                             VStack(spacing: 10) {
                                 ForEach(viewModel.meetings.filter { meeting in
@@ -65,23 +70,30 @@ struct MeetingListView: View {
                             }
                             .padding(.horizontal)
                         }
+                        .padding(.top, 10)
                     }
                 }
                 
-                // 모임 생성 버튼
-                NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel())
-                    .onAppear { isTabBarHidden = true }
-                    .onDisappear { isTabBarHidden = false }
-                ) {
-                    Image(systemName: "plus")
-                        .font(.largeTitle)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .clipShape(Circle())
-                        .shadow(radius: 5)
+                // + 버튼을 화면 오른쪽 하단에 고정
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel())
+                            .onAppear { isTabBarHidden = true }
+                            .onDisappear { isTabBarHidden = false }
+                        ) {
+                            Image(systemName: "plus")
+                                .font(.largeTitle)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .clipShape(Circle())
+                                .shadow(radius: 5)
+                        }
                         .padding(.bottom, 20)
                         .padding(.trailing, 20)
+                    }
                 }
             }
             .navigationTitle("모임")
@@ -105,10 +117,10 @@ struct MeetingListView: View {
                     }
                 }
             }
-        }
-        .onAppear {
-            // 대기 중인 요청을 실시간으로 받아오도록 설정
-            viewModel.meetingViewModel.fetchPendingMeetingRequests()
+            .onAppear {
+                // 대기 중인 요청을 실시간으로 받아오도록 설정
+                viewModel.meetingViewModel.fetchPendingMeetingRequests()
+            }
         }
     }
 }

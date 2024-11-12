@@ -62,9 +62,3 @@ struct ReportView: View {
         
     }
 }
-// 프리뷰용 코드
-struct ReportView_Previews: PreviewProvider {
-    static var previews: some View {
-        ReportView()
-    }
-}

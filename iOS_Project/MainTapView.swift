@@ -1,5 +1,5 @@
 //
-//  TapView.swift
+//  MainTabView.swift
 //  iOS_Project
 //
 //  Created by 신찬솔 on 10/13/24.
@@ -34,7 +34,7 @@ struct CustomTabView: UIViewControllerRepresentable {
         friendView.tabBarItem = UITabBarItem(title: "친구", image: UIImage(systemName: "person.3"), tag: 1)
         
         let profileView = UIHostingController(rootView: ProfileView(isTabBarHidden: $isTabBarHidden))
-        profileView.tabBarItem = UITabBarItem(title: "내정보", image: UIImage(systemName: "person"), tag: 2)
+        profileView.tabBarItem = UITabBarItem(title: "설정", image: UIImage(systemName: "gear"), tag: 2)
         
         tabBarController.viewControllers = [meetingListView, friendView, profileView]
         
