@@ -55,11 +55,16 @@
 		F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FF62CD3CC5D00520042 /* FindPasswordModel.swift */; };
 		F52E2FF92CD3CC9000520042 /* FindPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */; };
 		F52E2FFB2CD3CEB500520042 /* FindPasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */; };
+		F54542302CE252890043B1E2 /* MeetingMapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F545422F2CE252830043B1E2 /* MeetingMapViewModel.swift */; };
+		F54542322CE257060043B1E2 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = F54542312CE257060043B1E2 /* FirebaseDatabase */; };
+		F54542342CE257240043B1E2 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = F54542332CE257240043B1E2 /* FirebaseDatabase */; };
 		F5ADB1D02CD90DAA00A1011C /* ProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1CF2CD90DA500A1011C /* ProfileModel.swift */; };
 		F5ADB1D42CD9296400A1011C /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1D32CD9295E00A1011C /* ProfileViewModel.swift */; };
 		F5ADB1D62CD92B0000A1011C /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1D52CD92AF600A1011C /* EditProfileView.swift */; };
 		F5C779FA2CD9576D00E5EC08 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5C779F92CD9576700E5EC08 /* ReportView.swift */; };
 		F5C779FC2CD9578B00E5EC08 /* ReportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5C779FB2CD9578700E5EC08 /* ReportViewModel.swift */; };
+		F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */; };
+		F5D76AE82CDCB1B700CB652B /* PermissionRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -129,11 +134,14 @@
 		F52E2FF62CD3CC5D00520042 /* FindPasswordModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordModel.swift; sourceTree = "<group>"; };
 		F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordView.swift; sourceTree = "<group>"; };
 		F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordViewModel.swift; sourceTree = "<group>"; };
+		F545422F2CE252830043B1E2 /* MeetingMapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingMapViewModel.swift; sourceTree = "<group>"; };
 		F5ADB1CF2CD90DA500A1011C /* ProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileModel.swift; sourceTree = "<group>"; };
 		F5ADB1D32CD9295E00A1011C /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		F5ADB1D52CD92AF600A1011C /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
 		F5C779F92CD9576700E5EC08 /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
 		F5C779FB2CD9578700E5EC08 /* ReportViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportViewModel.swift; sourceTree = "<group>"; };
+		F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocationCoordinator.swift; sourceTree = "<group>"; };
+		F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRequiredView.swift; sourceTree = "<group>"; };
 		FB3FFC42D97330368AC296CF /* Pods-iOS_Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS_Project.debug.xcconfig"; path = "Target Support Files/Pods-iOS_Project/Pods-iOS_Project.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -144,6 +152,7 @@
 			files = (
 				EAD481B02CBD7D4B0052D22B /* FirebaseAuth in Frameworks */,
 				EAD481B22CBD7D4B0052D22B /* FirebaseFirestore in Frameworks */,
+				F54542322CE257060043B1E2 /* FirebaseDatabase in Frameworks */,
 				D3DAC0BC663E9922C2AE4C22 /* Pods_iOS_Project.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -152,6 +161,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F54542342CE257240043B1E2 /* FirebaseDatabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,6 +240,7 @@
 			children = (
 				EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */,
 				EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */,
+				F545422F2CE252830043B1E2 /* MeetingMapViewModel.swift */,
 				EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */,
 				EA86C10D2CC2F15700989E43 /* MeetingView.swift */,
 				EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */,
@@ -292,6 +303,7 @@
 				EA86C1142CC2F15700989E43 /* Preview Content */,
 				EA86C1162CC2F15700989E43 /* Profile */,
 				EA86C11A2CC2F15700989E43 /* SignUp */,
+				F5D76AE42CDCAF9C00CB652B /* LocationManagers */,
 				EA86C11B2CC2F15700989E43 /* Assets.xcassets */,
 				EA86C11D2CC2F15700989E43 /* Info.plist */,
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
@@ -362,6 +374,15 @@
 			path = FindAuth;
 			sourceTree = "<group>";
 		};
+		F5D76AE42CDCAF9C00CB652B /* LocationManagers */ = {
+			isa = PBXGroup;
+			children = (
+				F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */,
+				F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */,
+			);
+			path = LocationManagers;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -383,6 +404,7 @@
 			packageProductDependencies = (
 				EAD481AF2CBD7D4B0052D22B /* FirebaseAuth */,
 				EAD481B12CBD7D4B0052D22B /* FirebaseFirestore */,
+				F54542312CE257060043B1E2 /* FirebaseDatabase */,
 			);
 			productName = iOS_Project;
 			productReference = EABADF2B2CB9223E00962A40 /* iOS_Project.app */;
@@ -550,6 +572,7 @@
 				F52E2FF92CD3CC9000520042 /* FindPasswordView.swift in Sources */,
 				EA86C1212CC2F15700989E43 /* AddMeetingModel.swift in Sources */,
 				F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */,
+				F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */,
 				EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */,
 				EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */,
 				EA86C1232CC2F15700989E43 /* AddMeetingViewModel.swift in Sources */,
@@ -568,8 +591,10 @@
 				F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */,
 				EA6EE1DD2CD39B07002961A9 /* MeetingRequestModel.swift in Sources */,
 				EA86C1292CC2F15700989E43 /* MeetingListModel.swift in Sources */,
+				F54542302CE252890043B1E2 /* MeetingMapViewModel.swift in Sources */,
 				EA86C12A2CC2F15700989E43 /* MeetingListView.swift in Sources */,
 				F50FDDBC2CD3AA12006E96B2 /* FindEmailView.swift in Sources */,
+				F5D76AE82CDCB1B700CB652B /* PermissionRequiredView.swift in Sources */,
 				EA86C12B2CC2F15700989E43 /* MeetingListViewModel.swift in Sources */,
 				EA86C12C2CC2F15700989E43 /* ProfileView.swift in Sources */,
 				EA86C12D2CC2F15700989E43 /* SignUpUserModel.swift in Sources */,
@@ -954,6 +979,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		F54542312CE257060043B1E2 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		F54542332CE257240043B1E2 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
