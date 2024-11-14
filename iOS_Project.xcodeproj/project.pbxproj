@@ -53,6 +53,8 @@
 		EAEA149D2CDCCB0F00C7FD9D /* EditMeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA149C2CDCCB0900C7FD9D /* EditMeetingViewModel.swift */; };
 		EAEA149F2CDCD04800C7FD9D /* EditLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA149E2CDCD04000C7FD9D /* EditLocationView.swift */; };
 		EAEA14A42CE5D38100C7FD9D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EAEA14A32CE5D38100C7FD9D /* GoogleService-Info.plist */; };
+		EAEA14A62CE5F72D00C7FD9D /* KickOutMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA14A52CE5F71100C7FD9D /* KickOutMember.swift */; };
+		EAEA14A82CE5F92400C7FD9D /* KickOutMemberViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA14A72CE5F91E00C7FD9D /* KickOutMemberViewModel.swift */; };
 		F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */; };
 		F50FDDBC2CD3AA12006E96B2 /* FindEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */; };
 		F50FDDBE2CD3AA2C006E96B2 /* FindEmailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */; };
@@ -138,6 +140,8 @@
 		EAEA149C2CDCCB0900C7FD9D /* EditMeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMeetingViewModel.swift; sourceTree = "<group>"; };
 		EAEA149E2CDCD04000C7FD9D /* EditLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditLocationView.swift; sourceTree = "<group>"; };
 		EAEA14A32CE5D38100C7FD9D /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		EAEA14A52CE5F71100C7FD9D /* KickOutMember.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KickOutMember.swift; sourceTree = "<group>"; };
+		EAEA14A72CE5F91E00C7FD9D /* KickOutMemberViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KickOutMemberViewModel.swift; sourceTree = "<group>"; };
 		F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailModel.swift; sourceTree = "<group>"; };
 		F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailView.swift; sourceTree = "<group>"; };
 		F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailViewModel.swift; sourceTree = "<group>"; };
@@ -310,6 +314,7 @@
 				EA86C1082CC2F15700989E43 /* Friend */,
 				EA86C10C2CC2F15700989E43 /* Login */,
 				EAEA14A22CDCD39D00C7FD9D /* EditMeeting */,
+				EAEA14A92CE5FF1700C7FD9D /* KickOut */,
 				EA86C10E2CC2F15700989E43 /* Meeting */,
 				EAA9ACE62CDC1E06002F2C79 /* LeaderSelction */,
 				EA86C1122CC2F15700989E43 /* MeetingList */,
@@ -391,6 +396,15 @@
 				EAEA149E2CDCD04000C7FD9D /* EditLocationView.swift */,
 			);
 			path = EditMeeting;
+			sourceTree = "<group>";
+		};
+		EAEA14A92CE5FF1700C7FD9D /* KickOut */ = {
+			isa = PBXGroup;
+			children = (
+				EAEA14A52CE5F71100C7FD9D /* KickOutMember.swift */,
+				EAEA14A72CE5F91E00C7FD9D /* KickOutMemberViewModel.swift */,
+			);
+			path = KickOut;
 			sourceTree = "<group>";
 		};
 		F50FDDB72CD3A814006E96B2 /* FindAuth */ = {
@@ -631,11 +645,13 @@
 				EA86C12C2CC2F15700989E43 /* ProfileView.swift in Sources */,
 				EA86C12D2CC2F15700989E43 /* SignUpUserModel.swift in Sources */,
 				EA86C12E2CC2F15700989E43 /* SignUpView.swift in Sources */,
+				EAEA14A62CE5F72D00C7FD9D /* KickOutMember.swift in Sources */,
 				EAA9ACE32CDC18B0002F2C79 /* LeaderSelectionView.swift in Sources */,
 				EA86C12F2CC2F15700989E43 /* SignUpViewModel.swift in Sources */,
 				F5ADB1D62CD92B0000A1011C /* EditProfileView.swift in Sources */,
 				EA28F4FA2CC83C6D004827A3 /* MeetingViewModel.swift in Sources */,
 				EAEA149B2CDCC0EE00C7FD9D /* EditMeetingView.swift in Sources */,
+				EAEA14A82CE5F92400C7FD9D /* KickOutMemberViewModel.swift in Sources */,
 				EAB9CBC02CCFEC7400BFA8DD /* FriendListViewModel.swift in Sources */,
 				EAA9ACE52CDC18BF002F2C79 /* User.swift in Sources */,
 				EAB9CBC62CCFF18900BFA8DD /* FriendRequestListView.swift in Sources */,
