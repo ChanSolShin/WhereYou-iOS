@@ -22,7 +22,6 @@ struct MeetingView: View {
     @State private var showActionSheet = false
     @State private var showingEditMeetingModal = false
     @State private var showingKickOutModal = false
-    // @State private var selectedUserLocation: CLLocationCoordinate2D? // 제거됨
     
     var body: some View {
         NavigationStack {
