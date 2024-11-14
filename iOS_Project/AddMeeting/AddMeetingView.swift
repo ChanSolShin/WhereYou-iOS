@@ -18,7 +18,7 @@ struct AddMeetingView: View {
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
-        NavigationView{
+        NavigationView {
             VStack(spacing: 20) {
                 Spacer().frame(height: 20)
                 Text("모임 이름을 입력하세요")
@@ -31,7 +31,6 @@ struct AddMeetingView: View {
                     .background(Color.gray.opacity(0.2))
                 
                 // 날짜 선택 버튼과 선택된 날짜 표시
-                
                 Button(action: {
                     showDatePicker.toggle()
                 }) {
@@ -44,15 +43,15 @@ struct AddMeetingView: View {
                         .cornerRadius(10)
                         .frame(width: 100, height: 50)
                 }
+                
                 // 선택된 날짜를 텍스트로 표시
-                HStack{
+                HStack {
                     Image(systemName: "calendar")
                         .foregroundColor(.gray)
                         .imageScale(.small)
                     Text("\(viewModel.meeting.meetingDate, formatter: dateFormatter)")
                         .font(.headline)
                 }
-                
                 
                 // 장소 선택 버튼과 선택된 주소 표시
                 Button(action: {
@@ -67,13 +66,13 @@ struct AddMeetingView: View {
                         .cornerRadius(10)
                         .frame(width: 100, height: 50)
                 }
-                HStack{
+                
+                HStack {
                     Image(systemName: "map")
                         .foregroundColor(.gray)
                         .imageScale(.small)
                     Text(viewModel.meeting.meetingAddress ?? "선택된 장소 없음")
                         .font(.headline)
-                    
                 }
                 
                 // 추가하기 버튼
@@ -107,7 +106,7 @@ struct AddMeetingView: View {
             .padding(.vertical, 20)
             .sheet(isPresented: $showDatePicker) {
                 VStack {
-                    DatePicker("Select a date", selection: $viewModel.meeting.meetingDate, displayedComponents: [.date, .hourAndMinute])
+                    DatePicker("Select a date", selection: $viewModel.meeting.meetingDate, in: Date()..., displayedComponents: [.date, .hourAndMinute])
                         .datePickerStyle(GraphicalDatePickerStyle())
                         .environment(\.locale, Locale(identifier: String(Locale.preferredLanguages[0])))
                         .padding()
@@ -122,12 +121,11 @@ struct AddMeetingView: View {
             .sheet(isPresented: $showLocationModal) {
                 AddLocationView(viewModel: viewModel)
             }
-            
         }
         .navigationTitle("모임추가")
         .font(.largeTitle)
-        
     }
+    
     var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
@@ -136,4 +134,3 @@ struct AddMeetingView: View {
         return formatter
     }
 }
-
