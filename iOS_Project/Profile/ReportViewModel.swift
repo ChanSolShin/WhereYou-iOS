@@ -13,6 +13,7 @@ class ReportViewModel: ObservableObject {
     @Published var reportContent = ""
     @Published var submissionStatus: String?
     
+    
     private let db = Firestore.firestore()
     
     func submitReport() {
