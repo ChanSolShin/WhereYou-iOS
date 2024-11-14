@@ -95,7 +95,7 @@ struct EditMeetingView: View {
             }
             .sheet(isPresented: $showDatePicker) {
                 VStack {
-                    DatePicker("Select a date", selection: $viewModel.meetingDate, displayedComponents: [.date, .hourAndMinute])
+                    DatePicker("Select a date", selection: $viewModel.meetingDate, in: Date()..., displayedComponents: [.date, .hourAndMinute])
                         .datePickerStyle(GraphicalDatePickerStyle())
                         .environment(\.locale, Locale(identifier: String(Locale.preferredLanguages[0])))
                         .padding()
