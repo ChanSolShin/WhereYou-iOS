@@ -9,7 +9,7 @@ import Foundation
 import CoreLocation
 
 struct MeetingModel {
-    var id: UUID
+    var id: String
     var title: String
     var date: Date
     var meetingAddress: String
@@ -17,8 +17,8 @@ struct MeetingModel {
     var meetingMemberIDs: [String]
     var meetingMasterID: String
     
-    init(title: String, date: Date, meetingAddress: String, meetingLocation: CLLocationCoordinate2D, meetingMemberIDs: [String], meetingMasterID: String) {
-        self.id = UUID()
+    init(id: String, title: String, date: Date, meetingAddress: String, meetingLocation: CLLocationCoordinate2D, meetingMemberIDs: [String], meetingMasterID: String) {
+        self.id = id
         self.title = title
         self.date = date
         self.meetingAddress = meetingAddress
