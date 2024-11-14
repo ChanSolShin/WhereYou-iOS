@@ -196,7 +196,6 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
         }
     }
-    
     func acceptMeetingRequest(requestID: String, toUserID: String) {
         let db = Firestore.firestore()
         
