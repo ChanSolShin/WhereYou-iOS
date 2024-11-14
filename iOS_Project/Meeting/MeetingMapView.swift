@@ -64,7 +64,8 @@ struct NaverMapView: UIViewRepresentable {
     }
     
     private func moveCamera(to coordinate: CLLocationCoordinate2D, in mapView: NMFNaverMapView) {
-        let cameraUpdate = NMFCameraUpdate(scrollTo: NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude))
+        let cameraPosition = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
+        let cameraUpdate = NMFCameraUpdate(scrollTo: cameraPosition, zoomTo: 16)
         cameraUpdate.animation = .fly
         cameraUpdate.animationDuration = 1.5
         mapView.mapView.moveCamera(cameraUpdate)
