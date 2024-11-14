@@ -67,7 +67,7 @@ class MeetingListViewModel: ObservableObject {
            guard index < meetings.count else { return }
            let meeting = meetings[index]
            
-           let meetingModel = MeetingModel(title: meeting.title, date: meeting.date, meetingAddress: meeting.meetingAddress, meetingLocation: meeting.meetingLocation, meetingMemberIDs: meeting.meetingMemberIDs, meetingMasterID: meeting.meetingMasterID)
+        let meetingModel = MeetingModel(id: meeting.id, title: meeting.title, date: meeting.date, meetingAddress: meeting.meetingAddress, meetingLocation: meeting.meetingLocation, meetingMemberIDs: meeting.meetingMemberIDs, meetingMasterID: meeting.meetingMasterID)
            meetingViewModel.selectMeeting(meeting: meetingModel)
        }
    }

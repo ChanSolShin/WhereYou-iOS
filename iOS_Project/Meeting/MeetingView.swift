@@ -21,6 +21,7 @@ struct MeetingView: View {
     @State private var alertMessage: String = ""
     @State private var showActionSheet = false
     @State private var showingEditMeetingModal = false
+    // @State private var selectedUserLocation: CLLocationCoordinate2D? // 제거됨
     
     var body: some View {
         NavigationStack {
@@ -29,7 +30,9 @@ struct MeetingView: View {
                     .font(.title2)
                 
                 MeetingMapView(
+                    selectedUserLocation: $meetingViewModel.selectedUserLocation, // ViewModel의 selectedUserLocation 바인딩
                     meeting: MeetingModel(
+                        id: meeting.id,
                         title: meeting.title,
                         date: meeting.date,
                         meetingAddress: meeting.meetingAddress,
@@ -40,9 +43,9 @@ struct MeetingView: View {
                 )
                 .frame(height: 300)
                 
-                
                 Button(action: {
                     title = "모임장소"
+                    meetingViewModel.selectedUserLocation = meeting.meetingLocation // ViewModel의 selectedUserLocation 업데이트
                 }) {
                     Text("모임장소")
                         .padding()
@@ -59,6 +62,9 @@ struct MeetingView: View {
                                 let memberID = meeting.meetingMemberIDs[index]
                                 Button(action: {
                                     title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치"
+                                    
+                                    // 해당 멤버의 위치 조회 및 ViewModel의 selectedUserLocation 업데이트
+                                    meetingViewModel.moveToUserLocation(userID: memberID)
                                 }) {
                                     ZStack {
                                         Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
@@ -70,7 +76,7 @@ struct MeetingView: View {
                                         if memberID == meeting.meetingMasterID {
                                             Image(systemName: "crown.fill")
                                                 .foregroundColor(.yellow)
-                                                .offset(x: 0, y: -40) 
+                                                .offset(x: 0, y: -40)
                                         }
                                     }
                                 }
@@ -82,6 +88,7 @@ struct MeetingView: View {
             }
             .onAppear {
                 meetingViewModel.selectMeeting(meeting: MeetingModel(
+                    id: meeting.id,
                     title: meeting.title,
                     date: meeting.date,
                     meetingAddress: meeting.meetingAddress,
