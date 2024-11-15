@@ -37,7 +37,6 @@
 		EA86C1482CC2F7A100989E43 /* AddLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1472CC2F79A00989E43 /* AddLocationView.swift */; };
 		EA86C14C2CC2FBAD00989E43 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1492CC2FBAD00989E43 /* Coordinator.swift */; };
 		EA86C14D2CC2FBAD00989E43 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C14A2CC2FBAD00989E43 /* MapView.swift */; };
-		EAA9ACE12CDBF8EB002F2C79 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EAA9ACE02CDBF8EB002F2C79 /* GoogleService-Info.plist */; };
 		EAA9ACE32CDC18B0002F2C79 /* LeaderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE22CDC18AE002F2C79 /* LeaderSelectionView.swift */; };
 		EAA9ACE52CDC18BF002F2C79 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE42CDC18BD002F2C79 /* User.swift */; };
 		EAA9ACE82CDC1E2F002F2C79 /* LeaderSelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE72CDC1E2A002F2C79 /* LeaderSelectionViewModel.swift */; };
@@ -55,10 +54,10 @@
 		F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */; };
 		F50FDDBC2CD3AA12006E96B2 /* FindEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */; };
 		F50FDDBE2CD3AA2C006E96B2 /* FindEmailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */; };
+		F528ED762CE2F2700041BD8A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F528ED752CE2F2700041BD8A /* GoogleService-Info.plist */; };
 		F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FF62CD3CC5D00520042 /* FindPasswordModel.swift */; };
 		F52E2FF92CD3CC9000520042 /* FindPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */; };
 		F52E2FFB2CD3CEB500520042 /* FindPasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */; };
-		F54542302CE252890043B1E2 /* MeetingMapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F545422F2CE252830043B1E2 /* MeetingMapViewModel.swift */; };
 		F54542322CE257060043B1E2 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = F54542312CE257060043B1E2 /* FirebaseDatabase */; };
 		F54542342CE257240043B1E2 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = F54542332CE257240043B1E2 /* FirebaseDatabase */; };
 		F5ADB1D02CD90DAA00A1011C /* ProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1CF2CD90DA500A1011C /* ProfileModel.swift */; };
@@ -120,7 +119,6 @@
 		EA86C1472CC2F79A00989E43 /* AddLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLocationView.swift; sourceTree = "<group>"; };
 		EA86C1492CC2FBAD00989E43 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
 		EA86C14A2CC2FBAD00989E43 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
-		EAA9ACE02CDBF8EB002F2C79 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		EAA9ACE22CDC18AE002F2C79 /* LeaderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderSelectionView.swift; sourceTree = "<group>"; };
 		EAA9ACE42CDC18BD002F2C79 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		EAA9ACE72CDC1E2A002F2C79 /* LeaderSelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderSelectionViewModel.swift; sourceTree = "<group>"; };
@@ -139,10 +137,10 @@
 		F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailModel.swift; sourceTree = "<group>"; };
 		F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailView.swift; sourceTree = "<group>"; };
 		F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailViewModel.swift; sourceTree = "<group>"; };
+		F528ED752CE2F2700041BD8A /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F52E2FF62CD3CC5D00520042 /* FindPasswordModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordModel.swift; sourceTree = "<group>"; };
 		F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordView.swift; sourceTree = "<group>"; };
 		F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordViewModel.swift; sourceTree = "<group>"; };
-		F545422F2CE252830043B1E2 /* MeetingMapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingMapViewModel.swift; sourceTree = "<group>"; };
 		F5ADB1CF2CD90DA500A1011C /* ProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileModel.swift; sourceTree = "<group>"; };
 		F5ADB1D32CD9295E00A1011C /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		F5ADB1D52CD92AF600A1011C /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
@@ -247,7 +245,6 @@
 			children = (
 				EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */,
 				EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */,
-				F545422F2CE252830043B1E2 /* MeetingMapViewModel.swift */,
 				EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */,
 				EA86C10D2CC2F15700989E43 /* MeetingView.swift */,
 				EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */,
@@ -299,7 +296,7 @@
 		EA86C1202CC2F15700989E43 /* iOS_Project */ = {
 			isa = PBXGroup;
 			children = (
-				EAA9ACE02CDBF8EB002F2C79 /* GoogleService-Info.plist */,
+				F528ED752CE2F2700041BD8A /* GoogleService-Info.plist */,
 				F50FDDB72CD3A814006E96B2 /* FindAuth */,
 				EA6EE1DF2CD39BBB002961A9 /* Request */,
 				EA86C14B2CC2FBAD00989E43 /* Map */,
@@ -529,7 +526,7 @@
 			files = (
 				EA86C1322CC2F15700989E43 /* Preview Assets.xcassets in Resources */,
 				EA86C1332CC2F15700989E43 /* Assets.xcassets in Resources */,
-				EAA9ACE12CDBF8EB002F2C79 /* GoogleService-Info.plist in Resources */,
+				F528ED762CE2F2700041BD8A /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -619,7 +616,6 @@
 				F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */,
 				EA6EE1DD2CD39B07002961A9 /* MeetingRequestModel.swift in Sources */,
 				EA86C1292CC2F15700989E43 /* MeetingListModel.swift in Sources */,
-				F54542302CE252890043B1E2 /* MeetingMapViewModel.swift in Sources */,
 				EA86C12A2CC2F15700989E43 /* MeetingListView.swift in Sources */,
 				F50FDDBC2CD3AA12006E96B2 /* FindEmailView.swift in Sources */,
 				F5D76AE82CDCB1B700CB652B /* PermissionRequiredView.swift in Sources */,
@@ -811,18 +807,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS_Project/Preview Content\"";
-				DEVELOPMENT_TEAM = R54DJK7U34;
+				DEVELOPMENT_TEAM = 52AU86437A;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = /Users/sinchansol/Desktop/iOS_Project/iOS_Project/Info.plist;
+				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/iOS_Project/iOS_Project/Info.plist";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치에 접근할 수 있도록 허용해 주세요.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "위치 정보를 항상 사용합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "위치 정보를 사용합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱이 활성화될 때 위치 정보를 사용합니다. ";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -834,9 +830,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shinchansol.iOS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yongzma.iOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -849,18 +844,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS_Project/Preview Content\"";
-				DEVELOPMENT_TEAM = R54DJK7U34;
+				DEVELOPMENT_TEAM = 52AU86437A;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = /Users/sinchansol/Desktop/iOS_Project/iOS_Project/Info.plist;
+				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/iOS_Project/iOS_Project/Info.plist";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치에 접근할 수 있도록 허용해 주세요.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "위치 정보를 항상 사용합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "위치 정보를 사용합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱이 활성화될 때 위치 정보를 사용합니다. ";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -872,9 +867,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shinchansol.iOS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yongzma.iOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

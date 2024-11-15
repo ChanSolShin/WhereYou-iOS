@@ -16,8 +16,11 @@ struct MeetingMapView: View {
     var body: some View {
         VStack {
             // NaverMapView에 selectedUserLocation을 바인딩으로 전달
-            NaverMapView(coordinate: $selectedUserLocation, title: meeting.title, address: meeting.meetingAddress)
-                .edgesIgnoringSafeArea(.all) // 미팅의 좌표, 제목 및 주소를 넘겨줌
+            NaverMapView(
+                coordinate: $selectedUserLocation,
+                title: meeting.title, address: meeting.meetingAddress
+            )
+            .edgesIgnoringSafeArea(.all) // 미팅의 좌표, 제목 및 주소를 넘겨줌
         }
         .navigationTitle(meeting.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -165,3 +168,4 @@ extension CLLocationCoordinate2D: Equatable {
         return lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
     }
 }
+
