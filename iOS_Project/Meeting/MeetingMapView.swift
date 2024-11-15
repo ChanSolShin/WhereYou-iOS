@@ -13,6 +13,7 @@ import FirebaseDatabase
 struct MeetingMapView: View {
     @Binding var selectedUserLocation: CLLocationCoordinate2D?
     var meeting: MeetingModel // MeetingModel을 사용하여 미팅 정보를 받아옴
+    @ObservedObject var meetingViewModel: MeetingViewModel
     
     var body: some View {
         VStack {
@@ -25,6 +26,9 @@ struct MeetingMapView: View {
         }
         .navigationTitle(meeting.title)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            meetingViewModel.selectMeeting(meeting: meeting)
+        }
     }
 }
 
@@ -40,8 +44,8 @@ struct NaverMapView: UIViewRepresentable {
         let naverMapView = NMFNaverMapView(frame: .zero)
         naverMapView.showLocationButton = true
         
-        // 초기 카메라 위치 설정 (모임 장소로)
-        moveCamera(to: meeting.meetingLocation, in: naverMapView)
+        // 초기 카메라 위치 설정 (모임 장소로) - 줌 레벨 14.0 설정
+        moveCamera(to: meeting.meetingLocation, zoom: 14.0, in: naverMapView)
         
         // 모임 장소 마커 추가
         context.coordinator.addMeetingMarker(to: naverMapView)
@@ -52,22 +56,26 @@ struct NaverMapView: UIViewRepresentable {
     func updateUIView(_ uiView: NMFNaverMapView, context: Context) {
         guard let newCoordinate = coordinate else { return }
         
-        // 카메라 이동
-        moveCamera(to: newCoordinate, in: uiView)
-        
-        // 마커 업데이트
+        // 카메라 이동 (줌 레벨 설정)
         if newCoordinate == meeting.meetingLocation {
-            // 모임 장소로 이동할 경우, 선택된 멤버 마커 제거
+            // 모임 장소로 이동할 때 줌 레벨 14.0 설정
+            moveCamera(to: newCoordinate, zoom: 14.0, in: uiView)
+            
+            // 마커 업데이트 (멤버 마커 제거)
             context.coordinator.removeMemberMarker()
         } else {
-            // 멤버 위치로 이동할 경우, 선택된 멤버 마커 추가 또는 업데이트
+            // 멤버 위치로 이동할 때 줌 레벨 16.0 설정
+            moveCamera(to: newCoordinate, zoom: 16.0, in: uiView)
+            
+            // 마커 업데이트 (멤버 마커 추가 또는 업데이트)
             context.coordinator.updateMemberMarker(to: newCoordinate, in: uiView)
         }
     }
     
-    private func moveCamera(to coordinate: CLLocationCoordinate2D, in mapView: NMFNaverMapView) {
+    private func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat, in mapView: NMFNaverMapView) {
         let cameraPosition = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
-        let cameraUpdate = NMFCameraUpdate(scrollTo: cameraPosition, zoomTo: 16)
+        // 카메라 위치 이동
+        let cameraUpdate = NMFCameraUpdate(scrollTo: cameraPosition, zoomTo: zoom)
         cameraUpdate.animation = .fly
         cameraUpdate.animationDuration = 1.5
         mapView.mapView.moveCamera(cameraUpdate)
