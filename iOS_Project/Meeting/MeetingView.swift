@@ -21,7 +21,6 @@ struct MeetingView: View {
     @State private var alertMessage: String = ""
     @State private var showActionSheet = false
     @State private var showingEditMeetingModal = false
-    @State private var showingKickOutModal = false
     
     var body: some View {
         NavigationStack {
@@ -39,12 +38,14 @@ struct MeetingView: View {
                         meetingLocation: meeting.meetingLocation,
                         meetingMemberIDs: meeting.meetingMemberIDs,
                         meetingMasterID: meeting.meetingMasterID
-                    )
+                    ),
+                    meetingViewModel: meetingViewModel
                 )
                 .frame(height: 300)
                 
                 Button(action: {
                     title = "모임장소"
+                    meetingViewModel.stopTrackingMember() // 멤버 추적 중지
                     meetingViewModel.selectedUserLocation = meeting.meetingLocation // ViewModel의 selectedUserLocation 업데이트
                 }) {
                     Text("모임장소")
@@ -63,7 +64,7 @@ struct MeetingView: View {
                                 Button(action: {
                                     title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치"
                                     
-                                    // 해당 멤버의 위치 조회 및 ViewModel의 selectedUserLocation 업데이트
+                                    // 해당 멤버의 위치 조회 및 ViewModel의 selectedUserLocation 업데이트 및 추적 시작
                                     meetingViewModel.moveToUserLocation(userID: memberID)
                                 }) {
                                     ZStack {
@@ -85,17 +86,6 @@ struct MeetingView: View {
                         }
                     }
                 }
-            }
-            .onAppear {
-                meetingViewModel.selectMeeting(meeting: MeetingModel(
-                    id: meeting.id,
-                    title: meeting.title,
-                    date: meeting.date,
-                    meetingAddress: meeting.meetingAddress,
-                    meetingLocation: meeting.meetingLocation,
-                    meetingMemberIDs: meeting.meetingMemberIDs,
-                    meetingMasterID: meeting.meetingMasterID
-                ))
             }
             .navigationTitle(meeting.title)
             .navigationBarTitleDisplayMode(.inline)
@@ -148,18 +138,6 @@ struct MeetingView: View {
                     .cancel(Text("취소"))
                 ]
                 
-                if let currentUserID = Auth.auth().currentUser?.uid {
-                    if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID) {
-                        buttons.insert(.default(Text("멤버 강퇴하기")) {
-                            showingKickOutModal = true
-                        }, at: 0)
-                    } else {
-                        buttons.insert(.default(Text("멤버 강퇴하기")) {
-                            alertMessage = "모임장만 사용할 수 있는 기능입니다"
-                            showAlert = true
-                        }, at: 0)
-                    }
-                }
                 
                 if let currentUserID = Auth.auth().currentUser?.uid {
                     if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID) {
@@ -173,7 +151,6 @@ struct MeetingView: View {
                         }, at: 0)
                     }
                 }
-                
                 if let currentUserID = Auth.auth().currentUser?.uid {
                     if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID) {
                         buttons.insert(.default(Text("모임장 변경")) {
@@ -201,9 +178,6 @@ struct MeetingView: View {
             }
             .sheet(isPresented: $leaderSelctionModal) {
                 LeaderSelectionView(meetingID: meeting.id, currentUserID: Auth.auth().currentUser?.uid ?? "")
-            }
-            .sheet(isPresented: $showingKickOutModal) {
-                KickOutMember(meetingID: meeting.id, currentUserID: Auth.auth().currentUser?.uid ?? "")
             }
         }
     }
