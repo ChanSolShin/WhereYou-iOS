@@ -4,6 +4,7 @@
 //
 //  Created by 신찬솔 on 10/23/24.
 //
+
 import SwiftUI
 import NMapsMap
 import CoreLocation
@@ -18,51 +19,49 @@ struct MeetingMapView: View {
             // NaverMapView에 selectedUserLocation을 바인딩으로 전달
             NaverMapView(
                 coordinate: $selectedUserLocation,
-                title: meeting.title, address: meeting.meetingAddress
+                meeting: meeting
             )
             .edgesIgnoringSafeArea(.all) // 미팅의 좌표, 제목 및 주소를 넘겨줌
         }
         .navigationTitle(meeting.title)
         .navigationBarTitleDisplayMode(.inline)
-        .onChange(of: selectedUserLocation) { newLocation in
-            if let location = newLocation {
-                print("Camera moving to selected user location: \(location.latitude), \(location.longitude)")
-            } else {
-                print("Selected user location is nil, reverting to meeting location")
-            }
-        }
     }
 }
 
 struct NaverMapView: UIViewRepresentable {
     @Binding var coordinate: CLLocationCoordinate2D?
-    var title: String
-    var address: String?
+    var meeting: MeetingModel
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
     
     func makeUIView(context: Context) -> NMFNaverMapView {
         let naverMapView = NMFNaverMapView(frame: .zero)
-        
-        // 초기 카메라 위치 설정
-        if let initialCoordinate = coordinate {
-            moveCamera(to: initialCoordinate, in: naverMapView)
-        }
-        
         naverMapView.showLocationButton = true
         
-        // 커스텀 마커 추가
-        if let initialCoordinate = coordinate {
-            addCustomMarker(to: naverMapView, coordinate: initialCoordinate)
-        }
+        // 초기 카메라 위치 설정 (모임 장소로)
+        moveCamera(to: meeting.meetingLocation, in: naverMapView)
+        
+        // 모임 장소 마커 추가
+        context.coordinator.addMeetingMarker(to: naverMapView)
         
         return naverMapView
     }
     
     func updateUIView(_ uiView: NMFNaverMapView, context: Context) {
-        if let newCoordinate = coordinate {
-            print("Moving camera to coordinates in updateUIView: \(newCoordinate.latitude), \(newCoordinate.longitude)")
-            moveCamera(to: newCoordinate, in: uiView)
+        guard let newCoordinate = coordinate else { return }
+        
+        // 카메라 이동
+        moveCamera(to: newCoordinate, in: uiView)
+        
+        // 마커 업데이트
+        if newCoordinate == meeting.meetingLocation {
+            // 모임 장소로 이동할 경우, 선택된 멤버 마커 제거
+            context.coordinator.removeMemberMarker()
         } else {
-            print("Coordinate is nil in updateUIView, no camera update")
+            // 멤버 위치로 이동할 경우, 선택된 멤버 마커 추가 또는 업데이트
+            context.coordinator.updateMemberMarker(to: newCoordinate, in: uiView)
         }
     }
     
@@ -74,32 +73,64 @@ struct NaverMapView: UIViewRepresentable {
         mapView.mapView.moveCamera(cameraUpdate)
     }
     
-    func addCustomMarker(to naverMapView: NMFNaverMapView, coordinate: CLLocationCoordinate2D) {
-        let infoWindowView = InfoWindowView(name: title, address: address)
+    class Coordinator: NSObject {
+        var parent: NaverMapView
+        var meetingMarker: NMFMarker?
+        var memberMarker: NMFMarker?
         
-        let controller = UIHostingController(rootView: infoWindowView)
-        controller.view.frame = CGRect(origin: .zero, size: CGSize(width: 240, height: 110))
-        controller.view.backgroundColor = .clear
+        init(_ parent: NaverMapView) {
+            self.parent = parent
+        }
         
-        
-        if let rootVC = UIApplication.shared.windows.first?.rootViewController {
-            rootVC.view.insertSubview(controller.view, at: 0)
+        func addMeetingMarker(to mapView: NMFNaverMapView) {
+            let meetingCoordinate = parent.meeting.meetingLocation
+            let infoWindowView = InfoWindowView(name: parent.meeting.title, address: parent.meeting.meetingAddress)
             
-            let renderer = UIGraphicsImageRenderer(size: CGSize(width: 240, height: 125))
-            let infoWindowImage = renderer.image { context in
-                controller.view.layer.render(in: context.cgContext)
+            let controller = UIHostingController(rootView: infoWindowView)
+            controller.view.frame = CGRect(origin: .zero, size: CGSize(width: 240, height: 125))
+            controller.view.backgroundColor = .clear
+            
+            // 캡처된 이미지로 마커 아이콘 생성
+            if let rootVC = UIApplication.shared.windows.first?.rootViewController {
+                rootVC.view.insertSubview(controller.view, at: 0)
+                
+                let renderer = UIGraphicsImageRenderer(size: controller.view.bounds.size)
+                let infoWindowImage = renderer.image { _ in
+                    controller.view.layer.render(in: UIGraphicsGetCurrentContext()!)
+                }
+                
+                let marker = NMFMarker()
+                marker.position = NMGLatLng(lat: meetingCoordinate.latitude, lng: meetingCoordinate.longitude)
+                marker.iconImage = NMFOverlayImage(image: infoWindowImage)
+                marker.mapView = mapView.mapView
+                marker.touchHandler = { _ in
+                    return true
+                }
+                
+                self.meetingMarker = marker
+                
+                // SwiftUI View 제거
+                controller.view.removeFromSuperview()
             }
-            
-            let marker = NMFMarker()
-            marker.position = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
-            marker.iconImage = NMFOverlayImage(image: infoWindowImage)
-            marker.mapView = naverMapView.mapView
-            marker.touchHandler = { _ in
-                return true
+        }
+        
+        func updateMemberMarker(to coordinate: CLLocationCoordinate2D, in mapView: NMFNaverMapView) {
+            if memberMarker == nil {
+                // 멤버 마커가 없으면 새로 생성
+                let marker = NMFMarker()
+                marker.position = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
+                marker.iconImage = NMF_MARKER_IMAGE_BLUE // 기본 마커 이미지 사용
+                marker.mapView = mapView.mapView
+                self.memberMarker = marker
+            } else {
+                // 이미 존재하면 위치 업데이트
+                memberMarker?.position = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
             }
-            
-            // SwiftUI View 제거
-            controller.view.removeFromSuperview()
+        }
+        
+        func removeMemberMarker() {
+            memberMarker?.mapView = nil
+            memberMarker = nil
         }
     }
 }
@@ -169,4 +200,3 @@ extension CLLocationCoordinate2D: Equatable {
         return lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
     }
 }
-
