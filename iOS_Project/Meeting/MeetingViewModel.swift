@@ -21,11 +21,13 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var members: [User] = []
     @Published var meetingMasterID: String?
     @Published var selectedUserLocation: CLLocationCoordinate2D? // 유저 위치 표시
+    @Published var trackedMemberID: String? // 현재 추적 중인 멤버 ID
     
     private var meeting: MeetingModel? // 현재 선택된 모임
     private let locationManager = CLLocationManager()
     private var realtimeDB = Database.database().reference()
-    private var locationUpdateTimer: Timer?
+    private var locationUpdateTimer: Timer? // 사용자 위치 전송 타이머
+    private var memberLocationTimer: Timer? // 멤버 위치 업데이트 타이머
     
     override init() {
         super.init() // NSObject 초기화
@@ -57,13 +59,14 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         
         if Date() >= triggerDate {
             locationManager.startUpdatingLocation()
-            locationUpdateTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
+            // 기존의 10초 타이머를 2초로 변경
+            locationUpdateTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
                 self?.updateMemberLocations()
             }
         }
     }
     
-    // Firebase에 위치 업데이트
+    // Firebase에 현재 사용자 위치 업데이트
     private func updateMemberLocations() {
         guard let userID = Auth.auth().currentUser?.uid,
               let currentLocation = locationManager.location?.coordinate,
@@ -74,7 +77,7 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).setValue([
             "latitude": currentLocation.latitude,
             "longitude": currentLocation.longitude
-        ]){ error, _ in
+        ]) { error, _ in
             if let error = error {
                 print("Failed to update location: \(error.localizedDescription)")
             } else {
@@ -89,28 +92,45 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         locationUpdateTimer?.invalidate()
     }
     
-    // 특정 유저 위치 가져오기
+    // 특정 유저 위치 가져오기 및 추적 시작
     func moveToUserLocation(userID: String) {
+        // 기존에 추적 중인 멤버가 있다면 중지
+        stopTrackingMember()
+        
+        // 새로운 멤버 추적 시작
+        self.trackedMemberID = userID
+        fetchMemberLocation(userID: userID)
+        
+        // 2초 간격으로 멤버 위치 업데이트
+        memberLocationTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+            self?.fetchMemberLocation(userID: userID)
+        }
+    }
+    
+    // 특정 멤버의 위치를 Firebase에서 가져와 업데이트
+    private func fetchMemberLocation(userID: String) {
         guard let meetingID = meeting?.id else { return }
         
-        print("Fetching location for userID \(userID) in meeting \(meetingID)")
-        
-        // Firebase에서 유저의 현재 위치를 가져와 selectedUserLocation 업데이트
         realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).observeSingleEvent(of: .value) { [weak self] snapshot in
             if let locationData = snapshot.value as? [String: Any],
                let latitude = locationData["latitude"] as? CLLocationDegrees,
                let longitude = locationData["longitude"] as? CLLocationDegrees {
                 DispatchQueue.main.async {
                     self?.selectedUserLocation = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                    print("Fetched location for user \(userID): (\(latitude), \(longitude))")
                 }
             } else {
-                print("사용자의 위치 데이터가 없습니다.")
                 DispatchQueue.main.async {
                     self?.errorMessage = "멤버의 위치 정보를 불러올 수 없습니다."
                 }
             }
         }
+    }
+    
+    // 멤버 추적 중지
+    func stopTrackingMember() {
+        memberLocationTimer?.invalidate()
+        memberLocationTimer = nil
+        trackedMemberID = nil
     }
     
     private func fetchUserName(byID userID: String, completion: @escaping (String) -> Void) {
@@ -196,6 +216,7 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
         }
     }
+    
     func acceptMeetingRequest(requestID: String, toUserID: String) {
         let db = Firestore.firestore()
         

@@ -21,7 +21,6 @@ struct MeetingView: View {
     @State private var alertMessage: String = ""
     @State private var showActionSheet = false
     @State private var showingEditMeetingModal = false
-    // @State private var selectedUserLocation: CLLocationCoordinate2D? // 제거됨
     
     var body: some View {
         NavigationStack {
@@ -39,12 +38,14 @@ struct MeetingView: View {
                         meetingLocation: meeting.meetingLocation,
                         meetingMemberIDs: meeting.meetingMemberIDs,
                         meetingMasterID: meeting.meetingMasterID
-                    )
+                    ),
+                    meetingViewModel: meetingViewModel
                 )
                 .frame(height: 300)
                 
                 Button(action: {
                     title = "모임장소"
+                    meetingViewModel.stopTrackingMember() // 멤버 추적 중지
                     meetingViewModel.selectedUserLocation = meeting.meetingLocation // ViewModel의 selectedUserLocation 업데이트
                 }) {
                     Text("모임장소")
@@ -63,7 +64,7 @@ struct MeetingView: View {
                                 Button(action: {
                                     title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치"
                                     
-                                    // 해당 멤버의 위치 조회 및 ViewModel의 selectedUserLocation 업데이트
+                                    // 해당 멤버의 위치 조회 및 ViewModel의 selectedUserLocation 업데이트 및 추적 시작
                                     meetingViewModel.moveToUserLocation(userID: memberID)
                                 }) {
                                     ZStack {
@@ -85,17 +86,6 @@ struct MeetingView: View {
                         }
                     }
                 }
-            }
-            .onAppear {
-                meetingViewModel.selectMeeting(meeting: MeetingModel(
-                    id: meeting.id,
-                    title: meeting.title,
-                    date: meeting.date,
-                    meetingAddress: meeting.meetingAddress,
-                    meetingLocation: meeting.meetingLocation,
-                    meetingMemberIDs: meeting.meetingMemberIDs,
-                    meetingMasterID: meeting.meetingMasterID
-                ))
             }
             .navigationTitle(meeting.title)
             .navigationBarTitleDisplayMode(.inline)
