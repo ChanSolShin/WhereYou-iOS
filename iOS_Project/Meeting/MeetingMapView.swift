@@ -72,6 +72,7 @@ struct NaverMapView: UIViewRepresentable {
         }
     }
     
+
     private func moveCamera(to coordinate: CLLocationCoordinate2D, zoom: CGFloat, in mapView: NMFNaverMapView) {
         let cameraPosition = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
         // 카메라 위치 이동
