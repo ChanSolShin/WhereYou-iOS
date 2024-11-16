@@ -94,23 +94,50 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     // 특정 유저 위치 가져오기 및 추적 시작
     func moveToUserLocation(userID: String) {
-        // 기존에 추적 중인 멤버가 있다면 중지
-        stopTrackingMember()
-        
-        // 새로운 멤버 추적 시작
-        self.trackedMemberID = userID
-        fetchMemberLocation(userID: userID)
-        
-        // 2초 간격으로 멤버 위치 업데이트
-        memberLocationTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
-            self?.fetchMemberLocation(userID: userID)
+        guard let meetingID = meeting?.id,
+              let meetingDate = meeting?.date else { return } 
+
+        let timeBeforeMeeting = meetingDate.addingTimeInterval(-3 * 3600) // 3시간 전
+        let timeAfterMeeting = meetingDate.addingTimeInterval(1 * 3600)   // 1시간 후
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        let formattedStartTime = dateFormatter.string(from: timeBeforeMeeting)
+        let formattedEndTime = dateFormatter.string(from: timeAfterMeeting)
+
+        // 현재 시간과 모임 시간 비교
+        let currentTime = Date()
+        guard currentTime >= timeBeforeMeeting && currentTime <= timeAfterMeeting else {
+            let errorMessage = "모임 당일 \(formattedStartTime)~\(formattedEndTime) 에 위치 조회가 가능합니다."
+            print(errorMessage)
+            DispatchQueue.main.async {
+                self.errorMessage = errorMessage
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                self.errorMessage = nil
+                            }
+            return
         }
-    }
-    
-    // 특정 멤버의 위치를 Firebase에서 가져와 업데이트
-    private func fetchMemberLocation(userID: String) {
-        guard let meetingID = meeting?.id else { return }
-        
+                // 기존에 추적 중인 멤버가 있다면 중지
+                stopTrackingMember()
+
+                // 새로운 멤버 추적 시작
+                self.trackedMemberID = userID
+                fetchMemberLocation(userID: userID)
+
+                // 2초 간격으로 멤버 위치 업데이트
+                memberLocationTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+                    self?.fetchMemberLocation(userID: userID)
+                }
+            }
+
+            // 특정 멤버의 위치를 Firebase에서 가져와 업데이트
+            private func fetchMemberLocation(userID: String) {
+                guard let meetingID = meeting?.id else { return }
+
+        print("Fetching location for userID \(userID) in meeting \(meetingID)")
+
+        // Firebase에서 유저의 현재 위치를 가져와 selectedUserLocation 업데이트
         realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).observeSingleEvent(of: .value) { [weak self] snapshot in
             if let locationData = snapshot.value as? [String: Any],
                let latitude = locationData["latitude"] as? CLLocationDegrees,
@@ -125,7 +152,7 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
         }
     }
-    
+
     // 멤버 추적 중지
     func stopTrackingMember() {
         memberLocationTimer?.invalidate()

@@ -20,7 +20,7 @@ struct LoginView: View {
         NavigationView {
             VStack {
                 // 앱 이름 표시
-                Text("MyApp")
+                Text("웨어유")
                     .font(.largeTitle)
                     .padding(.top, 60)
                     .padding(.bottom, 10)
