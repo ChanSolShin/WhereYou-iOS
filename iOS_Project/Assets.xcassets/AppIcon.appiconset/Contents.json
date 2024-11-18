@@ -1,6 +1,7 @@
 {
   "images" : [
     {
+      "filename" : "KakaoTalk_Photo_2024-11-18-22-51-14 2.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -12,6 +13,7 @@
           "value" : "dark"
         }
       ],
+      "filename" : "KakaoTalk_Photo_2024-11-18-22-51-14 1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -23,6 +25,7 @@
           "value" : "tinted"
         }
       ],
+      "filename" : "KakaoTalk_Photo_2024-11-18-22-51-14.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
