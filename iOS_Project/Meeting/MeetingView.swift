@@ -23,12 +23,31 @@ struct MeetingView: View {
     @State private var showingEditMeetingModal = false
     @State private var showingKickOutModal = false
 
-    
     var body: some View {
         NavigationStack {
             VStack {
+                VStack(alignment: .leading) {
+                    Text("모임날짜: \(formattedDate(date: meeting.date))")
+                        .font(.headline)
+                        .padding(.bottom, 5)
+                    
+                    if let masterName = meetingViewModel.meetingMemberNames[meeting.meetingMasterID] {
+                        Text("모임장: \(masterName)")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .padding(.bottom, 50)
+                    } else {
+                        Text("모임장 정보를 불러오는 중...")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .padding(.bottom, 50)
+                    }
+                }
+                .padding(.leading, -120)
+                
                 Text(title)
                     .font(.title2)
+            
                 
                 MeetingMapView(
                     selectedUserLocation: $meetingViewModel.selectedUserLocation, // ViewModel의 selectedUserLocation 바인딩
@@ -57,38 +76,39 @@ struct MeetingView: View {
                         .cornerRadius(10)
                 }
                 
-                ForEach(0..<meeting.meetingMemberIDs.count/3 + (meeting.meetingMemberIDs.count % 3 > 0 ? 1 : 0), id: \.self) { rowIndex in
+                ForEach(0..<meeting.meetingMemberIDs.count / 3 + (meeting.meetingMemberIDs.count % 3 > 0 ? 1 : 0), id: \.self) { rowIndex in
                     HStack {
                         ForEach(0..<3) { columnIndex in
                             let index = rowIndex * 3 + columnIndex
                             if index < meeting.meetingMemberIDs.count {
                                 let memberID = meeting.meetingMemberIDs[index]
-                                Button(action: {
-                                    if meetingViewModel.trackedMemberID == memberID {
-                                            // 동일한 멤버를 다시 클릭한 경우 추적 중지
+                                
+                                if let currentUserID = Auth.auth().currentUser?.uid, currentUserID != memberID {
+                                    Button(action: {
+                                        if meetingViewModel.trackedMemberID == memberID {
                                             title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n     추적 중지"
                                             meetingViewModel.stopTrackingMember()
                                         } else {
-                                            // 새로운 멤버를 클릭한 경우 추적 시작
                                             title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n      추적 중"
                                             meetingViewModel.moveToUserLocation(userID: memberID)
                                         }
-                                }) {
-                                    ZStack {
-                                        Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
-                                            .padding()
-                                            .background(Color.blue)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(10)
-                                        
-                                        if memberID == meeting.meetingMasterID {
-                                            Image(systemName: "crown.fill")
-                                                .foregroundColor(.yellow)
-                                                .offset(x: 0, y: -40)
+                                    }) {
+                                        ZStack {
+                                            Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
+                                                .padding()
+                                                .background(Color.blue)
+                                                .foregroundColor(.white)
+                                                .cornerRadius(10)
+                                            
+                                            if memberID == meeting.meetingMasterID {
+                                                Image(systemName: "crown.fill")
+                                                    .foregroundColor(.yellow)
+                                                    .offset(x: 0, y: -40)
+                                            }
                                         }
                                     }
+                                    .padding(.vertical, 2)
                                 }
-                                .padding(.vertical, 2)
                             }
                         }
                     }
@@ -207,4 +227,9 @@ struct MeetingView: View {
             }
         }
     }
+    private func formattedDate(date: Date) -> String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy년 MM월 dd일 HH:mm"
+            return formatter.string(from: date)
+        }
 }
