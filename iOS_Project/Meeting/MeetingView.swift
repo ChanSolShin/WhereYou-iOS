@@ -64,10 +64,15 @@ struct MeetingView: View {
                             if index < meeting.meetingMemberIDs.count {
                                 let memberID = meeting.meetingMemberIDs[index]
                                 Button(action: {
-                                    title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치"
-                                    
-                                    // 해당 멤버의 위치 조회 및 ViewModel의 selectedUserLocation 업데이트 및 추적 시작
-                                    meetingViewModel.moveToUserLocation(userID: memberID)
+                                    if meetingViewModel.trackedMemberID == memberID {
+                                            // 동일한 멤버를 다시 클릭한 경우 추적 중지
+                                            title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n     추적 중지"
+                                            meetingViewModel.stopTrackingMember()
+                                        } else {
+                                            // 새로운 멤버를 클릭한 경우 추적 시작
+                                            title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n      추적 중"
+                                            meetingViewModel.moveToUserLocation(userID: memberID)
+                                        }
                                 }) {
                                     ZStack {
                                         Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
