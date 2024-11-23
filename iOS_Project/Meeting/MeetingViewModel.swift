@@ -116,17 +116,26 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             DispatchQueue.main.async {
                 self.errorMessage = errorMessage
             }
-            DispatchQueue.main.asyncAfter(deadline: .now()) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 self.errorMessage = nil
             }
             return
         }
-        
+
+        // 동일한 멤버 버튼이 눌린 경우 추적 중지
+        if trackedMemberID == userID {
+            print("Stopped tracking user \(userID)")
+            stopTrackingMember()
+            // 위치 변경하지 않고 그대로 유지
+            return
+        }
+
         // 기존에 추적 중인 멤버가 있다면 중지
         stopTrackingMember()
 
         // 새로운 멤버 추적 시작
-        self.trackedMemberID = userID
+        print("Started tracking user \(userID)")
+        trackedMemberID = userID
         fetchMemberLocation(userID: userID)
 
         // 5초 간격으로 멤버 위치 업데이트
