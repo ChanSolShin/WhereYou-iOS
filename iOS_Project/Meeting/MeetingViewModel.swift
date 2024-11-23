@@ -67,30 +67,31 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     // Firebase에 현재 사용자 위치 업데이트
-    func updateMemberLocations() {
-        guard let userID = Auth.auth().currentUser?.uid,
-              let meetingID = meeting?.id,
-              let currentLocation = locationCoordinator.currentLocation else { return }
-        
-        print("Updating location for userID \(userID) at \(currentLocation.latitude), \(currentLocation.longitude)")
-        
-        realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).setValue([
-            "latitude": currentLocation.latitude,
-            "longitude": currentLocation.longitude
-        ]) { error, _ in
-            if let error = error {
-                print("Failed to update location: \(error.localizedDescription)")
-            } else {
-                print("Location updated successfully for user \(userID)")
-            }
-        }
-    }
-    
-    // 실시간 위치 업데이트 중지
-    func stopLocationUpdates() {
-        locationManager.stopUpdatingLocation()
-        locationUpdateTimer?.invalidate()
-    }
+    // Firebase에 위치 업데이트
+       private func updateMemberLocations() {
+           guard let userID = Auth.auth().currentUser?.uid,
+                 let currentLocation = locationManager.location?.coordinate,
+                 let meetingID = meeting?.id else { return } // Firestore에서 가져온 meetingID를 사용
+           
+           print("Updating location for userID \(userID) at \(currentLocation.latitude), \(currentLocation.longitude)")
+           
+           realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).setValue([
+               "latitude": currentLocation.latitude,
+               "longitude": currentLocation.longitude
+           ]){ error, _ in
+               if let error = error {
+                   print("Failed to update location: \(error.localizedDescription)")
+               } else {
+                   print("Location updated successfully for user \(userID)")
+               }
+           }
+       }
+       
+       // 실시간 위치 업데이트 중지
+       func stopLocationUpdates() {
+           locationManager.stopUpdatingLocation()
+           locationUpdateTimer?.invalidate()
+       }
     
     // 특정 유저 위치 가져오기 및 추적 시작
     func moveToUserLocation(userID: String) {
@@ -99,7 +100,7 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         let firestoreDB = Firestore.firestore()
         let realtimeDB = Database.database().reference()
 
-
+        // Firestore에서 모임 정보를 가져옴
         firestoreDB.collection("meetings").document(meetingID).getDocument { [weak self] (document, error) in
             guard let self = self else { return }
 
@@ -129,7 +130,7 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             let formattedStartTime = dateFormatter.string(from: timeBeforeMeeting)
             let formattedEndTime = dateFormatter.string(from: timeAfterMeeting)
 
-            
+            // 현재 시간과 모임 시간 비교
             let currentTime = Date()
             guard currentTime >= timeBeforeMeeting && currentTime <= timeAfterMeeting else {
                 let errorMessage = "모임 당일 \(formattedStartTime)~\(formattedEndTime) 에 위치 조회가 가능합니다."
@@ -143,8 +144,19 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
                 return
             }
 
-            print("Fetching location for userID \(userID) in meeting \(meetingID)")
+            // 기존에 추적 중인 멤버가 있다면 중지
+            self.stopTrackingMember()
 
+            // 새로운 멤버 추적 시작
+            self.trackedMemberID = userID
+            self.fetchMemberLocation(userID: userID)
+
+            // 5초 간격으로 멤버 위치 업데이트
+            self.memberLocationTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
+                self?.fetchMemberLocation(userID: userID)
+            }
+
+            // Firestore에서 위치 정보 가져오기
             realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).observeSingleEvent(of: .value) { snapshot in
                 if let locationData = snapshot.value as? [String: Any],
                    let latitude = locationData["latitude"] as? CLLocationDegrees,
@@ -162,6 +174,8 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
         }
     }
+    
+    
     // 특정 멤버의 위치를 Firebase에서 가져와 업데이트
     func fetchMemberLocation(userID: String) {
         guard let meetingID = meeting?.id else {
@@ -187,6 +201,8 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
         }
     }
+    
+    
     
     // 멤버 추적 중지
     func stopTrackingMember() {
