@@ -8,7 +8,7 @@ import SwiftUI
 import NMapsMap
 
 struct MeetingListView: View {
-    @ObservedObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel())
+    @ObservedObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel(locationCoordinator: AppLocationCoordinator()))
     @State private var searchText = "" // 검색 텍스트
     @Binding var isTabBarHidden: Bool
 
