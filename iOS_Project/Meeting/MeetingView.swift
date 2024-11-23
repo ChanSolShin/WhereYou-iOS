@@ -89,6 +89,9 @@ struct MeetingView: View {
                     }
                 }
             }
+            .onDisappear{
+                meetingViewModel.stopTrackingMember()
+            }
             .navigationTitle(meeting.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

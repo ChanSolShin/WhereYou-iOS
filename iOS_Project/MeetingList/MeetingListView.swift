@@ -1,14 +1,8 @@
-//
-//  MeetingListView.swift
-//  iOS_Project
-//
-//  Created by 신찬솔 on 10/11/24.
-//
 import SwiftUI
 import NMapsMap
 
 struct MeetingListView: View {
-    @ObservedObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel(locationCoordinator: AppLocationCoordinator()))
+    @ObservedObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel(locationCoordinator: AppLocationCoordinator.shared))
     @State private var searchText = "" // 검색 텍스트
     @Binding var isTabBarHidden: Bool
 
@@ -26,7 +20,6 @@ struct MeetingListView: View {
                             Spacer()
                         }
                     } else {
-                        
                         ScrollView {
                             VStack(spacing: 10) {
                                 ForEach(viewModel.meetings.filter { meeting in
