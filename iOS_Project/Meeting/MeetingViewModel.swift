@@ -21,16 +21,18 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var members: [User] = []
     @Published var meetingMasterID: String?
     @Published var selectedUserLocation: CLLocationCoordinate2D? // 유저 위치 표시
+    @Published var trackedMemberID: String? // 현재 추적 중인 멤버 ID
     
     private var meeting: MeetingModel? // 현재 선택된 모임
     private let locationManager = CLLocationManager()
     private var realtimeDB = Database.database().reference()
-    private var locationUpdateTimer: Timer?
+    private let locationCoordinator: AppLocationCoordinator // 위치 코디네이터
+    private var locationUpdateTimer: Timer? // 사용자 위치 전송 타이머
+    private var memberLocationTimer: Timer? // 멤버 위치 업데이트 타이머
     
-    override init() {
-        super.init() // NSObject 초기화
-        locationManager.requestAlwaysAuthorization()
-        locationManager.delegate = self
+    init(locationCoordinator: AppLocationCoordinator) {
+        self.locationCoordinator = locationCoordinator // locationCoordinator 초기화
+        super.init() // super.init 호출
     }
     
     // 모임 선택 및 초기화
@@ -57,24 +59,25 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         
         if Date() >= triggerDate {
             locationManager.startUpdatingLocation()
-            locationUpdateTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
+            // 기존의 10초 타이머를 2초로 변경
+            locationUpdateTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
                 self?.updateMemberLocations()
             }
         }
     }
     
-    // Firebase에 위치 업데이트
-    private func updateMemberLocations() {
+    // Firebase에 현재 사용자 위치 업데이트
+    func updateMemberLocations() {
         guard let userID = Auth.auth().currentUser?.uid,
-              let currentLocation = locationManager.location?.coordinate,
-              let meetingID = meeting?.id else { return } // Firestore에서 가져온 meetingID를 사용
+              let meetingID = meeting?.id,
+              let currentLocation = locationCoordinator.currentLocation else { return }
         
         print("Updating location for userID \(userID) at \(currentLocation.latitude), \(currentLocation.longitude)")
         
         realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).setValue([
             "latitude": currentLocation.latitude,
             "longitude": currentLocation.longitude
-        ]){ error, _ in
+        ]) { error, _ in
             if let error = error {
                 print("Failed to update location: \(error.localizedDescription)")
             } else {
@@ -89,78 +92,77 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         locationUpdateTimer?.invalidate()
     }
     
-  
-
+    // 특정 유저 위치 가져오기 및 추적 시작
     func moveToUserLocation(userID: String) {
-        guard let meetingID = meeting?.id else { return }
-
-        let firestoreDB = Firestore.firestore()
-        let realtimeDB = Database.database().reference()
-
-
-        firestoreDB.collection("meetings").document(meetingID).getDocument { [weak self] (document, error) in
-            guard let self = self else { return }
-
-            if let error = error {
-                print("Firestore에서 데이터 가져오기 실패: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    self.errorMessage = "모임 정보를 불러올 수 없습니다."
-                }
-                return
+        guard let meetingID = meeting?.id,
+              let meetingDate = meeting?.date else { return }
+        
+        let timeBeforeMeeting = meetingDate.addingTimeInterval(-3 * 3600) // 3시간 전
+        let timeAfterMeeting = meetingDate.addingTimeInterval(1 * 3600)   // 1시간 후
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        let formattedStartTime = dateFormatter.string(from: timeBeforeMeeting)
+        let formattedEndTime = dateFormatter.string(from: timeAfterMeeting)
+        
+        // 현재 시간과 모임 시간 비교
+        let currentTime = Date()
+        guard currentTime >= timeBeforeMeeting && currentTime <= timeAfterMeeting else {
+            let errorMessage = "모임 당일 \(formattedStartTime)~\(formattedEndTime) 에 위치 조회가 가능합니다."
+            print(errorMessage)
+            DispatchQueue.main.async {
+                self.errorMessage = errorMessage
             }
-
-            guard let document = document, document.exists,
-                  let meetingTimestamp = document.data()?["meetingDate"] as? Timestamp else {
-                print("모임 날짜를 가져올 수 없습니다.")
-                DispatchQueue.main.async {
-                    self.errorMessage = "모임 날짜 정보를 불러올 수 없습니다."
-                }
-                return
+            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                self.errorMessage = nil
             }
+            return
+        }
+        // 기존에 추적 중인 멤버가 있다면 중지
+        stopTrackingMember()
+        
+        // 새로운 멤버 추적 시작
+        self.trackedMemberID = userID
+        fetchMemberLocation(userID: userID)
+        
+        // 5초 간격으로 멤버 위치 업데이트
+        memberLocationTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
+            self?.fetchMemberLocation(userID: userID)
+        }
+    }
+    
+    // 특정 멤버의 위치를 Firebase에서 가져와 업데이트
+    func fetchMemberLocation(userID: String) {
+        guard let meetingID = meeting?.id else {
+            print("Meeting ID is nil")
+            return
+        }
 
-            let meetingDate = meetingTimestamp.dateValue()
-            let timeBeforeMeeting = meetingDate.addingTimeInterval(-3 * 3600) // 3시간 전
-            let timeAfterMeeting = meetingDate.addingTimeInterval(1 * 3600)   // 1시간 후
+        print("Fetching location for userID \(userID) in meeting \(meetingID)")
 
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "HH:mm"
-            let formattedStartTime = dateFormatter.string(from: timeBeforeMeeting)
-            let formattedEndTime = dateFormatter.string(from: timeAfterMeeting)
-
-            
-            let currentTime = Date()
-            guard currentTime >= timeBeforeMeeting && currentTime <= timeAfterMeeting else {
-                let errorMessage = "모임 당일 \(formattedStartTime)~\(formattedEndTime) 에 위치 조회가 가능합니다."
-                print(errorMessage)
+        realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).observeSingleEvent(of: .value) { [weak self] snapshot in
+            if let locationData = snapshot.value as? [String: Any],
+               let latitude = locationData["latitude"] as? CLLocationDegrees,
+               let longitude = locationData["longitude"] as? CLLocationDegrees {
                 DispatchQueue.main.async {
-                    self.errorMessage = errorMessage
+                    self?.selectedUserLocation = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+                    print("Fetched location for user \(userID): \(latitude), \(longitude)")
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now()) {
-                    self.errorMessage = nil
-                }
-                return
-            }
-
-            print("Fetching location for userID \(userID) in meeting \(meetingID)")
-
-            realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).observeSingleEvent(of: .value) { snapshot in
-                if let locationData = snapshot.value as? [String: Any],
-                   let latitude = locationData["latitude"] as? CLLocationDegrees,
-                   let longitude = locationData["longitude"] as? CLLocationDegrees {
-                    DispatchQueue.main.async {
-                        self.selectedUserLocation = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                        print("Fetched location for user \(userID): (\(latitude), \(longitude))")
-                    }
-                } else {
-                    print("사용자의 위치 데이터가 없습니다.")
-                    DispatchQueue.main.async {
-                        self.errorMessage = "멤버의 위치 정보를 불러올 수 없습니다."
-                    }
+            } else {
+                print("Failed to fetch location for user \(userID). Snapshot: \(snapshot.value ?? "nil")")
+                DispatchQueue.main.async {
+                    self?.errorMessage = "멤버의 위치 정보를 불러올 수 없습니다."
                 }
             }
         }
     }
     
+    // 멤버 추적 중지
+    func stopTrackingMember() {
+        memberLocationTimer?.invalidate()
+        memberLocationTimer = nil
+        trackedMemberID = nil
+    }
     
     private func fetchUserName(byID userID: String, completion: @escaping (String) -> Void) {
         let db = Firestore.firestore()
@@ -245,6 +247,7 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
         }
     }
+    
     func acceptMeetingRequest(requestID: String, toUserID: String) {
         let db = Firestore.firestore()
         
