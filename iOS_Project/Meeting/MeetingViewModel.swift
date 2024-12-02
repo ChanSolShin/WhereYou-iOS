@@ -96,50 +96,74 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     // 특정 유저 위치 가져오기 및 추적 시작
     func moveToUserLocation(userID: String) {
-        guard let meetingID = meeting?.id,
-              let meetingDate = meeting?.date else { return }
+        guard let meetingID = meeting?.id else { return }
 
-        let timeBeforeMeeting = meetingDate.addingTimeInterval(-3 * 3600) // 3시간 전
-        let timeAfterMeeting = meetingDate.addingTimeInterval(1 * 3600)   // 1시간 후
+        let firestoreDB = Firestore.firestore()
+        // Firestore에서 모임 날짜 가져오기
+        firestoreDB.collection("meetings").document(meetingID).getDocument { [weak self] (document, error) in
+            guard let self = self else { return }
 
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
-        let formattedStartTime = dateFormatter.string(from: timeBeforeMeeting)
-        let formattedEndTime = dateFormatter.string(from: timeAfterMeeting)
-
-        // 현재 시간과 모임 시간 비교
-        let currentTime = Date()
-        guard currentTime >= timeBeforeMeeting && currentTime <= timeAfterMeeting else {
-            let errorMessage = "모임 당일 \(formattedStartTime)~\(formattedEndTime) 에 위치 조회가 가능합니다."
-            print(errorMessage)
-            DispatchQueue.main.async {
-                self.errorMessage = errorMessage
+            if let error = error {
+                print("Firestore에서 데이터 가져오기 실패: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.errorMessage = "모임 정보를 불러올 수 없습니다."
+                }
+                return
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                self.errorMessage = nil
+
+            guard let document = document, document.exists,
+                  let meetingTimestamp = document.data()?["meetingDate"] as? Timestamp else {
+                print("모임 날짜를 가져올 수 없습니다.")
+                DispatchQueue.main.async {
+                    self.errorMessage = "모임 날짜 정보를 불러올 수 없습니다."
+                }
+                return
             }
-            return
-        }
 
-        // 동일한 멤버 버튼이 눌린 경우 추적 중지
-        if trackedMemberID == userID {
-            print("Stopped tracking user \(userID)")
-            stopTrackingMember()
-            return
-        }
+            // Firebase에서 가져온 Timestamp를 Date로 변환
+            let meetingDate = meetingTimestamp.dateValue()
+            let timeBeforeMeeting = meetingDate.addingTimeInterval(-3 * 3600) // 3시간 전
+            let timeAfterMeeting = meetingDate.addingTimeInterval(1 * 3600)   // 1시간 후
 
-        // 기존에 추적 중인 멤버가 있다면 중지
-        stopTrackingMember()
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "HH:mm"
+            let formattedStartTime = dateFormatter.string(from: timeBeforeMeeting)
+            let formattedEndTime = dateFormatter.string(from: timeAfterMeeting)
 
-        // 새로운 멤버 추적 시작
-        print("Started tracking user \(userID)")
-        trackedMemberID = userID
-        fetchMemberLocation(userID: userID)
+            // 현재 시간과 모임 시간 비교
+            let currentTime = Date()
+            guard currentTime >= timeBeforeMeeting && currentTime <= timeAfterMeeting else {
+                let errorMessage = "모임 당일 \(formattedStartTime)~\(formattedEndTime) 에 위치 조회가 가능합니다."
+                print(errorMessage)
+                DispatchQueue.main.async {
+                    self.errorMessage = errorMessage
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    self.errorMessage = nil
+                }
+                return
+            }
 
-        // 10초 간격으로 멤버 위치 업데이트
-        locationCoordinator.startUpdatingLocation()
-        memberLocationTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { [weak self] _ in
-            self?.fetchMemberLocation(userID: userID)
+            // 동일한 멤버 버튼이 눌린 경우 추적 중지
+            if self.trackedMemberID == userID {
+                print("Stopped tracking user \(userID)")
+                self.stopTrackingMember()
+                return
+            }
+
+            // 기존에 추적 중인 멤버가 있다면 중지
+            self.stopTrackingMember()
+
+            // 새로운 멤버 추적 시작
+            print("Started tracking user \(userID)")
+            self.trackedMemberID = userID
+            self.fetchMemberLocation(userID: userID)
+
+            // 10초 간격으로 멤버 위치 업데이트
+            self.locationCoordinator.startUpdatingLocation()
+            self.memberLocationTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { [weak self] _ in
+                self?.fetchMemberLocation(userID: userID)
+            }
         }
     }
 
