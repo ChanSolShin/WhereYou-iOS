@@ -31,7 +31,6 @@ struct iOS_ProjectApp: App {
                             .onAppear {
                                 locationCoordinator.startUpdatingLocation()
                             }
-
                     } else {
                         LoginView()
                     }
@@ -44,18 +43,19 @@ struct iOS_ProjectApp: App {
                     PermissionRequiredView() // 설정으로 이동하는 화면
                 }
             }
-            .onChange(of: locationCoordinator.authorizationStatus) { status in
-                if status == .denied || status == .restricted {
-                    showAlert = true
-                }
             .onAppear {
                 // 위치 권한이 허용되지 않으면 경고 표시
                 if locationCoordinator.authorizationStatus != .authorizedAlways {
                     showAlert = true
                 }
                 
-                // 앱이 실행될 때 알림 권한 요청
+                // 알림 권한 요청
                 requestNotificationPermission()
+            }
+            .onChange(of: locationCoordinator.authorizationStatus) { status in
+                if status == .denied || status == .restricted {
+                    showAlert = true
+                }
             }
             .alert(isPresented: $showAlert) {
                 Alert(
@@ -67,8 +67,7 @@ struct iOS_ProjectApp: App {
                         }
                     },
                     secondaryButton: .cancel(Text("취소")) {
-
-                        exitApp() // 취소 버튼 클릭 시, 앱 종료
+                        exitApp()
                     }
                 )
             }
@@ -92,7 +91,6 @@ struct iOS_ProjectApp: App {
         }
     }
     
-    // 알림 권한 요청 함수
     private func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if granted {
@@ -100,7 +98,7 @@ struct iOS_ProjectApp: App {
             } else {
                 print("알림 권한이 거부되었습니다.")
                 DispatchQueue.main.async {
-                    self.showNotificationAlert = true // 권한 거부 시 알림 권한 요청 메시지 표시
+                    self.showNotificationAlert = true
                 }
             }
         }
