@@ -15,6 +15,7 @@ struct MeetingView: View {
     var meeting: MeetingListModel
     @ObservedObject var meetingViewModel: MeetingViewModel
     @State private var title: String = "모임장소"
+    @State private var meetingDate: String = "모임시간: 불러오는 중..."
     @State private var showingAddFriendModal = false
     @State private var leaderSelctionModal = false
     @State private var showAlert: Bool = false
@@ -23,15 +24,21 @@ struct MeetingView: View {
     @State private var showingEditMeetingModal = false
     @State private var showingKickOutModal = false
 
-    
     var body: some View {
         NavigationStack {
             VStack {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(meetingDate)
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                }
+                .padding(.bottom, 10)
+
                 Text(title)
                     .font(.title2)
                 
                 MeetingMapView(
-                    selectedUserLocation: $meetingViewModel.selectedUserLocation, // ViewModel의 selectedUserLocation 바인딩
+                    selectedUserLocation: $meetingViewModel.selectedUserLocation,
                     meeting: MeetingModel(
                         id: meeting.id,
                         title: meeting.title,
@@ -47,8 +54,8 @@ struct MeetingView: View {
                 
                 Button(action: {
                     title = "모임장소"
-                    meetingViewModel.stopTrackingMember() // 멤버 추적 중지
-                    meetingViewModel.selectedUserLocation = meeting.meetingLocation // ViewModel의 selectedUserLocation 업데이트
+                    meetingViewModel.stopTrackingMember()
+                    meetingViewModel.selectedUserLocation = meeting.meetingLocation
                 }) {
                     Text("모임장소")
                         .padding()
@@ -57,7 +64,7 @@ struct MeetingView: View {
                         .cornerRadius(10)
                 }
                 
-                ForEach(0..<meeting.meetingMemberIDs.count/3 + (meeting.meetingMemberIDs.count % 3 > 0 ? 1 : 0), id: \.self) { rowIndex in
+                ForEach(0..<meeting.meetingMemberIDs.count / 3 + (meeting.meetingMemberIDs.count % 3 > 0 ? 1 : 0), id: \.self) { rowIndex in
                     HStack {
                         ForEach(0..<3) { columnIndex in
                             let index = rowIndex * 3 + columnIndex
@@ -65,14 +72,12 @@ struct MeetingView: View {
                                 let memberID = meeting.meetingMemberIDs[index]
                                 Button(action: {
                                     if meetingViewModel.trackedMemberID == memberID {
-                                            // 동일한 멤버를 다시 클릭한 경우 추적 중지
-                                            title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n     추적 중지"
-                                            meetingViewModel.stopTrackingMember()
-                                        } else {
-                                            // 새로운 멤버를 클릭한 경우 추적 시작
-                                            title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n      추적 중"
-                                            meetingViewModel.moveToUserLocation(userID: memberID)
-                                        }
+                                        title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n     추적 중지"
+                                        meetingViewModel.stopTrackingMember()
+                                    } else {
+                                        title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n      추적 중"
+                                        meetingViewModel.moveToUserLocation(userID: memberID)
+                                    }
                                 }) {
                                     ZStack {
                                         Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
@@ -94,7 +99,10 @@ struct MeetingView: View {
                     }
                 }
             }
-            .onDisappear{
+            .onAppear {
+                fetchMeetingData()
+            }
+            .onDisappear {
                 meetingViewModel.stopTrackingMember()
             }
             .navigationTitle(meeting.title)
@@ -104,14 +112,12 @@ struct MeetingView: View {
                     HStack {
                         Button(action: {
                             if let currentUserID = Auth.auth().currentUser?.uid {
-                                if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID){
+                                if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID) {
                                     showingAddFriendModal = true
-                                }
-                                else {
+                                } else {
                                     alertMessage = "모임장만 멤버 초대를 할 수 있습니다."
                                     showAlert = true
                                 }
-
                             }
                         }) {
                             Image(systemName: "person.badge.plus")
@@ -187,7 +193,6 @@ struct MeetingView: View {
                     }
                 }
                 
-                // ActionSheet 반환
                 return ActionSheet(
                     title: Text("모임 관리"),
                     message: Text("원하는 작업을 선택하세요."),
@@ -207,4 +212,29 @@ struct MeetingView: View {
             }
         }
     }
+
+    private func fetchMeetingData() {
+        let db = Firestore.firestore()
+        let docRef = db.collection("meetings").document(meeting.id)
+
+        docRef.getDocument { (document, error) in
+            if let error = error {
+                print("meetings 컬렉션에서 문서를 가져오는 중 오류: \(error.localizedDescription)")
+                return
+            }
+
+            guard let document = document, document.exists else {
+                print("meetings 컬렉션에서 문서가 존재하지 않습니다.")
+                return
+            }
+
+            if let date = document.data()?["meetingDate"] as? Timestamp {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy년 MM월 dd일 HH:mm"
+                meetingDate = "모임시간: \(formatter.string(from: date.dateValue()))"
+            }
+        }
+    }
+
+    
 }
