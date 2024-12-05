@@ -9,7 +9,6 @@ import SwiftUI
 import NMapsMap
 import CoreLocation
 import FirebaseDatabase
-
 struct MeetingMapView: View {
     @Binding var selectedUserLocation: CLLocationCoordinate2D?
     var meeting: MeetingModel // MeetingModel을 사용하여 미팅 정보를 받아옴

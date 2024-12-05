@@ -5,6 +5,7 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
     static let shared = AppLocationCoordinator()
     
     private let locationManager = CLLocationManager()
+    private var locationUpdateTimer: Timer? // Timer 추가
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
     var currentLocation: CLLocationCoordinate2D?
     
@@ -29,14 +30,34 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
     }
     
     func startUpdatingLocation() {
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        locationManager.distanceFilter = kCLDistanceFilterNone // 거리 제한 없이 업데이트
         locationManager.allowsBackgroundLocationUpdates = true // 백그라운드 위치 업데이트 활성화
         locationManager.pausesLocationUpdatesAutomatically = false
         locationManager.startUpdatingLocation()
+        
+        // Timer로 10초마다 위치 업로드
+        locationUpdateTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
+            self?.uploadLocation()
+        }
     }
     
     func stopUpdatingLocation() {
         locationManager.stopUpdatingLocation()
+        locationUpdateTimer?.invalidate() // Timer 중지
+        locationUpdateTimer = nil
+    }
+    
+    private func uploadLocation() {
+        guard let currentLocation = currentLocation else {
+            print("위치를 가져올 수 없습니다.")
+            return
+        }
+        
+        let latitude = currentLocation.latitude
+        let longitude = currentLocation.longitude
+        print("현재 위치 업로드: (\(latitude), \(longitude))")
+        
     }
     
     private func showAlertForDisabledLocationService() {
