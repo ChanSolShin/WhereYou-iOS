@@ -62,7 +62,7 @@ class MeetingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
 
         if Date() >= triggerDate {
             locationCoordinator.startUpdatingLocation() // AppLocationCoordinator 호출
-            locationUpdateTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+            locationUpdateTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
                 self?.updateMemberLocations()
             }
         }
