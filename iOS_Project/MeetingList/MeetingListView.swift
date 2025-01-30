@@ -2,7 +2,7 @@ import SwiftUI
 import NMapsMap
 
 struct MeetingListView: View {
-    @ObservedObject private var viewModel = MeetingListViewModel(meetingViewModel: MeetingViewModel(locationCoordinator: AppLocationCoordinator.shared))
+    @ObservedObject private var viewModel = MeetingListViewModel()
     @State private var searchText = "" // 검색 텍스트
     @Binding var isTabBarHidden: Bool
 
@@ -115,5 +115,13 @@ struct MeetingListView: View {
                 viewModel.meetingViewModel.fetchPendingMeetingRequests()
             }
         }
+    }
+    
+    // DateFormatter 정의
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter
     }
 }
