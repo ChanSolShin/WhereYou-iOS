@@ -1,13 +1,27 @@
 import CoreLocation
+import FirebaseCore
 import SwiftUI
+import FirebaseDatabase
+import FirebaseAuth
 
 class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDelegate {
     static let shared = AppLocationCoordinator()
     
     private let locationManager = CLLocationManager()
-    private var locationUpdateTimer: Timer? // Timer 추가
+    private var locationUpdateTimer: DispatchSourceTimer? // Timer 추가
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
-    var currentLocation: CLLocationCoordinate2D?
+    @Published var currentLocation: CLLocationCoordinate2D?
+    
+    // 활성화된 회의 정보
+    @Published var activeMeetings: [MeetingModel] = []
+    
+    //lazy var: Firebase가 설정된 후에 데이터베이스를 참조하도록 설정
+    private lazy var realtimeDB: DatabaseReference = {
+            guard FirebaseApp.app() != nil else {
+                fatalError("Wait for FirebaseApp to configured")
+            }
+            return Database.database().reference()
+        }()
     
     private override init() {
         super.init()
@@ -31,20 +45,22 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
     
     func startUpdatingLocation() {
         locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        locationManager.distanceFilter = kCLDistanceFilterNone // 거리 제한 없이 업데이트
-        locationManager.allowsBackgroundLocationUpdates = true // 백그라운드 위치 업데이트 활성화
+        locationManager.distanceFilter = kCLDistanceFilterNone
+        locationManager.allowsBackgroundLocationUpdates = true
         locationManager.pausesLocationUpdatesAutomatically = false
         locationManager.startUpdatingLocation()
-        
-        // Timer로 10초마다 위치 업로드
-        locationUpdateTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
+
+        locationUpdateTimer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .background))
+        locationUpdateTimer?.schedule(deadline: .now(), repeating: 10) // 10초마다 실행
+        locationUpdateTimer?.setEventHandler { [weak self] in
             self?.uploadLocation()
         }
+        locationUpdateTimer?.resume() // 타이머 실행
     }
     
     func stopUpdatingLocation() {
         locationManager.stopUpdatingLocation()
-        locationUpdateTimer?.invalidate() // Timer 중지
+        locationUpdateTimer?.cancel()
         locationUpdateTimer = nil
     }
     
@@ -58,6 +74,25 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
         let longitude = currentLocation.longitude
         print("현재 위치 업로드: (\(latitude), \(longitude))")
         
+        // 활성화된 모든 회의에 대해 위치 업로드
+        for meeting in activeMeetings {
+            realtimeDB.child("meetings").child(meeting.id).child("locations").child(getCurrentUserID()).setValue([
+                "latitude": latitude,
+                "longitude": longitude,
+                "timestamp": ServerValue.timestamp()
+            ]) { error, _ in
+                if let error = error {
+                    print("Failed to update location for meeting \(meeting.id): \(error.localizedDescription)")
+                } else {
+                    print("Location updated successfully for meeting \(meeting.id)")
+                }
+            }
+        }
+    }
+    
+    // 현재 사용자 ID 가져오기
+    private func getCurrentUserID() -> String {
+        return Auth.auth().currentUser?.uid ?? "unknown_user"
     }
     
     private func showAlertForDisabledLocationService() {
@@ -73,6 +108,52 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
             
             if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
                 rootViewController.present(alert, animated: true)
+            }
+        }
+    }
+    
+    // 회의 등록
+    func registerMeeting(_ meeting: MeetingModel) {
+        // 회의 시간 계산
+        let meetingDate = meeting.date
+        let startUploadDate = Calendar.current.date(byAdding: .hour, value: -3, to: meetingDate)!
+        let endUploadDate = Calendar.current.date(byAdding: .hour, value: 1, to: meetingDate)!
+        
+        // 현재 시간이 업로드 기간 내에 있는지 확인
+        let currentTime = Date()
+        if currentTime >= startUploadDate && currentTime <= endUploadDate {
+            // 현재 업로드 중인 회의에 추가
+            activeMeetings.append(meeting)
+            print("업로드 활성화된 회의 추가: \(meeting.id)")
+            
+            // 위치 업데이트 시작 (이미 시작되어 있지 않다면)
+            if authorizationStatus == .authorizedAlways {
+                startUpdatingLocation()
+            }
+        } else if currentTime < startUploadDate {
+            // 업로드 시작 시점에 타이머 설정
+            let delay = startUploadDate.timeIntervalSince(currentTime)
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.activeMeetings.append(meeting)
+                print("타이머 후 업로드 활성화된 회의 추가: \(meeting.id)")
+                
+                if self?.authorizationStatus == .authorizedAlways {
+                    self?.startUpdatingLocation()
+                }
+            }
+        }
+        
+        // 업로드 종료 시점에 타이머 설정
+        let endDelay = endUploadDate.timeIntervalSince(currentTime)
+        if endDelay > 0 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + endDelay) { [weak self] in
+                self?.activeMeetings.removeAll { $0.id == meeting.id }
+                print("업로드 비활성화된 회의 제거: \(meeting.id)")
+                
+                // 더 이상 활성화된 회의가 없으면 위치 업데이트 중지
+                if self?.activeMeetings.isEmpty == true {
+                    self?.stopUpdatingLocation()
+                }
             }
         }
     }
