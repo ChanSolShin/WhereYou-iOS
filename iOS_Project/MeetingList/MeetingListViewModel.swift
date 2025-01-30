@@ -19,10 +19,10 @@ class MeetingListViewModel: ObservableObject {
            Auth.auth().currentUser?.uid
        }
     
-    init(meetingViewModel: MeetingViewModel) {
-        self.meetingViewModel = meetingViewModel
-        fetchMeetings()
-    }
+    init(meetingViewModel: MeetingViewModel = MeetingViewModel()) {
+            self.meetingViewModel = meetingViewModel
+            fetchMeetings()
+        }
         
     func fetchMeetings() {
         db.collection("meetings").addSnapshotListener { (snapshot, error) in
