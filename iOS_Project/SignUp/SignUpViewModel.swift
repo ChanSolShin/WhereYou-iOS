@@ -5,7 +5,6 @@
 //  Created by 신찬솔 on 10/11/24.
 //
 
-// CreateAccountViewModel.swift
 import SwiftUI
 import Combine
 import FirebaseAuth
@@ -20,8 +19,6 @@ class SignUpViewModel: ObservableObject { // 이 항목들 서버로 보내서 �
     @Published var phoneNumber: String = ""
     @Published var signUpErrorMessage: String?
     @Published var signUpSuccess: Bool = false
-    
-    
     
     private var db = Firestore.firestore()
     
@@ -41,7 +38,6 @@ class SignUpViewModel: ObservableObject { // 이 항목들 서버로 보내서 �
     }
     
     func signUp() {
-        
         signUpErrorMessage = nil
         
         Auth.auth().createUser(withEmail: username, password: password) { [weak self] authResult, error in
@@ -74,7 +70,9 @@ class SignUpViewModel: ObservableObject { // 이 항목들 서버로 보내서 �
             "email": username,
             "name": realName,
             "phoneNumber": phoneNumber,
-            "birthday": birthday
+            "birthday": birthday,
+            "isLoggedIn": false,                  // 로그인 여부
+            "createdAt": Timestamp(date: Date())  // 회원가입 날짜
         ]
         
         db.collection("users").document(uid).setData(userData) { [weak self] error in

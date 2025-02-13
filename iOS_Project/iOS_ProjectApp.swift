@@ -30,6 +30,7 @@ struct iOS_ProjectApp: App {
                         MainTabView()
                             .onAppear {
                                 locationCoordinator.startUpdatingLocation()
+                                // 로그인 후 강제 로그아웃 리스너는 LoginViewModel에서 처리됨.
                             }
                     } else {
                         LoginView()
@@ -43,6 +44,7 @@ struct iOS_ProjectApp: App {
                     PermissionRequiredView() // 설정으로 이동하는 화면
                 }
             }
+            .environmentObject(loginViewModel) // LoginViewModel을 전역에서 사용
             .onAppear {
                 // 위치 권한이 허용되지 않으면 경고 표시
                 if locationCoordinator.authorizationStatus != .authorizedAlways {
@@ -56,6 +58,16 @@ struct iOS_ProjectApp: App {
                 if status == .denied || status == .restricted {
                     showAlert = true
                 }
+            }
+            // 강제 로그아웃 발생 시 알림 표시 (로그인된 상태에서만 적용됨)
+            .alert(isPresented: $loginViewModel.forcedLogout) {
+                Alert(
+                    title: Text("강제 로그아웃"),
+                    message: Text("다른 기기에서 로그인되어 로그아웃되었습니다."),
+                    dismissButton: .default(Text("확인"), action: {
+                        loginViewModel.forcedLogout = false
+                    })
+                )
             }
             .alert(isPresented: $showAlert) {
                 Alert(

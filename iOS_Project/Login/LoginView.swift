@@ -5,13 +5,12 @@
 //  Created by 신찬솔 on 10/11/24.
 //
 
-
 import SwiftUI
 import NMapsMap
 
 struct LoginView: View {
     
-    @StateObject private var viewModel = LoginViewModel()
+    @EnvironmentObject var viewModel: LoginViewModel  // 전역 LoginViewModel 사용 (초기화하지 않음)
     @State private var showPassword = false
     @State private var isLoggedIn = false
     @State private var showAlert = false
@@ -31,7 +30,6 @@ struct LoginView: View {
                     .font(.title2)
                     .padding(.bottom, 50)
                     .fontWeight(.bold)
-                
                 
                 HStack {
                     Image(systemName: "person")
@@ -75,7 +73,6 @@ struct LoginView: View {
                 .padding(.bottom, 5)
                 .padding(.top,10)
                 
-                
                 NavigationLink(destination: FindPasswordView()){
                     Text("비밀번호 찾기")
                 }
@@ -85,7 +82,6 @@ struct LoginView: View {
                 .underline()
                 .padding(.horizontal, 10)
                 .padding(.bottom, 15)
-                
                 
                 // 로그인 및 회원가입 버튼
                 NavigationLink(destination: MainTabView(), isActive: $viewModel.isLoggedIn) {
@@ -136,11 +132,9 @@ struct LoginView: View {
                             .foregroundColor(.black)
                             .underline()
                     }
-                    
                 }
                 .padding(.horizontal, 40)
                 Spacer()
-                
             }
         }
     }
