@@ -12,7 +12,7 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
     @Published var currentLocation: CLLocationCoordinate2D?
     
-    // 활성화된 회의 정보
+    // 활성화된 모임 정보
     @Published var activeMeetings: [MeetingModel] = []
     
     //lazy var: Firebase가 설정된 후에 데이터베이스를 참조하도록 설정
@@ -74,7 +74,7 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
         let longitude = currentLocation.longitude
         print("현재 위치 업로드: (\(latitude), \(longitude))")
         
-        // 활성화된 모든 회의에 대해 위치 업로드
+        // 활성화된 모든 모임에 대해 위치 업로드
         for meeting in activeMeetings {
             realtimeDB.child("meetings").child(meeting.id).child("locations").child(getCurrentUserID()).setValue([
                 "latitude": latitude,
@@ -112,9 +112,9 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
         }
     }
     
-    // 회의 등록
+    // 모임 등록
     func registerMeeting(_ meeting: MeetingModel) {
-        // 회의 시간 계산
+        // 모임 시간 계산
         let meetingDate = meeting.date
         let startUploadDate = Calendar.current.date(byAdding: .hour, value: -3, to: meetingDate)!
         let endUploadDate = Calendar.current.date(byAdding: .hour, value: 1, to: meetingDate)!
@@ -122,9 +122,9 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
         // 현재 시간이 업로드 기간 내에 있는지 확인
         let currentTime = Date()
         if currentTime >= startUploadDate && currentTime <= endUploadDate {
-            // 현재 업로드 중인 회의에 추가
+            // 현재 업로드 중인 모임에 추가
             activeMeetings.append(meeting)
-            print("업로드 활성화된 회의 추가: \(meeting.id)")
+            print("업로드 활성화된 모임 추가: \(meeting.id)")
             
             // 위치 업데이트 시작 (이미 시작되어 있지 않다면)
             if authorizationStatus == .authorizedAlways {
@@ -135,7 +135,7 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
             let delay = startUploadDate.timeIntervalSince(currentTime)
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
                 self?.activeMeetings.append(meeting)
-                print("타이머 후 업로드 활성화된 회의 추가: \(meeting.id)")
+                print("타이머 후 업로드 활성화된 모임 추가: \(meeting.id)")
                 
                 if self?.authorizationStatus == .authorizedAlways {
                     self?.startUpdatingLocation()
@@ -148,9 +148,9 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
         if endDelay > 0 {
             DispatchQueue.main.asyncAfter(deadline: .now() + endDelay) { [weak self] in
                 self?.activeMeetings.removeAll { $0.id == meeting.id }
-                print("업로드 비활성화된 회의 제거: \(meeting.id)")
+                print("업로드 비활성화된 모임 제거: \(meeting.id)")
                 
-                // 더 이상 활성화된 회의가 없으면 위치 업데이트 중지
+                // 더 이상 활성화된 모임이 없으면 위치 업데이트 중지
                 if self?.activeMeetings.isEmpty == true {
                     self?.stopUpdatingLocation()
                 }

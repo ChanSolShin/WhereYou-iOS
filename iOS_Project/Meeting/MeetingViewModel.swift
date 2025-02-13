@@ -45,7 +45,7 @@ class MeetingViewModel: NSObject, ObservableObject {
             }
         }
         
-        // AppLocationCoordinator에 회의 등록
+        // AppLocationCoordinator에 모임 등록
         locationCoordinator.registerMeeting(meeting)
     }
     
