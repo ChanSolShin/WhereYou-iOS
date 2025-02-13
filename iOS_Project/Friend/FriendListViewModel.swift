@@ -224,11 +224,34 @@ class FriendListViewModel: ObservableObject {
     }
     
     func rejectFriendRequest(requestID: String) {
+        let db = Firestore.firestore()
+        
         db.collection("friendRequests").document(requestID).updateData([
             "status": "rejected"
-        ])
+        ]) { error in
+            if let error = error {
+                print("친구 요청 거절 실패: \(error.localizedDescription)")
+            } else {
+                print("친구 요청 거절 완료")
+                
+                // 상태 업데이트가 완료되면 해당 문서를 삭제
+                self.deleteRequest(requestID: requestID)
+            }
+        }
     }
-    
+
+    private func deleteRequest(requestID: String) {
+        let db = Firestore.firestore()
+        
+        // 해당 문서 삭제
+        db.collection("friendRequests").document(requestID).delete { error in
+            if let error = error {
+                print("친구 요청 삭제 실패: \(error.localizedDescription)")
+            } else {
+                print("친구 요청 삭제 성공")
+            }
+        }
+    }
     func removeFriend(friendID: String) {
         guard let userID = currentUserID else { return }
         

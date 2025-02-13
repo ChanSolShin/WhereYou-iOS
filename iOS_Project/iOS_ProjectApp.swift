@@ -30,6 +30,9 @@ struct iOS_ProjectApp: App {
                         MainTabView()
                             .onAppear {
                                 locationCoordinator.startUpdatingLocation()
+                                
+                                // 친구 요청 알림 감지 시작
+                                NotificationManager.shared.observeFriendRequests()
                             }
                     } else {
                         LoginView()
