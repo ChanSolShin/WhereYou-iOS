@@ -17,7 +17,7 @@ struct MeetingRequestListView: View {
                     .font(.headline)
                     .foregroundColor(.gray)
                     .padding()
-            } else { ㄴㄴ
+            } else { 
                 List {
                     ForEach(viewModel.pendingMeetingRequests) { request in
                         HStack {
