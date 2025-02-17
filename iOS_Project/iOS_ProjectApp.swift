@@ -10,7 +10,6 @@ import Firebase
 import CoreLocation
 import NMapsMap
 import UserNotifications
-import FirebaseMessaging
 
 @main
 struct iOS_ProjectApp: App {
@@ -20,10 +19,6 @@ struct iOS_ProjectApp: App {
     @StateObject private var loginViewModel = LoginViewModel()
     @State private var showAlert = false
     @State private var showNotificationAlert = false // 알림 권한 요청 상태
-    
-    init() {
-        FirebaseApp.configure()  // Firebase 초기화
-    }
     
     var body: some Scene {
         WindowGroup {
