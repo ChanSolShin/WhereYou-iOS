@@ -10,16 +10,19 @@ import Firebase
 import CoreLocation
 import NMapsMap
 import UserNotifications
+import FirebaseMessaging
 
 @main
 struct iOS_ProjectApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     @ObservedObject private var locationCoordinator = AppLocationCoordinator.shared
     @StateObject private var loginViewModel = LoginViewModel()
     @State private var showAlert = false
     @State private var showNotificationAlert = false // 알림 권한 요청 상태
     
     init() {
-        FirebaseApp.configure()
+        FirebaseApp.configure()  // Firebase 초기화
     }
     
     var body: some Scene {
@@ -30,9 +33,6 @@ struct iOS_ProjectApp: App {
                         MainTabView()
                             .onAppear {
                                 locationCoordinator.startUpdatingLocation()
-                                
-                                // 친구 요청 알림 감지 시작
-                                NotificationManager.shared.observeFriendRequests()
                             }
                     } else {
                         LoginView()
