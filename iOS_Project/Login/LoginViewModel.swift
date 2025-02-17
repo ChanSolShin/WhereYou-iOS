@@ -9,20 +9,17 @@ import SwiftUI
 import Foundation
 import Combine
 import FirebaseAuth
+import FirebaseMessaging
 import FirebaseFirestore
 
 class LoginViewModel: ObservableObject {
     @Published var user: SignUpUserModel = SignUpUserModel(username: "", password: "")
     @Published var isLoggedIn: Bool = false
     @Published var loginErrorMessage: String?
-    @Published var forcedLogout: Bool = false  // 강제 로그아웃 발생 시 true로 설정 -> 알림 표시용
     
-    private let db = Firestore.firestore()
-    private var logoutListener: ListenerRegistration?
-    // 현재 기기의 고유 ID
-    private let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? ""
-    
-    init(){
+    private var db = Firestore.firestore()
+
+    init() {
         checkAutoLogin()
     }
     
@@ -42,34 +39,53 @@ class LoginViewModel: ObservableObject {
     func login() {
         Auth.auth().signIn(withEmail: user.username, password: user.password) { [weak self] authResult, error in
             // 로그인 성공 시
-            print("로그인 성공")
-            guard let self = self else { return }
-            
             if let error = error {
-                self.loginErrorMessage = error.localizedDescription // 로그인 실패 시 오류 메시지 설정
-                self.isLoggedIn = false
+                self?.loginErrorMessage = error.localizedDescription // 로그인 실패 시 오류 메시지 설정
+                self?.isLoggedIn = false
                 return
             }
             
-            // 로그인 성공 시, Firestore에 회원가입 시 사용하는 경로(사용자 uid 기반)로 데이터 업데이트
-            guard let uid = authResult?.user.uid else { return }
-            let userRef = self.db.collection("users").document(uid)
-            userRef.setData([
-                "isLoggedIn": true,
-                "deviceID": self.deviceID,
-                "lastLogin": Timestamp(date: Date())
-            ], merge: true) { error in
-                if let error = error {
-                    print("Firestore 업데이트 에러: \(error.localizedDescription)")
+            // 로그인 성공 시, FCM 토큰 저장
+            self?.getFCMToken { fcmToken in
+                if let fcmToken = fcmToken {
+                    self?.saveFCMTokenToFirestore(fcmToken: fcmToken)
                 }
             }
             
-            self.isLoggedIn = true
-            self.loginErrorMessage = nil
+            self?.isLoggedIn = true
+            self?.loginErrorMessage = nil
             UserDefaults.standard.set(true, forKey: "isLoggedIn")
-            
-            // 로그인 후 강제 로그아웃 리스너 시작
-            self.startListeningForForcedLogout()
+        }
+    }
+    
+    // FCM 토큰 가져오기
+    private func getFCMToken(completion: @escaping (String?) -> Void) {
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("FCM 토큰 가져오기 오류: \(error.localizedDescription)")
+                completion(nil)
+            } else if let token = token {
+                print("FCM 토큰: \(token)")
+                completion(token)
+            } else {
+                print("FCM 토큰을 받을 수 없습니다.")
+                completion(nil)
+            }
+        }
+    }
+    
+    // Firestore에 FCM 토큰 저장
+    private func saveFCMTokenToFirestore(fcmToken: String) {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        db.collection("users").document(userId).updateData([
+            "fcmToken": fcmToken
+        ]) { [weak self] error in
+            if let error = error {
+                print("FCM 토큰 저장 오류: \(error.localizedDescription)")
+            } else {
+                print("FCM 토큰 저장 성공")
+            }
         }
     }
     
@@ -77,49 +93,8 @@ class LoginViewModel: ObservableObject {
     private func checkAutoLogin() {
         if Auth.auth().currentUser != nil || UserDefaults.standard.bool(forKey: "isLoggedIn") {
             self.isLoggedIn = true
-            if let uid = Auth.auth().currentUser?.uid {
-                self.startListeningForForcedLogout(uid: uid)
-            }
         } else {
             self.isLoggedIn = false
         }
-    }
-    
-    // Firestore 문서 변경 감지 -> 다른 기기에서 로그인 시 강제 로그아웃 처리
-    func startListeningForForcedLogout(uid: String? = nil) {
-        let uidToUse: String
-        if let uid = uid {
-            uidToUse = uid
-        } else {
-            guard let currentUID = Auth.auth().currentUser?.uid else { return }
-            uidToUse = currentUID
-        }
-        let userRef = db.collection("users").document(uidToUse)
-        // 기존 리스너 제거
-        logoutListener?.remove()
-        logoutListener = userRef.addSnapshotListener { [weak self] snapshot, error in
-            guard let self = self, let data = snapshot?.data() else { return }
-            let remoteDeviceID = data["deviceID"] as? String ?? ""
-            // 다른 기기에서 로그인되어 저장된 deviceID와 다르면 강제 로그아웃 실행
-            if remoteDeviceID != self.deviceID {
-                DispatchQueue.main.async {
-                    self.forcedLogout = true // 강제 로그아웃 알림 표시용 플래그 활성화
-                    self.signOut()
-                }
-            }
-        }
-    }
-    
-    // 로그아웃 처리
-    func signOut() {
-        do {
-            try Auth.auth().signOut()
-        } catch {
-            print("로그아웃 에러: \(error.localizedDescription)")
-        }
-        self.isLoggedIn = false
-        // 리스너 제거
-        logoutListener?.remove()
-        logoutListener = nil
     }
 }

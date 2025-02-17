@@ -53,7 +53,7 @@ struct MeetingRequestListView: View {
                 }
             }
         }
-        .navigationTitle("모임 요청 목록")
+        .navigationTitle("모임 요청")
         .onAppear {
             viewModel.fetchPendingMeetingRequests()
         }
