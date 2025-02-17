@@ -13,7 +13,7 @@ import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     
-    let gcmMessageIDKey = "gcm.message_id"  // 메시지 ID를 추적할 수 있도록 키 설정
+    let gcmMessageIDKey = "gcm.message_id"
     
     // 앱이 실행될 때 호출되는 함수
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
@@ -92,6 +92,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
 
+        // Do Something With MSG Data...
         if let messageID = userInfo[gcmMessageIDKey] {
             print("Message ID: \(messageID)")
         }
