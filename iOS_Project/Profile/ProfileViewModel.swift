@@ -86,11 +86,26 @@ class ProfileViewModel: ObservableObject {
     
     // 로그아웃
     func logout() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        // Firestore에서 FCM 토큰 삭제
+        db.collection("users").document(userId).updateData([
+            "fcmToken": FieldValue.delete()  // FCM 토큰 삭제
+        ]) { [weak self] error in
+            if let error = error {
+                print("FCM 토큰 삭제 오류: \(error.localizedDescription)")
+            } else {
+                print("FCM 토큰 삭제 성공")
+            }
+        }
+        
+        // Firebase Auth 로그아웃 처리
         do {
             try Auth.auth().signOut()
             UserDefaults.standard.set(false, forKey: "isLoggedIn")
+            self.isLoggedIn = false
         } catch let signOutError as NSError {
-            print("Error signing out: %@", signOutError)
+            print("로그아웃 오류: %@", signOutError)
         }
     }
     

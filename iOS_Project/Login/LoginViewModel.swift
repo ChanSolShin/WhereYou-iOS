@@ -9,13 +9,17 @@ import SwiftUI
 import Foundation
 import Combine
 import FirebaseAuth
+import FirebaseMessaging
+import FirebaseFirestore
 
 class LoginViewModel: ObservableObject {
     @Published var user: SignUpUserModel = SignUpUserModel(username: "", password: "")
     @Published var isLoggedIn: Bool = false
     @Published var loginErrorMessage: String?
     
-    init(){
+    private var db = Firestore.firestore()
+
+    init() {
         checkAutoLogin()
     }
     
@@ -33,34 +37,64 @@ class LoginViewModel: ObservableObject {
     
     // Firebase 로그인 로직
     func login() {
-        
         Auth.auth().signIn(withEmail: user.username, password: user.password) { [weak self] authResult, error in
             // 로그인 성공 시
-            print("로그인 성공")
-            self?.isLoggedIn = true
-            self?.loginErrorMessage = nil
             if let error = error {
                 self?.loginErrorMessage = error.localizedDescription // 로그인 실패 시 오류 메시지 설정
                 self?.isLoggedIn = false
                 return
             }
-            //로그인 성공 시, 자동 로그인
+            
+            // 로그인 성공 시, FCM 토큰 저장
+            self?.getFCMToken { fcmToken in
+                if let fcmToken = fcmToken {
+                    self?.saveFCMTokenToFirestore(fcmToken: fcmToken)
+                }
+            }
+            
             self?.isLoggedIn = true
             self?.loginErrorMessage = nil
             UserDefaults.standard.set(true, forKey: "isLoggedIn")
         }
     }
     
-    //앱 시작 시 자동 로그인 상태 확인
+    // FCM 토큰 가져오기
+    private func getFCMToken(completion: @escaping (String?) -> Void) {
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("FCM 토큰 가져오기 오류: \(error.localizedDescription)")
+                completion(nil)
+            } else if let token = token {
+                print("FCM 토큰: \(token)")
+                completion(token)
+            } else {
+                print("FCM 토큰을 받을 수 없습니다.")
+                completion(nil)
+            }
+        }
+    }
+    
+    // Firestore에 FCM 토큰 저장
+    private func saveFCMTokenToFirestore(fcmToken: String) {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        db.collection("users").document(userId).updateData([
+            "fcmToken": fcmToken
+        ]) { [weak self] error in
+            if let error = error {
+                print("FCM 토큰 저장 오류: \(error.localizedDescription)")
+            } else {
+                print("FCM 토큰 저장 성공")
+            }
+        }
+    }
+    
+    // 앱 시작 시 자동 로그인 상태 확인
     private func checkAutoLogin() {
         if Auth.auth().currentUser != nil || UserDefaults.standard.bool(forKey: "isLoggedIn") {
             self.isLoggedIn = true
-        }else{
+        } else {
             self.isLoggedIn = false
         }
-        
     }
-    
 }
-
-

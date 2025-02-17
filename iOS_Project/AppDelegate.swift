@@ -61,11 +61,10 @@ extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         if let fcmToken = fcmToken {
             print("FCM 토큰: \(fcmToken)")
-            // 받은 토큰을 Firebase Firestore에 저장하거나 서버로 전송하는 등의 작업을 할 수 있습니다.
+            // 받은 토큰을 Firebase Firestore에 저장하거나 서버로 전송하는 등의 작업을 함
             
-            // 예시: Firestore에 저장하는 코드
             let dataDict: [String: String] = ["token": fcmToken]
-            // 여기서 Firestore에 저장하는 작업을 할 수 있습니다.
+            // 여기서 Firestore에 저장하는 작업을 할 수 있음
         }
     }
 }

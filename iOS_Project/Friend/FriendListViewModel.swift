@@ -15,10 +15,15 @@ class FriendListViewModel: ObservableObject {
     @Published var showAlert: Bool = false
     
     private var db = Firestore.firestore()
-    private var currentUserID: String? {
+    public var currentUserID: String? {
         return Auth.auth().currentUser?.uid
     }
     var currentUserName: String?
+    
+    func getCurrentUserID() -> String? {
+           return currentUserID
+       }
+    
     private var friendListener: ListenerRegistration?
     
     init() {
