@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
-    @State private var isLoggedIn = true // 로그인 상태 관리
+    @EnvironmentObject var loginViewModel: LoginViewModel  // 전역 로그인 상태 사용
     @State private var showLogoutAlert = false // 로그아웃 알림 상태
     @Binding var isTabBarHidden: Bool
     
@@ -67,7 +67,6 @@ struct ProfileView: View {
                             .foregroundColor(.gray)
                     }
                     .padding(.vertical, 8)
-                    
                     
                     NavigationLink(destination: ReportView()
                         .onAppear { isTabBarHidden = true }
@@ -127,17 +126,11 @@ struct ProfileView: View {
                 Alert(
                     title: Text("로그아웃 하시겠습니까?"),
                     primaryButton: .destructive(Text("로그아웃"), action: {
-                        viewModel.logout()
-                        isLoggedIn = false // 로그아웃 시 로그인 상태 변경
+                        // ProfileViewModel의 logout() 대신 전역 LoginViewModel을 통해 로그아웃 처리
+                        loginViewModel.signOut()
                     }),
                     secondaryButton: .cancel(Text("취소"))
                 )
-            }
-            .fullScreenCover(isPresented: Binding(
-                get: { !isLoggedIn },
-                set: { _ in }
-            )) {
-                LoginView() // 로그아웃 시 표시될 로그인 화면
             }
         }
     }

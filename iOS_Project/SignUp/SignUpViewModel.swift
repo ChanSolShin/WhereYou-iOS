@@ -71,7 +71,7 @@ class SignUpViewModel: ObservableObject { // 이 항목들 서버로 보내서 �
             "name": realName,
             "phoneNumber": phoneNumber,
             "birthday": birthday,
-            "isLoggedIn": false,                  // 로그인 여부
+            "loginStatus": false,                  // 로그인 여부
             "createdAt": Timestamp(date: Date())  // 회원가입 날짜
         ]
         
