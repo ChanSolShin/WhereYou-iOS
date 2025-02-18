@@ -12,7 +12,6 @@ import FirebaseAuth
 class ProfileViewModel: ObservableObject {
     @Published var profile: ProfileModel?
     @Published var isEditing = false
-    @Published var isLoggedIn = true
     @Published var errorMessage: String? // 에러 메시지 상태 추가
     
     private let db = Firestore.firestore()
@@ -84,15 +83,6 @@ class ProfileViewModel: ObservableObject {
         return birthday.count == 8 && birthday.allSatisfy { $0.isNumber }
     }
     
-    // 로그아웃
-    func logout() {
-        do {
-            try Auth.auth().signOut()
-            UserDefaults.standard.set(false, forKey: "isLoggedIn")
-        } catch let signOutError as NSError {
-            print("Error signing out: %@", signOutError)
-        }
-    }
     
     // 계정 삭제
     func deleteAccount() {
@@ -110,7 +100,6 @@ class ProfileViewModel: ObservableObject {
                     print("Error deleting user: \(error)")
                 } else {
                     UserDefaults.standard.set(false, forKey: "isLoggedIn")
-                    self?.isLoggedIn = false
                 }
             }
         }

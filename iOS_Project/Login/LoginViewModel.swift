@@ -16,9 +16,12 @@ class LoginViewModel: ObservableObject {
     @Published var isLoggedIn: Bool = false
     @Published var loginErrorMessage: String?
     @Published var forcedLogout: Bool = false  // 강제 로그아웃 발생 시 true로 설정 -> 알림 표시용
-    
+    @Published var showNewDeviceLoginAlert: Bool = false
+
     private let db = Firestore.firestore()
     private var logoutListener: ListenerRegistration?
+    private var pendingUserRef: DocumentReference?
+
     // 현재 기기의 고유 ID
     private let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? ""
     
@@ -41,8 +44,7 @@ class LoginViewModel: ObservableObject {
     // Firebase 로그인 로직
     func login() {
         Auth.auth().signIn(withEmail: user.username, password: user.password) { [weak self] authResult, error in
-            // 로그인 성공 시
-            print("로그인 성공")
+            print("로그인 시도")
             guard let self = self else { return }
             
             if let error = error {
@@ -51,26 +53,61 @@ class LoginViewModel: ObservableObject {
                 return
             }
             
-            // 로그인 성공 시, Firestore에 회원가입 시 사용하는 경로(사용자 uid 기반)로 데이터 업데이트
+            // 로그인 성공 시, Firestore 업데이트 전, 기기 중복 여부 확인
             guard let uid = authResult?.user.uid else { return }
             let userRef = self.db.collection("users").document(uid)
-            userRef.setData([
-                "isLoggedIn": true,
-                "deviceID": self.deviceID,
-                "lastLogin": Timestamp(date: Date())
-            ], merge: true) { error in
-                if let error = error {
-                    print("Firestore 업데이트 에러: \(error.localizedDescription)")
+            self.pendingUserRef = userRef  // 임시로 저장
+            userRef.getDocument { snapshot, error in
+                if let data = snapshot?.data(),
+                   let existingDeviceID = data["deviceID"] as? String,
+                   existingDeviceID != self.deviceID {
+                    // 다른 기기에서 이미 로그인 중 -> 새로운 기기에서 로그인 여부 확인 알림 표시
+                    DispatchQueue.main.async {
+                        self.showNewDeviceLoginAlert = true
+                    }
+                } else {
+                    // 문제 없으면 바로 Firestore 업데이트 후 로그인 처리
+                    userRef.setData([
+                        "loginStatus": true,
+                        "deviceID": self.deviceID,
+                        "lastLogin": Timestamp(date: Date())
+                    ], merge: true) { error in
+                        if let error = error {
+                            print("Firestore 업데이트 에러: \(error.localizedDescription)")
+                        }
+                    }
+                    DispatchQueue.main.async {
+                        self.isLoggedIn = true
+                        self.loginErrorMessage = nil
+                        UserDefaults.standard.set(true, forKey: "isLoggedIn")
+                    }
+                    self.startListeningForForcedLogout(uid: uid)
                 }
             }
-            
+        }
+    }
+    
+    // 새로운 기기 로그인 확인 후 호출되는 함수
+    func confirmNewDeviceLogin() {
+        guard let userRef = pendingUserRef,
+              let uid = Auth.auth().currentUser?.uid else { return }
+        userRef.setData([
+            "loginStatus": true,
+            "deviceID": self.deviceID,
+            "lastLogin": Timestamp(date: Date())
+        ], merge: true) { error in
+            if let error = error {
+                print("Firestore 업데이트 에러: \(error.localizedDescription)")
+            }
+        }
+        DispatchQueue.main.async {
             self.isLoggedIn = true
             self.loginErrorMessage = nil
             UserDefaults.standard.set(true, forKey: "isLoggedIn")
-            
-            // 로그인 후 강제 로그아웃 리스너 시작
-            self.startListeningForForcedLogout()
+            self.showNewDeviceLoginAlert = false
         }
+        self.startListeningForForcedLogout(uid: uid)
+        self.pendingUserRef = nil
     }
     
     // 앱 시작 시 자동 로그인 상태 확인
@@ -110,14 +147,31 @@ class LoginViewModel: ObservableObject {
         }
     }
     
-    // 로그아웃 처리
+    // 로그아웃 처리 (Firestore의 loginStatus 필드를 false로 업데이트)
     func signOut() {
-        do {
-            try Auth.auth().signOut()
-        } catch {
-            print("로그아웃 에러: \(error.localizedDescription)")
+        guard let uid = Auth.auth().currentUser?.uid else {
+            self.isLoggedIn = false
+            return
         }
-        self.isLoggedIn = false
+        
+        let userRef = db.collection("users").document(uid)
+        userRef.updateData([
+            "loginStatus": false
+        ]) { error in
+            if let error = error {
+                print("Error updating login status: \(error.localizedDescription)")
+            }
+            do {
+                try Auth.auth().signOut()
+                UserDefaults.standard.set(false, forKey: "isLoggedIn")
+                DispatchQueue.main.async {
+                    self.isLoggedIn = false
+                }
+            } catch let signOutError as NSError {
+                print("Error signing out: \(signOutError.localizedDescription)")
+            }
+        }
+        
         // 리스너 제거
         logoutListener?.remove()
         logoutListener = nil
