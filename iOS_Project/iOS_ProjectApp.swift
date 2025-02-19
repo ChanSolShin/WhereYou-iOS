@@ -13,14 +13,12 @@ import UserNotifications
 
 @main
 struct iOS_ProjectApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     @ObservedObject private var locationCoordinator = AppLocationCoordinator.shared
     @StateObject private var loginViewModel = LoginViewModel()
     @State private var showAlert = false
     @State private var showNotificationAlert = false // 알림 권한 요청 상태
-    
-    init() {
-        FirebaseApp.configure()
-    }
     
     var body: some Scene {
         WindowGroup {
@@ -30,9 +28,6 @@ struct iOS_ProjectApp: App {
                         MainTabView()
                             .onAppear {
                                 locationCoordinator.startUpdatingLocation()
-                                
-                                // 친구 요청 알림 감지 시작
-                                NotificationManager.shared.observeFriendRequests()
                             }
                     } else {
                         LoginView()
@@ -72,16 +67,6 @@ struct iOS_ProjectApp: App {
                     secondaryButton: .cancel(Text("취소")) {
                         exitApp()
                     }
-                )
-            }
-            .alert(isPresented: $showNotificationAlert) {
-                Alert(
-                    title: Text("알림 권한이 필요합니다"),
-                    message: Text("앱에서 알림을 받으려면 권한이 필요합니다."),
-                    primaryButton: .default(Text("허용")) {
-                        requestNotificationPermission()
-                    },
-                    secondaryButton: .cancel(Text("취소"))
                 )
             }
         }
