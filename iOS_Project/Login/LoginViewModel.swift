@@ -22,6 +22,8 @@ enum LoginAlert: Identifiable {
     case forcedLogout
     case newDeviceLogin
 }
+import FirebaseMessaging
+import FirebaseFirestore
 
 class LoginViewModel: ObservableObject {
     @Published var user: SignUpUserModel = SignUpUserModel(username: "", password: "")
@@ -40,7 +42,9 @@ class LoginViewModel: ObservableObject {
     // 강제 로그아웃 관련 snapshot 무시 기한 (그레이스 기간)
     private var ignoreForcedLogoutUntil: Date?
     
-    init(){
+    private var db = Firestore.firestore()
+
+    init() {
         checkAutoLogin()
     }
     
@@ -62,6 +66,7 @@ class LoginViewModel: ObservableObject {
             print("로그인 시도")
             guard let self = self else { return }
             
+            // 로그인 성공 시
             if let error = error {
                 self.loginErrorMessage = error.localizedDescription // 로그인 실패 시 오류 메시지 설정
                 self.isLoggedIn = false
@@ -161,6 +166,50 @@ class LoginViewModel: ObservableObject {
         }
     }
     
+            // 로그인 성공 시, FCM 토큰 저장
+            self?.getFCMToken { fcmToken in
+                if let fcmToken = fcmToken {
+                    self?.saveFCMTokenToFirestore(fcmToken: fcmToken)
+                }
+            }
+            
+            self?.isLoggedIn = true
+            self?.loginErrorMessage = nil
+            UserDefaults.standard.set(true, forKey: "isLoggedIn")
+        }
+    }
+    
+    // FCM 토큰 가져오기
+    private func getFCMToken(completion: @escaping (String?) -> Void) {
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("FCM 토큰 가져오기 오류: \(error.localizedDescription)")
+                completion(nil)
+            } else if let token = token {
+                print("FCM 토큰: \(token)")
+                completion(token)
+            } else {
+                print("FCM 토큰을 받을 수 없습니다.")
+                completion(nil)
+            }
+        }
+    }
+    
+    // Firestore에 FCM 토큰 저장
+    private func saveFCMTokenToFirestore(fcmToken: String) {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        db.collection("users").document(userId).updateData([
+            "fcmToken": fcmToken
+        ]) { [weak self] error in
+            if let error = error {
+                print("FCM 토큰 저장 오류: \(error.localizedDescription)")
+            } else {
+                print("FCM 토큰 저장 성공")
+            }
+        }
+    }
+    
     // 앱 시작 시 자동 로그인 상태 확인
     private func checkAutoLogin() {
         if Auth.auth().currentUser != nil || UserDefaults.standard.bool(forKey: "isLoggedIn") {
@@ -215,6 +264,7 @@ class LoginViewModel: ObservableObject {
             userRef.updateData([
                 "loginStatus": false,
                 "deviceID": FieldValue.delete()
+                "fcmToken": FieldValue.delete() 
             ]) { error in
                 if let error = error {
                     print("Error updating login status: \(error.localizedDescription)")

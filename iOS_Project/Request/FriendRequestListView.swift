@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 struct FriendRequestListView: View {
     @ObservedObject var viewModel: FriendListViewModel
@@ -55,7 +56,7 @@ struct FriendRequestListView: View {
                 }
             }
         }
-        .navigationTitle("친구 요청 목록")
+        .navigationTitle("친구 요청")
         .onAppear {
             viewModel.fetchPendingRequests()
         }
@@ -79,8 +80,19 @@ struct FriendRequestListView: View {
     }
     
     private func deleteRequest(_ request: FriendRequestModel) {
-        if let index = viewModel.pendingRequests.firstIndex(where: { $0.id == request.id }) {
-            viewModel.pendingRequests.remove(at: index)
+        let db = Firestore.firestore()
+        let requestRef = db.collection("friendsRequests").document(request.id)
+        
+        requestRef.delete { error in
+            if let error = error {
+                print("친구 요청 삭제 실패: \(error.localizedDescription)")
+            } else {
+                print("친구 요청 삭제 성공")
+                
+                if let index = viewModel.pendingRequests.firstIndex(where: { $0.id == request.id }) {
+                    viewModel.pendingRequests.remove(at: index)
+                }
+            }
         }
     }
 }

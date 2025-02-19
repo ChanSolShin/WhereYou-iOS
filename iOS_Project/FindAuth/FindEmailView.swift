@@ -13,7 +13,7 @@ struct FindEmailView: View {
     var body: some View {
         ScrollView{
             VStack {
-                Text("MyApp")
+                Text("웨어유")
                     .font(.largeTitle)
                     .padding(.top, 20)
                     .padding(.bottom, 60)

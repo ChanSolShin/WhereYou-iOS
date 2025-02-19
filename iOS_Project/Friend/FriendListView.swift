@@ -48,7 +48,7 @@ struct FriendListView: View {
                     }
                 }
             }
-            .navigationTitle("친구 목록")
+            .navigationTitle("친구")
             .toolbar {
                 NavigationLink(destination: FriendRequestListView(viewModel: viewModel)
                     .onAppear { isTabBarHidden = true }

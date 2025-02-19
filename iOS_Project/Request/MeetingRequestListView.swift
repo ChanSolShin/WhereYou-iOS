@@ -17,7 +17,7 @@ struct MeetingRequestListView: View {
                     .font(.headline)
                     .foregroundColor(.gray)
                     .padding()
-            } else {
+            } else { 
                 List {
                     ForEach(viewModel.pendingMeetingRequests) { request in
                         HStack {
@@ -53,7 +53,7 @@ struct MeetingRequestListView: View {
                 }
             }
         }
-        .navigationTitle("모임 요청 목록")
+        .navigationTitle("모임 요청")
         .onAppear {
             viewModel.fetchPendingMeetingRequests()
         }
