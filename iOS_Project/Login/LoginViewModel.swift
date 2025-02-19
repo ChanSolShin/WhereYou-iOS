@@ -196,26 +196,40 @@ class LoginViewModel: ObservableObject {
             if remoteDeviceID != self.deviceID {
                 DispatchQueue.main.async {
                     self.currentAlert = .forcedLogout
-                    self.signOut()
+                    // Firestore 업데이트 없이 로컬에서만 로그아웃 처리
+                    self.signOut(updateFirestore: false)
                 }
             }
         }
     }
     
     // 로그아웃 처리
-    func signOut() {
+    func signOut(updateFirestore: Bool = true) {
         guard let uid = Auth.auth().currentUser?.uid else {
             self.isLoggedIn = false
             return
         }
-        let userRef = db.collection("users").document(uid)
-        userRef.updateData([
-            "loginStatus": false,
-            "deviceID": FieldValue.delete()
-        ]) { error in
-            if let error = error {
-                print("Error updating login status: \(error.localizedDescription)")
+        
+        if updateFirestore {
+            let userRef = db.collection("users").document(uid)
+            userRef.updateData([
+                "loginStatus": false,
+                "deviceID": FieldValue.delete()
+            ]) { error in
+                if let error = error {
+                    print("Error updating login status: \(error.localizedDescription)")
+                }
+                do {
+                    try Auth.auth().signOut()
+                    UserDefaults.standard.set(false, forKey: "isLoggedIn")
+                    DispatchQueue.main.async {
+                        self.isLoggedIn = false
+                    }
+                } catch let signOutError as NSError {
+                    print("Error signing out: \(signOutError.localizedDescription)")
+                }
             }
+        } else {
             do {
                 try Auth.auth().signOut()
                 UserDefaults.standard.set(false, forKey: "isLoggedIn")
