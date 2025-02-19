@@ -12,6 +12,7 @@ import FirebaseAuth
 class ProfileViewModel: ObservableObject {
     @Published var profile: ProfileModel?
     @Published var isEditing = false
+    @Published var isLoggedIn = true
     @Published var errorMessage: String? // 에러 메시지 상태 추가
     
     private let db = Firestore.firestore()
@@ -83,6 +84,30 @@ class ProfileViewModel: ObservableObject {
         return birthday.count == 8 && birthday.allSatisfy { $0.isNumber }
     }
     
+    // 로그아웃
+    func logout() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        // Firestore에서 FCM 토큰 삭제
+        db.collection("users").document(userId).updateData([
+            "fcmToken": FieldValue.delete()  // FCM 토큰 삭제
+        ]) { [weak self] error in
+            if let error = error {
+                print("FCM 토큰 삭제 오류: \(error.localizedDescription)")
+            } else {
+                print("FCM 토큰 삭제 성공")
+            }
+        }
+        
+        // Firebase Auth 로그아웃 처리
+        do {
+            try Auth.auth().signOut()
+            UserDefaults.standard.set(false, forKey: "isLoggedIn")
+            self.isLoggedIn = false
+        } catch let signOutError as NSError {
+            print("로그아웃 오류: %@", signOutError)
+        }
+    }
     
     // 계정 삭제
     func deleteAccount() {
@@ -100,6 +125,7 @@ class ProfileViewModel: ObservableObject {
                     print("Error deleting user: \(error)")
                 } else {
                     UserDefaults.standard.set(false, forKey: "isLoggedIn")
+                    self?.isLoggedIn = false
                 }
             }
         }
