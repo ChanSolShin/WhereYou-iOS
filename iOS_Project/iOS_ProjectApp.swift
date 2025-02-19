@@ -73,16 +73,6 @@ struct iOS_ProjectApp: App {
                     }
                 )
             }
-            .alert(isPresented: $showNotificationAlert) {
-                Alert(
-                    title: Text("알림 권한이 필요합니다"),
-                    message: Text("앱에서 알림을 받으려면 권한이 필요합니다."),
-                    primaryButton: .default(Text("허용")) {
-                        requestNotificationPermission()
-                    },
-                    secondaryButton: .cancel(Text("취소"))
-                )
-            }
         }
     }
     
