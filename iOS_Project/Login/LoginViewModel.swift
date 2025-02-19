@@ -11,12 +11,24 @@ import Combine
 import FirebaseAuth
 import FirebaseFirestore
 
+// Alert 타입 enum -> 강제로그아웃 or 중복로그인 알림 case 구분
+enum LoginAlert: Identifiable {
+    var id: Int {
+        switch self {
+        case .forcedLogout: return 0
+        case .newDeviceLogin: return 1
+        }
+    }
+    case forcedLogout
+    case newDeviceLogin
+}
+
 class LoginViewModel: ObservableObject {
     @Published var user: SignUpUserModel = SignUpUserModel(username: "", password: "")
     @Published var isLoggedIn: Bool = false
     @Published var loginErrorMessage: String?
-    @Published var forcedLogout: Bool = false  // 강제 로그아웃 발생 시 true -> 알림 표시용
-    @Published var showNewDeviceLoginAlert: Bool = false  // 새 기기 로그인 확인 알림
+    // 기존 forcedLogout, showNewDeviceLoginAlert -> 하나로 통합
+    @Published var currentAlert: LoginAlert?
     
     private let db = Firestore.firestore()
     private var logoutListener: ListenerRegistration?
@@ -66,7 +78,7 @@ class LoginViewModel: ObservableObject {
                    existingDeviceID != self.deviceID {
                     // 기존 기기와 deviceID가 다르면 새 기기 로그인 확인 알림 표시
                     DispatchQueue.main.async {
-                        self.showNewDeviceLoginAlert = true
+                        self.currentAlert = .newDeviceLogin
                     }
                 } else {
                     // 기존 기기 로그인 없음 → 바로 Firestore 업데이트 후 로그인 처리
@@ -102,22 +114,35 @@ class LoginViewModel: ObservableObject {
         logoutListener?.remove()
         logoutListener = nil
         
-        userRef.setData([
-            "loginStatus": true,
-            "deviceID": self.deviceID,
-            "lastLogin": Timestamp(date: Date())
-        ], merge: true) { error in
+        // 강제 로그아웃 처리 후 새로우 로그인 처리
+        userRef.updateData([
+            "loginStatus": false,
+            "deviceID": FieldValue.delete()
+        ]) { error in
             if let error = error {
-                print("Firestore 업데이트 에러: \(error.localizedDescription)")
+                print("기존 세션 강제 로그아웃 처리 에러: \(error.localizedDescription)")
+                return
             }
-            DispatchQueue.main.async {
-                self.isLoggedIn = true
-                self.loginErrorMessage = nil
-                UserDefaults.standard.set(true, forKey: "isLoggedIn")
-                self.showNewDeviceLoginAlert = false
+            // 0.5초 딜레이 후 새 기기 로그인 정보 업데이트
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                userRef.setData([
+                    "loginStatus": true,
+                    "deviceID": self.deviceID,
+                    "lastLogin": Timestamp(date: Date())
+                ], merge: true) { error in
+                    if let error = error {
+                        print("Firestore 업데이트 에러: \(error.localizedDescription)")
+                    }
+                    DispatchQueue.main.async {
+                        self.isLoggedIn = true
+                        self.loginErrorMessage = nil
+                        UserDefaults.standard.set(true, forKey: "isLoggedIn")
+                        self.currentAlert = nil
+                    }
+                    self.pendingUserRef = nil
+                    self.startListeningForForcedLogout(uid: uid)
+                }
             }
-            self.pendingUserRef = nil
-            self.startListeningForForcedLogout(uid: uid)
         }
     }
     
@@ -128,7 +153,7 @@ class LoginViewModel: ObservableObject {
             try Auth.auth().signOut()
             DispatchQueue.main.async {
                 self.isLoggedIn = false
-                self.showNewDeviceLoginAlert = false
+                self.currentAlert = nil
                 UserDefaults.standard.set(false, forKey: "isLoggedIn")
             }
         } catch let signOutError as NSError {
@@ -170,7 +195,7 @@ class LoginViewModel: ObservableObject {
             let remoteDeviceID = data["deviceID"] as? String ?? ""
             if remoteDeviceID != self.deviceID {
                 DispatchQueue.main.async {
-                    self.forcedLogout = true
+                    self.currentAlert = .forcedLogout
                     self.signOut()
                 }
             }
@@ -183,7 +208,6 @@ class LoginViewModel: ObservableObject {
             self.isLoggedIn = false
             return
         }
-        
         let userRef = db.collection("users").document(uid)
         userRef.updateData([
             "loginStatus": false,

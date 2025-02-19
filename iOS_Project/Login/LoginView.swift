@@ -12,8 +12,7 @@ struct LoginView: View {
     
     @EnvironmentObject var viewModel: LoginViewModel  // 전역 LoginViewModel 사용 (초기화하지 않음)
     @State private var showPassword = false
-    @State private var isLoggedIn = false
-    @State private var showAlert = false
+    @State private var showAlert = false  // 로그인 실패 Alert용
     
     var body: some View {
         NavigationView {
@@ -136,18 +135,29 @@ struct LoginView: View {
                 .padding(.horizontal, 40)
                 Spacer()
             }
-            // 새 기기 로그인 확인 알림
-            .alert(isPresented: $viewModel.showNewDeviceLoginAlert) {
-                Alert(
-                    title: Text("다른 기기에서 로그인 중입니다."),
-                    message: Text("강제 로그아웃하고, 현재 기기에서 로그인 하시겠습니까?"),
-                    primaryButton: .destructive(Text("확인"), action: {
-                        viewModel.confirmNewDeviceLogin()
-                    }),
-                    secondaryButton: .cancel(Text("취소"), action:{
-                        viewModel.cancelNewDeviceLogin()
-                    })
-                )
+            // 하나의 Alert로 강제 로그아웃 및 새 기기 로그인 확인 처리
+            .alert(item: $viewModel.currentAlert) { alertType in
+                switch alertType {
+                case .forcedLogout:
+                    return Alert(
+                        title: Text("강제 로그아웃"),
+                        message: Text("다른 기기에서 로그인되어 로그아웃되었습니다."),
+                        dismissButton: .default(Text("확인"), action: {
+                            viewModel.currentAlert = nil
+                        })
+                    )
+                case .newDeviceLogin:
+                    return Alert(
+                        title: Text("다른 기기에서 로그인 중입니다."),
+                        message: Text("강제 로그아웃하고, 현재 기기에서 로그인 하시겠습니까?"),
+                        primaryButton: .destructive(Text("확인"), action: {
+                            viewModel.confirmNewDeviceLogin()
+                        }),
+                        secondaryButton: .cancel({
+                            viewModel.cancelNewDeviceLogin()
+                        })
+                    )
+                }
             }
         }
     }
