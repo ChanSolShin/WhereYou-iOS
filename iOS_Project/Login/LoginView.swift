@@ -5,16 +5,14 @@
 //  Created by 신찬솔 on 10/11/24.
 //
 
-
 import SwiftUI
 import NMapsMap
 
 struct LoginView: View {
     
-    @StateObject private var viewModel = LoginViewModel()
+    @EnvironmentObject var viewModel: LoginViewModel  // 전역 LoginViewModel 사용 (초기화하지 않음)
     @State private var showPassword = false
-    @State private var isLoggedIn = false
-    @State private var showAlert = false
+    @State private var showAlert = false  // 로그인 실패 Alert용
     
     var body: some View {
         NavigationView {
@@ -26,13 +24,12 @@ struct LoginView: View {
                     .padding(.bottom, 10)
                     .fontWeight(.bold)
                 
-                // 이메일
                 Text("로그인")
                     .font(.title2)
                     .padding(.bottom, 50)
                     .fontWeight(.bold)
                 
-                
+                // 이메일 입력
                 HStack {
                     Image(systemName: "person")
                         .foregroundColor(.gray)
@@ -45,7 +42,7 @@ struct LoginView: View {
                 .cornerRadius(8)
                 .padding(.horizontal, 30)
                 
-                // 비밀번호
+                // 비밀번호 입력
                 HStack {
                     Image(systemName: "lock")
                         .foregroundColor(.gray)
@@ -73,8 +70,7 @@ struct LoginView: View {
                 .cornerRadius(8)
                 .padding(.horizontal, 30)
                 .padding(.bottom, 5)
-                .padding(.top,10)
-                
+                .padding(.top, 10)
                 
                 NavigationLink(destination: FindPasswordView()){
                     Text("비밀번호 찾기")
@@ -85,7 +81,6 @@ struct LoginView: View {
                 .underline()
                 .padding(.horizontal, 10)
                 .padding(.bottom, 15)
-                
                 
                 // 로그인 및 회원가입 버튼
                 NavigationLink(destination: MainTabView(), isActive: $viewModel.isLoggedIn) {
@@ -114,11 +109,11 @@ struct LoginView: View {
                 }
                 .onChange(of: viewModel.loginErrorMessage) { errorMessage in
                     if errorMessage != nil {
-                        showAlert = true // 로그인 실패 시 알림창 띄우기
-                        viewModel.loginErrorMessage = nil // 알림창을 다시 띄울 수 있도록 loginErrorMessage 초기화
+                        showAlert = true // 로그인 실패 시 알림창 표시
+                        viewModel.loginErrorMessage = nil // 재발 표시를 위해 초기화
                     }
                 }
-                .padding(.bottom,20)
+                .padding(.bottom, 20)
                 
                 HStack {
                     NavigationLink(destination: SignUpView()) {
@@ -136,11 +131,33 @@ struct LoginView: View {
                             .foregroundColor(.black)
                             .underline()
                     }
-                    
                 }
                 .padding(.horizontal, 40)
                 Spacer()
-                
+            }
+            // 하나의 Alert로 강제 로그아웃 및 새 기기 로그인 확인 처리
+            .alert(item: $viewModel.currentAlert) { alertType in
+                switch alertType {
+                case .forcedLogout:
+                    return Alert(
+                        title: Text("강제 로그아웃"),
+                        message: Text("다른 기기에서 로그인되어 로그아웃되었습니다."),
+                        dismissButton: .default(Text("확인"), action: {
+                            viewModel.currentAlert = nil
+                        })
+                    )
+                case .newDeviceLogin:
+                    return Alert(
+                        title: Text("다른 기기에서 로그인 중입니다."),
+                        message: Text("강제 로그아웃하고, 현재 기기에서 로그인 하시겠습니까?"),
+                        primaryButton: .destructive(Text("확인"), action: {
+                            viewModel.confirmNewDeviceLogin()
+                        }),
+                        secondaryButton: .cancel({
+                            viewModel.cancelNewDeviceLogin()
+                        })
+                    )
+                }
             }
         }
     }

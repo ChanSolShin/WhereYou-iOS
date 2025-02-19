@@ -84,7 +84,9 @@ class SignUpViewModel: ObservableObject {
             "email": username,
             "name": realName,
             "phoneNumber": phoneNumber,
-            "birthday": birthday
+            "birthday": birthday,
+            "loginStatus": false,                  // 로그인 여부
+            "createdAt": Timestamp(date: Date())  // 회원가입 날짜
         ]
 
         db.collection("users").document(uid).setData(userData) { [weak self] error in
