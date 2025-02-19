@@ -59,16 +59,16 @@ struct iOS_ProjectApp: App {
                     showAlert = true
                 }
             }
-            // 강제 로그아웃 발생 시 알림 표시 (로그인된 상태에서만 적용됨)
-            .alert(isPresented: $loginViewModel.forcedLogout) {
-                Alert(
-                    title: Text("강제 로그아웃"),
-                    message: Text("다른 기기에서 로그인되어 로그아웃되었습니다."),
-                    dismissButton: .default(Text("확인"), action: {
-                        loginViewModel.forcedLogout = false
-                    })
-                )
-            }
+//            // 강제 로그아웃 발생 시 알림 표시 (로그인된 상태에서만 적용됨)
+//            .alert(isPresented: $loginViewModel.forcedLogout) {
+//                Alert(
+//                    title: Text("강제 로그아웃"),
+//                    message: Text("다른 기기에서 로그인되어 로그아웃되었습니다."),
+//                    dismissButton: .default(Text("확인"), action: {
+//                        loginViewModel.forcedLogout = false
+//                    })
+//                )
+//            }
             .alert(isPresented: $showAlert) {
                 Alert(
                     title: Text("위치 권한이 필요합니다"),
