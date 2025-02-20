@@ -40,10 +40,6 @@
 		EAA9ACE32CDC18B0002F2C79 /* LeaderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE22CDC18AE002F2C79 /* LeaderSelectionView.swift */; };
 		EAA9ACE52CDC18BF002F2C79 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE42CDC18BD002F2C79 /* User.swift */; };
 		EAA9ACE82CDC1E2F002F2C79 /* LeaderSelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE72CDC1E2A002F2C79 /* LeaderSelectionViewModel.swift */; };
-		EAB288122D5E4F260077787E /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = EAB288112D5E4F260077787E /* FirebaseMessaging */; };
-		EAB288172D6396D50077787E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB288162D6396CD0077787E /* AppDelegate.swift */; };
-		EAB288192D639C830077787E /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = EAB288182D639C830077787E /* FirebaseAnalytics */; };
-		EAB2881B2D63A25C0077787E /* FriendRequestNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB2881A2D63A24B0077787E /* FriendRequestNotification.swift */; };
 		EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */; };
 		EAB9CBC02CCFEC7400BFA8DD /* FriendListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBBF2CCFEC6C00BFA8DD /* FriendListViewModel.swift */; };
 		EAB9CBC42CCFEDD400BFA8DD /* FriendModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBC32CCFEDCF00BFA8DD /* FriendModel.swift */; };
@@ -65,6 +61,7 @@
 		F52E2FFB2CD3CEB500520042 /* FindPasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */; };
 		F54542322CE257060043B1E2 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = F54542312CE257060043B1E2 /* FirebaseDatabase */; };
 		F54542342CE257240043B1E2 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = F54542332CE257240043B1E2 /* FirebaseDatabase */; };
+		F55D6CF72D66D9D20036E89F /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = F55D6CF62D66D9D20036E89F /* FirebaseMessaging */; };
 		F5ADB1D02CD90DAA00A1011C /* ProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1CF2CD90DA500A1011C /* ProfileModel.swift */; };
 		F5ADB1D42CD9296400A1011C /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1D32CD9295E00A1011C /* ProfileViewModel.swift */; };
 		F5ADB1D62CD92B0000A1011C /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1D52CD92AF600A1011C /* EditProfileView.swift */; };
@@ -73,6 +70,7 @@
 		F5CD57482CE893AC00B212BC /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5CD57472CE893AC00B212BC /* GoogleService-Info.plist */; };
 		F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */; };
 		F5D76AE82CDCB1B700CB652B /* PermissionRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */; };
+		F5E8486B2D66DBF200047AA1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -128,9 +126,6 @@
 		EAA9ACE22CDC18AE002F2C79 /* LeaderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderSelectionView.swift; sourceTree = "<group>"; };
 		EAA9ACE42CDC18BD002F2C79 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		EAA9ACE72CDC1E2A002F2C79 /* LeaderSelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderSelectionViewModel.swift; sourceTree = "<group>"; };
-		EAB288152D6390FA0077787E /* iOS_Project.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS_Project.entitlements; sourceTree = "<group>"; };
-		EAB288162D6396CD0077787E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		EAB2881A2D63A24B0077787E /* FriendRequestNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRequestNotification.swift; sourceTree = "<group>"; };
 		EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingMapView.swift; sourceTree = "<group>"; };
 		EAB9CBBF2CCFEC6C00BFA8DD /* FriendListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendListViewModel.swift; sourceTree = "<group>"; };
 		EAB9CBC32CCFEDCF00BFA8DD /* FriendModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendModel.swift; sourceTree = "<group>"; };
@@ -159,6 +154,7 @@
 		F5CD57472CE893AC00B212BC /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocationCoordinator.swift; sourceTree = "<group>"; };
 		F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRequiredView.swift; sourceTree = "<group>"; };
+		F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FB3FFC42D97330368AC296CF /* Pods-iOS_Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS_Project.debug.xcconfig"; path = "Target Support Files/Pods-iOS_Project/Pods-iOS_Project.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -169,8 +165,7 @@
 			files = (
 				EAD481B02CBD7D4B0052D22B /* FirebaseAuth in Frameworks */,
 				EAD481B22CBD7D4B0052D22B /* FirebaseFirestore in Frameworks */,
-				EAB288192D639C830077787E /* FirebaseAnalytics in Frameworks */,
-				EAB288122D5E4F260077787E /* FirebaseMessaging in Frameworks */,
+				F55D6CF72D66D9D20036E89F /* FirebaseMessaging in Frameworks */,
 				F54542322CE257060043B1E2 /* FirebaseDatabase in Frameworks */,
 				D3DAC0BC663E9922C2AE4C22 /* Pods_iOS_Project.framework in Frameworks */,
 			);
@@ -310,7 +305,6 @@
 			isa = PBXGroup;
 			children = (
 				F5CD57472CE893AC00B212BC /* GoogleService-Info.plist */,
-				EAB2881C2D63A2660077787E /* Notification */,
 				F50FDDB72CD3A814006E96B2 /* FindAuth */,
 				EA6EE1DF2CD39BBB002961A9 /* Request */,
 				EA86C14B2CC2FBAD00989E43 /* Map */,
@@ -328,10 +322,9 @@
 				F5D76AE42CDCAF9C00CB652B /* LocationManagers */,
 				EA86C11B2CC2F15700989E43 /* Assets.xcassets */,
 				EA86C11D2CC2F15700989E43 /* Info.plist */,
+				F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */,
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
-				EAB288162D6396CD0077787E /* AppDelegate.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
-				EAB288152D6390FA0077787E /* iOS_Project.entitlements */,
 			);
 			path = iOS_Project;
 			sourceTree = "<group>";
@@ -370,14 +363,6 @@
 				EAA9ACE42CDC18BD002F2C79 /* User.swift */,
 			);
 			path = LeaderSelction;
-			sourceTree = "<group>";
-		};
-		EAB2881C2D63A2660077787E /* Notification */ = {
-			isa = PBXGroup;
-			children = (
-				EAB2881A2D63A24B0077787E /* FriendRequestNotification.swift */,
-			);
-			path = Notification;
 			sourceTree = "<group>";
 		};
 		EABADF222CB9223E00962A40 = {
@@ -465,8 +450,7 @@
 				EAD481AF2CBD7D4B0052D22B /* FirebaseAuth */,
 				EAD481B12CBD7D4B0052D22B /* FirebaseFirestore */,
 				F54542312CE257060043B1E2 /* FirebaseDatabase */,
-				EAB288112D5E4F260077787E /* FirebaseMessaging */,
-				EAB288182D639C830077787E /* FirebaseAnalytics */,
+				F55D6CF62D66D9D20036E89F /* FirebaseMessaging */,
 			);
 			productName = iOS_Project;
 			productReference = EABADF2B2CB9223E00962A40 /* iOS_Project.app */;
@@ -631,14 +615,13 @@
 			files = (
 				F52E2FF92CD3CC9000520042 /* FindPasswordView.swift in Sources */,
 				EA86C1212CC2F15700989E43 /* AddMeetingModel.swift in Sources */,
-				EAB2881B2D63A25C0077787E /* FriendRequestNotification.swift in Sources */,
 				F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */,
 				F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */,
 				EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */,
 				EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */,
 				EA86C1232CC2F15700989E43 /* AddMeetingViewModel.swift in Sources */,
 				EA86C1242CC2F15700989E43 /* FriendListView.swift in Sources */,
-				EAB288172D6396D50077787E /* AppDelegate.swift in Sources */,
+				F5E8486B2D66DBF200047AA1 /* AppDelegate.swift in Sources */,
 				EA86C14C2CC2FBAD00989E43 /* Coordinator.swift in Sources */,
 				EAB9CBC42CCFEDD400BFA8DD /* FriendModel.swift in Sources */,
 				EA86C14D2CC2FBAD00989E43 /* MapView.swift in Sources */,
@@ -847,20 +830,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = iOS_Project/iOS_Project.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS_Project/Preview Content\"";
-				DEVELOPMENT_TEAM = R54DJK7U34;
+				DEVELOPMENT_TEAM = 52AU86437A;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = /Users/sinchansol/Desktop/iOS_Project/WhereYou_Project/Info.plist;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱 사용 중 위치 정보를 사용합니다.";
+				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/WhereYou-iOS/iOS_Project/Info.plist";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치에 접근할 수 있도록 허용해 주세요.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "위치 정보를 항상 사용합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱이 활성화될 때 위치 정보를 사용합니다. ";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -872,9 +853,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.chansol.iOS-Project";
+				PRODUCT_BUNDLE_IDENTIFIER = com.yongzma.iOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -887,7 +867,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
@@ -898,10 +877,10 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = /Users/sinchansol/Desktop/iOS_Project/WhereYou_Project/Info.plist;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱 사용 중 위치 정보를 사용합니다.";
+				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/WhereYou-iOS/iOS_Project/Info.plist";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치에 접근할 수 있도록 허용해 주세요.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "위치 정보를 항상 사용합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱이 활성화될 때 위치 정보를 사용합니다. ";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -913,7 +892,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.chansol.iOS-Project";
+				PRODUCT_BUNDLE_IDENTIFIER = com.shinchansol.iOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = whereyou;
@@ -1048,16 +1027,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		EAB288112D5E4F260077787E /* FirebaseMessaging */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseMessaging;
-		};
-		EAB288182D639C830077787E /* FirebaseAnalytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAnalytics;
-		};
 		EAD481AF2CBD7D4B0052D22B /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
@@ -1077,6 +1046,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseDatabase;
+		};
+		F55D6CF62D66D9D20036E89F /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

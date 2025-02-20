@@ -57,20 +57,6 @@ struct iOS_ProjectApp: App {
                     showAlert = true
                 }
             }
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text("위치 권한이 필요합니다"),
-                    message: Text("앱이 정상적으로 작동하려면 위치 권한을 항상 허용으로 설정해야 합니다."),
-                    primaryButton: .default(Text("설정으로 이동")) {
-                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                            UIApplication.shared.open(url)
-                        }
-                    },
-                    secondaryButton: .cancel(Text("취소")) {
-                        exitApp()
-                    }
-                )
-            }
         }
     }
     
