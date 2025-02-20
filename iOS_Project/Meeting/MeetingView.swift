@@ -46,7 +46,8 @@ struct MeetingView: View {
                         meetingAddress: meeting.meetingAddress,
                         meetingLocation: meeting.meetingLocation,
                         meetingMemberIDs: meeting.meetingMemberIDs,
-                        meetingMasterID: meeting.meetingMasterID
+                        meetingMasterID: meeting.meetingMasterID,
+                        isLocationTrackingEnabled: meeting.isLocationTrackingEnabled
                     ),
                     meetingViewModel: meetingViewModel
                 )

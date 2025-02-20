@@ -37,7 +37,8 @@ class MeetingListViewModel: ObservableObject {
                               let address = data["meetingAddress"] as? String,
                               let location = data["meetingLocation"] as? GeoPoint,
                               let memberIDs = data["meetingMembers"] as? [String],
-                              let masterID = data["meetingMaster"] as? String else {
+                              let masterID = data["meetingMaster"] as? String,
+                             let isLocationTrackingEnabled = data["isLocationTrackingEnabled"]  else {
                             return nil
                         }
 
@@ -54,7 +55,7 @@ class MeetingListViewModel: ObservableObject {
                         let date = timestamp.dateValue()
                         let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
                         
-                        return MeetingListModel(id: document.documentID, title: title, date: date, meetingAddress: address, meetingLocation: coordinate, meetingMemberIDs: memberIDs, meetingMasterID: masterID)
+                        return MeetingListModel(id: document.documentID, title: title, date: date, meetingAddress: address, meetingLocation: coordinate, meetingMemberIDs: memberIDs, meetingMasterID: masterID, isLocationTrackingEnabled: isLocationTrackingEnabled as! Bool)
                     }
                     self.meetings.sort { $0.date < $1.date }
                 }
@@ -67,7 +68,7 @@ class MeetingListViewModel: ObservableObject {
            guard index < meetings.count else { return }
            let meeting = meetings[index]
            
-        let meetingModel = MeetingModel(id: meeting.id, title: meeting.title, date: meeting.date, meetingAddress: meeting.meetingAddress, meetingLocation: meeting.meetingLocation, meetingMemberIDs: meeting.meetingMemberIDs, meetingMasterID: meeting.meetingMasterID)
+        let meetingModel = MeetingModel(id: meeting.id, title: meeting.title, date: meeting.date, meetingAddress: meeting.meetingAddress, meetingLocation: meeting.meetingLocation, meetingMemberIDs: meeting.meetingMemberIDs, meetingMasterID: meeting.meetingMasterID, isLocationTrackingEnabled: meeting.isLocationTrackingEnabled)
            meetingViewModel.selectMeeting(meeting: meetingModel)
        }
    }

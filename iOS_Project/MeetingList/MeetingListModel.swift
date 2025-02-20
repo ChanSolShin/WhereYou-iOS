@@ -16,8 +16,9 @@ struct MeetingListModel: Identifiable {
     var meetingLocation: CLLocationCoordinate2D
     var meetingMemberIDs: [String]
     var meetingMasterID: String
+    var isLocationTrackingEnabled: Bool
 
-    init(id: String, title: String, date: Date, meetingAddress: String, meetingLocation: CLLocationCoordinate2D, meetingMemberIDs: [String], meetingMasterID: String) {
+    init(id: String, title: String, date: Date, meetingAddress: String, meetingLocation: CLLocationCoordinate2D, meetingMemberIDs: [String], meetingMasterID: String, isLocationTrackingEnabled: Bool) {
         self.id = id
         self.title = title
         self.date = date
@@ -25,5 +26,6 @@ struct MeetingListModel: Identifiable {
         self.meetingLocation = meetingLocation
         self.meetingMemberIDs = meetingMemberIDs
         self.meetingMasterID = meetingMasterID
+        self.isLocationTrackingEnabled = isLocationTrackingEnabled
     }
 }
