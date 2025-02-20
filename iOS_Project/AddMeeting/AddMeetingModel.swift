@@ -17,4 +17,5 @@ struct AddMeetingModel {
     var meetingAddress: String? = nil // 주소
     var meetingMembers: [String] = []
     var meetingMaster: String = ""
+    var isLocationTrackingEnabled:Bool = false
 }
