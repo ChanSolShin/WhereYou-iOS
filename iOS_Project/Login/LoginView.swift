@@ -153,7 +153,7 @@ struct LoginView: View {
                         primaryButton: .destructive(Text("확인"), action: {
                             viewModel.confirmNewDeviceLogin()
                         }),
-                        secondaryButton: .cancel({
+                        secondaryButton: .cancel(Text("취소"), action: {
                             viewModel.cancelNewDeviceLogin()
                         })
                     )

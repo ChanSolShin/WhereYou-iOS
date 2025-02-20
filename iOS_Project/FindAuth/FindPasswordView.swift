@@ -15,7 +15,7 @@ struct FindPasswordView: View {
         ScrollView {
             VStack {
                 
-                Text("MyApp")
+                Text("웨어유")
                     .font(.largeTitle)
                     .padding(.bottom, 180)
                     .padding(.top,20)

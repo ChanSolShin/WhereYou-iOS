@@ -61,6 +61,7 @@
 		F52E2FFB2CD3CEB500520042 /* FindPasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */; };
 		F54542322CE257060043B1E2 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = F54542312CE257060043B1E2 /* FirebaseDatabase */; };
 		F54542342CE257240043B1E2 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = F54542332CE257240043B1E2 /* FirebaseDatabase */; };
+		F55D6CF72D66D9D20036E89F /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = F55D6CF62D66D9D20036E89F /* FirebaseMessaging */; };
 		F5ADB1D02CD90DAA00A1011C /* ProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1CF2CD90DA500A1011C /* ProfileModel.swift */; };
 		F5ADB1D42CD9296400A1011C /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1D32CD9295E00A1011C /* ProfileViewModel.swift */; };
 		F5ADB1D62CD92B0000A1011C /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ADB1D52CD92AF600A1011C /* EditProfileView.swift */; };
@@ -69,6 +70,7 @@
 		F5CD57482CE893AC00B212BC /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5CD57472CE893AC00B212BC /* GoogleService-Info.plist */; };
 		F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */; };
 		F5D76AE82CDCB1B700CB652B /* PermissionRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */; };
+		F5E8486B2D66DBF200047AA1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -152,6 +154,7 @@
 		F5CD57472CE893AC00B212BC /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocationCoordinator.swift; sourceTree = "<group>"; };
 		F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRequiredView.swift; sourceTree = "<group>"; };
+		F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FB3FFC42D97330368AC296CF /* Pods-iOS_Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS_Project.debug.xcconfig"; path = "Target Support Files/Pods-iOS_Project/Pods-iOS_Project.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -162,6 +165,7 @@
 			files = (
 				EAD481B02CBD7D4B0052D22B /* FirebaseAuth in Frameworks */,
 				EAD481B22CBD7D4B0052D22B /* FirebaseFirestore in Frameworks */,
+				F55D6CF72D66D9D20036E89F /* FirebaseMessaging in Frameworks */,
 				F54542322CE257060043B1E2 /* FirebaseDatabase in Frameworks */,
 				D3DAC0BC663E9922C2AE4C22 /* Pods_iOS_Project.framework in Frameworks */,
 			);
@@ -318,6 +322,7 @@
 				F5D76AE42CDCAF9C00CB652B /* LocationManagers */,
 				EA86C11B2CC2F15700989E43 /* Assets.xcassets */,
 				EA86C11D2CC2F15700989E43 /* Info.plist */,
+				F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */,
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
 			);
@@ -445,6 +450,7 @@
 				EAD481AF2CBD7D4B0052D22B /* FirebaseAuth */,
 				EAD481B12CBD7D4B0052D22B /* FirebaseFirestore */,
 				F54542312CE257060043B1E2 /* FirebaseDatabase */,
+				F55D6CF62D66D9D20036E89F /* FirebaseMessaging */,
 			);
 			productName = iOS_Project;
 			productReference = EABADF2B2CB9223E00962A40 /* iOS_Project.app */;
@@ -615,6 +621,7 @@
 				EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */,
 				EA86C1232CC2F15700989E43 /* AddMeetingViewModel.swift in Sources */,
 				EA86C1242CC2F15700989E43 /* FriendListView.swift in Sources */,
+				F5E8486B2D66DBF200047AA1 /* AppDelegate.swift in Sources */,
 				EA86C14C2CC2FBAD00989E43 /* Coordinator.swift in Sources */,
 				EAB9CBC42CCFEDD400BFA8DD /* FriendModel.swift in Sources */,
 				EA86C14D2CC2FBAD00989E43 /* MapView.swift in Sources */,
@@ -1039,6 +1046,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseDatabase;
+		};
+		F55D6CF62D66D9D20036E89F /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
