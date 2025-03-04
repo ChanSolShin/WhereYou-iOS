@@ -1,103 +1,127 @@
 const functions = require('firebase-functions/v2');
 const admin = require('firebase-admin');
+const { getFirestore } = require("firebase-admin/firestore");
+const { onSchedule } = require('firebase-functions/scheduler'); // V2에서는 onSchedule 사용
 
 admin.initializeApp(); // Firebase Admin SDK 초기화
-
 const db = admin.firestore(); // Firestore 인스턴스 가져오기
 
-// 친구 요청 알림 함수 (Firestore에 friendRequests 문서가 생성될 때)
-exports.sendFriendRequestNotification = functions.firestore
-    .onDocumentCreated('friendRequests/{requestId}', async (event) => {
-        const requestData = event.data.data();
-        const toUserID = requestData.toUserID;
-        const fromUserName = requestData.fromUserName;
+// ✅ 친구 요청 알림 함수 (Firestore에 friendRequests 문서가 생성될 때)
+exports.sendFriendRequestNotification = functions.firestore.onDocumentCreated('friendRequests/{requestId}', async (event) => {
+    const requestData = event.data.data();
+    const toUserID = requestData.toUserID;
+    const fromUserName = requestData.fromUserName;
 
-        if (!toUserID || !fromUserName) {
-            console.log('필수 데이터 누락');
-            return null;
-        }
+    if (!toUserID || !fromUserName) {
+        console.log('필수 데이터 누락');
+        return null;
+    }
 
-        try {
-            // Firestore에서 요청 받은 사용자의 FCM 토큰 가져오기
-            const userDoc = await db.collection('users').doc(toUserID).get();
-            if (!userDoc.exists) {
-                console.log('수신자 정보를 찾을 수 없음');
-                return null;
+    try {
+        const userDoc = await db.collection('users').doc(toUserID).get();
+        if (!userDoc.exists) return console.log('수신자 정보를 찾을 수 없음');
+
+        const fcmToken = userDoc.data()?.fcmToken;
+        if (!fcmToken) return console.log('FCM 토큰이 없음');
+
+        const message = {
+            notification: {
+                title: '웨어유',
+                body: `${fromUserName}님이 친구 요청을 보냈습니다!`,
+            },
+            token: fcmToken,
+        };
+
+        await admin.messaging().send(message);
+        console.log('푸시 알림 전송 성공');
+    } catch (error) {
+        console.error('푸시 알림 전송 실패:', error);
+    }
+
+    return null;
+});
+
+// ✅ 모임 초대 요청 알림 함수 (Firestore에 meetingRequests 문서가 생성될 때)
+exports.sendMeetingInviteNotification = functions.firestore.onDocumentCreated('meetingRequests/{requestId}', async (event) => {
+    const requestData = event.data.data();
+    const toUserID = requestData.toUserID;
+    const fromUserName = requestData.fromUserName;
+    const meetingName = requestData.meetingName;
+
+    if (!toUserID || !fromUserName || !meetingName) {
+        console.log('필수 데이터 누락');
+        return null;
+    }
+
+    try {
+        const userDoc = await db.collection('users').doc(toUserID).get();
+        if (!userDoc.exists) return console.log('수신자 정보를 찾을 수 없음');
+
+        const fcmToken = userDoc.data()?.fcmToken;
+        if (!fcmToken) return console.log('FCM 토큰이 없음');
+
+        const message = {
+            notification: {
+                title: '웨어유',
+                body: `${fromUserName}님이 '${meetingName}' 모임에 초대했습니다!`,
+            },
+            token: fcmToken,
+        };
+
+        await admin.messaging().send(message);
+        console.log('푸시 알림 전송 성공');
+    } catch (error) {
+        console.error('푸시 알림 전송 실패:', error);
+    }
+
+    return null;
+});
+
+
+// ✅ 1분마다 실행하여 모임 시간을 확인하고, 위치 추적 활성화 여부를 변경
+exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (event) => {
+    const currentDate = new Date();
+    const koreaTimeOffset = 9 * 60; // UTC+9 (한국 시간)
+    currentDate.setMinutes(currentDate.getMinutes() + currentDate.getTimezoneOffset() + koreaTimeOffset);
+
+    try {
+        const meetingsSnapshot = await db.collection('meetings').get();
+
+        await Promise.all(meetingsSnapshot.docs.map(async (doc) => {
+            const meetingData = doc.data();
+
+            if (!meetingData.meetingDate || !meetingData.meetingDate.toDate) {
+                console.log(`meetingDate가 올바르지 않음: ${JSON.stringify(meetingData)}`);
+                return;
             }
 
-            const userData = userDoc.data();
-            const fcmToken = userData.fcmToken;
+            const meetingDate = meetingData.meetingDate.toDate();
+            const meetingDateKST = new Date(meetingDate);
+            meetingDateKST.setMinutes(meetingDateKST.getMinutes() + meetingDateKST.getTimezoneOffset() + koreaTimeOffset);
 
-            if (!fcmToken) {
-                console.log('FCM 토큰이 없음');
-                return null;
+            const trackingStart = new Date(meetingDateKST);
+            trackingStart.setHours(trackingStart.getHours() - 3); // 모임 3시간 전
+
+            const trackingEnd = new Date(meetingDateKST);
+            trackingEnd.setHours(trackingEnd.getHours() + 1); // 모임 1시간 후
+
+            if (currentDate >= trackingStart && currentDate <= trackingEnd) {
+                // ✅ 3시간 전 ~ 1시간 후: 위치 추적 활성화
+                if (!meetingData.isLocationTrackingEnabled) {
+                    await doc.ref.update({ isLocationTrackingEnabled: true });
+                    console.log(`모임 ${doc.id}: 위치 추적 활성화 (true)`);
+                }
+            } else {
+                // ❌ 범위를 벗어나면 위치 추적 비활성화
+                if (meetingData.isLocationTrackingEnabled) {
+                    await doc.ref.update({ isLocationTrackingEnabled: false });
+                    console.log(`모임 ${doc.id}: 위치 추적 비활성화 (false)`);
+                }
             }
+        }));
+    } catch (error) {
+        console.error('Firestore에서 모임 정보를 가져오는 중 오류 발생:', error);
+    }
 
-            // FCM 메시지 구성
-            const message = {
-                notification: {
-                    title: '웨어유',
-                    body: `${fromUserName}님이 친구 요청을 보냈습니다!`,
-                },
-                token: fcmToken,
-            };
-
-            // FCM을 통해 푸시 알림 전송
-            const response = await admin.messaging().send(message);
-            console.log('푸시 알림 전송 성공:', response);
-
-            return null;
-        } catch (error) {
-            console.error('푸시 알림 전송 실패:', error);
-            return null;
-        }
-    });
-
-// 모임 초대 요청 알림 함수 (Firestore에 meetingRequests 문서가 생성될 때)
-exports.sendMeetingInviteNotification = functions.firestore
-    .onDocumentCreated('meetingRequests/{requestId}', async (event) => {
-        const requestData = event.data.data();
-        const toUserID = requestData.toUserID;
-        const fromUserName = requestData.fromUserName;
-        const meetingName = requestData.meetingName;
-
-        if (!toUserID || !fromUserName || !meetingName) {
-            console.log('필수 데이터 누락');
-            return null;
-        }
-
-        try {
-            // Firestore에서 요청 받은 사용자의 FCM 토큰 가져오기
-            const userDoc = await db.collection('users').doc(toUserID).get();
-            if (!userDoc.exists) {
-                console.log('수신자 정보를 찾을 수 없음');
-                return null;
-            }
-
-            const userData = userDoc.data();
-            const fcmToken = userData.fcmToken;
-
-            if (!fcmToken) {
-                console.log('FCM 토큰이 없음');
-                return null;
-            }
-
-            // FCM 메시지 구성
-            const message = {
-                notification: {
-                    title: '웨어유',
-                    body: `${fromUserName}님이 '${meetingName}' 모임에 초대했습니다!`,
-                },
-                token: fcmToken,
-            };
-
-            // FCM을 통해 푸시 알림 전송
-            const response = await admin.messaging().send(message);
-            console.log('푸시 알림 전송 성공:', response);
-
-            return null;
-        } catch (error) {
-            console.error('푸시 알림 전송 실패:', error);
-            return null;
-        }
-    });
+    return null;
+});
