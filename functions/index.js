@@ -5,6 +5,7 @@ const { onSchedule } = require('firebase-functions/scheduler'); // V2에서는 o
 
 admin.initializeApp(); // Firebase Admin SDK 초기화
 const db = admin.firestore(); // Firestore 인스턴스 가져오기
+const messaging = admin.messaging(); // Firebase Cloud Messaging 인스턴스 가져오기
 
 // ✅ 친구 요청 알림 함수 (Firestore에 friendRequests 문서가 생성될 때)
 exports.sendFriendRequestNotification = functions.firestore.onDocumentCreated('friendRequests/{requestId}', async (event) => {
@@ -32,7 +33,7 @@ exports.sendFriendRequestNotification = functions.firestore.onDocumentCreated('f
             token: fcmToken,
         };
 
-        await admin.messaging().send(message);
+        await messaging.send(message);  // admin.messaging()으로 수정
         console.log('푸시 알림 전송 성공');
     } catch (error) {
         console.error('푸시 알림 전송 실패:', error);
@@ -68,7 +69,7 @@ exports.sendMeetingInviteNotification = functions.firestore.onDocumentCreated('m
             token: fcmToken,
         };
 
-        await admin.messaging().send(message);
+        await messaging.send(message);  // admin.messaging()으로 수정
         console.log('푸시 알림 전송 성공');
     } catch (error) {
         console.error('푸시 알림 전송 실패:', error);
@@ -77,8 +78,7 @@ exports.sendMeetingInviteNotification = functions.firestore.onDocumentCreated('m
     return null;
 });
 
-
-// ✅ 1분마다 실행하여 모임 시간을 확인하고, 위치 추적 활성화 여부를 변경
+// ✅ 1분마다 실행하여 모임 시간을 확인하고, 위치 추적 활성화 여부를 변경 및 알림 전송
 exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (event) => {
     const currentDate = new Date();
     const koreaTimeOffset = 9 * 60; // UTC+9 (한국 시간)
@@ -110,6 +110,63 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
                 if (!meetingData.isLocationTrackingEnabled) {
                     await doc.ref.update({ isLocationTrackingEnabled: true });
                     console.log(`모임 ${doc.id}: 위치 추적 활성화 (true)`);
+
+                    // 위치 추적 활성화 후 모임 멤버들에게 알림 전송
+                    const meetingName = meetingData.meetingName || "알 수 없는 모임";
+                    const meetingMembers = meetingData.meetingMembers || [];
+                    const meetingAddress = meetingData.meetingAddress || "주소 정보 없음";
+                    
+                    if (meetingMembers.length === 0) {
+                        console.log(`⚠️ 모임 ${doc.id}에 멤버가 없습니다.`);
+                        return null;
+                    }
+
+                    let tokens = [];
+
+                    // FCM 토큰 가져오기
+                    await Promise.all(meetingMembers.map(async (memberUID) => {
+                        try {
+                            const userDoc = await db.collection("users").doc(memberUID).get();
+                            if (!userDoc.exists) {
+                                console.log(`⚠️ 사용자 ${memberUID}의 데이터가 존재하지 않음`);
+                                return;
+                            }
+
+                            const fcmToken = userDoc.data()?.fcmToken;
+                            if (fcmToken) {
+                                tokens.push(fcmToken);  // FCM 토큰 수집
+                            } else {
+                                console.log(`⚠️ 사용자 ${memberUID}의 FCM 토큰이 없음`);
+                            }
+                        } catch (error) {
+                            console.error(`❌ 사용자 ${memberUID} 데이터 가져오기 실패:`, error);
+                        }
+                    }));
+
+                    if (tokens.length === 0) {
+                        console.log(`⚠️ 모임 ${doc.id} 멤버들에게 보낼 FCM 토큰이 없음`);
+                        return null;
+                    }
+
+                    // 각 멤버에게 FCM 메시지 전송
+                    const message = {
+                        notification: {
+                            title: "웨어유",
+                            body: `지금부터 ${meetingName} 멤버의 위치 조회가 가능합니다!`,
+                        },
+                    };
+
+                    try {
+                        // 각 멤버에게 개별적으로 메시지 전송
+                        for (const token of tokens) {
+                            message.token = token;  // 각 토큰에 대해 메시지 전송
+                            await messaging.send(message);
+                        }
+
+                        console.log(`✅ 모임 ${doc.id} - 푸시 알림 전송 성공`);
+                    } catch (error) {
+                        console.error(`❌ 모임 ${doc.id} - 푸시 알림 전송 실패:`, error);
+                    }
                 }
             } else {
                 // ❌ 범위를 벗어나면 위치 추적 비활성화
