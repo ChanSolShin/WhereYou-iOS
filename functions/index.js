@@ -186,7 +186,7 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
 
 
 // ✅ 모임에 새로운 멤버가 추가되었을 때 알림 전송
-exports.notifyMemberAdded = onDocumentUpdated(
+exports.notifyMemberAdded = functions.firestore.onDocumentUpdated(
     { document: 'meetings/{meetingId}' }, // Firestore 문서 변경 감지
     async (event) => {
         const beforeData = event.data.before.data();
@@ -218,7 +218,10 @@ exports.notifyMemberAdded = onDocumentUpdated(
             }
         }
 
-        if (fcmTokens.length === 0) return null;
+        if (fcmTokens.length === 0) {
+            console.log('❌ FCM 토큰이 없어 알림을 전송할 수 없습니다.');
+            return null;
+        }
 
         try {
             // ✅ UID를 사용자 이름으로 변환
@@ -234,16 +237,25 @@ exports.notifyMemberAdded = onDocumentUpdated(
                 })
             );
 
-            // ✅ 푸시 알림 전송
-            const response = await messaging.sendEachForMulticast({
-                tokens: fcmTokens, // 멤버들의 FCM 토큰 목록
-                notification: {
-                    title: '웨어유',
-                    body: `${newMemberNames.join(', ')}님이 ${meetingName} 모임에 참여하였습니다!`,
-                },
-            });
+            // ✅ FCM 토큰을 500개씩 나누어 전송 (Firebase 제한)
+            const chunkSize = 500;
+            for (let i = 0; i < fcmTokens.length; i += chunkSize) {
+                const tokenChunk = fcmTokens.slice(i, i + chunkSize);
 
-            console.log(`✅ 푸시 알림 전송 성공:`, response);
+                for (const token of tokenChunk) {
+                    const message = {
+                        token: token,
+                        notification: {
+                            title: '웨어유',
+                            body: `${newMemberNames.join(', ')}님이 ${meetingName} 모임에 참여하였습니다!`,
+                        },
+                    };
+
+                    // ✅ `send` 사용 (단건 메시지 전송)
+                    const response = await messaging.send(message);
+                    console.log(`✅ 푸시 알림 전송 성공 (Token: ${token}):`, response);
+                }
+            }
         } catch (error) {
             console.error('❌ 푸시 알림 전송 실패:', error);
         }
