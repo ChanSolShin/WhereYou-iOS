@@ -2,6 +2,7 @@ const functions = require('firebase-functions/v2');
 const admin = require('firebase-admin');
 const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require('firebase-functions/scheduler'); // V2에서는 onSchedule 사용
+const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
 
 admin.initializeApp(); // Firebase Admin SDK 초기화
 const db = admin.firestore(); // Firestore 인스턴스 가져오기
@@ -182,3 +183,71 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
 
     return null;
 });
+
+
+// ✅ 모임에 새로운 멤버가 추가되었을 때 알림 전송
+exports.notifyMemberAdded = onDocumentUpdated(
+    { document: 'meetings/{meetingId}' }, // Firestore 문서 변경 감지
+    async (event) => {
+        const beforeData = event.data.before.data();
+        const afterData = event.data.after.data();
+
+        const beforeMembers = beforeData?.meetingMembers || [];
+        const afterMembers = afterData?.meetingMembers || [];
+
+        const newMembers = afterMembers.filter(member => !beforeMembers.includes(member));
+
+        if (newMembers.length === 0) {
+            console.log('새로운 멤버가 없습니다.');
+            return null;
+        }
+
+        const existingMembers = afterMembers.filter(member => !newMembers.includes(member));
+        const meetingName = afterData.meetingName || '알 수 없는 모임';
+
+        const fcmTokens = [];
+
+        for (const memberId of existingMembers) {
+            try {
+                const userDoc = await db.collection('users').doc(memberId).get();
+                if (!userDoc.exists) continue;
+                const fcmToken = userDoc.data()?.fcmToken;
+                if (fcmToken) fcmTokens.push(fcmToken);
+            } catch (error) {
+                console.error(`사용자 ${memberId} 데이터 가져오기 실패:`, error);
+            }
+        }
+
+        if (fcmTokens.length === 0) return null;
+
+        try {
+            // ✅ UID를 사용자 이름으로 변환
+            const newMemberNames = await Promise.all(
+                newMembers.map(async (uid) => {
+                    try {
+                        const userDoc = await db.collection('users').doc(uid).get();
+                        return userDoc.exists ? userDoc.data().name : uid; // 이름이 없으면 UID 그대로
+                    } catch (error) {
+                        console.error(`사용자 ${uid} 데이터 가져오기 실패:`, error);
+                        return uid; // 에러 발생 시 UID 그대로 반환
+                    }
+                })
+            );
+
+            // ✅ 푸시 알림 전송
+            const response = await messaging.sendEachForMulticast({
+                tokens: fcmTokens, // 멤버들의 FCM 토큰 목록
+                notification: {
+                    title: '웨어유',
+                    body: `${newMemberNames.join(', ')}님이 ${meetingName} 모임에 참여하였습니다!`,
+                },
+            });
+
+            console.log(`✅ 푸시 알림 전송 성공:`, response);
+        } catch (error) {
+            console.error('❌ 푸시 알림 전송 실패:', error);
+        }
+
+        return null;
+    }
+);
