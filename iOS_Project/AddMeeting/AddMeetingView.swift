@@ -109,6 +109,7 @@ struct AddMeetingView: View {
                     DatePicker("Select a date", selection: $viewModel.meeting.meetingDate, in: Date()..., displayedComponents: [.date, .hourAndMinute])
                         .datePickerStyle(GraphicalDatePickerStyle())
                         .environment(\.locale, Locale(identifier: String(Locale.preferredLanguages[0])))
+                        .frame(height: 500)
                         .padding()
                     
                     Button("완료") {
