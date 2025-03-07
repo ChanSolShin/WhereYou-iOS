@@ -28,10 +28,36 @@ class MeetingViewModel: NSObject, ObservableObject {
     private let locationCoordinator: AppLocationCoordinator // 위치 코디네이터
     
     init(locationCoordinator: AppLocationCoordinator = AppLocationCoordinator.shared) {
-            self.locationCoordinator = locationCoordinator
-            super.init()
-        }
+        self.locationCoordinator = locationCoordinator
+        super.init()
+    }
     
+    // 현재 로그인한 사용자 ID 가져오기
+    func getCurrentUserID() -> String? {
+        return Auth.auth().currentUser?.uid
+    }
+    
+    // 현재 로그인한 사용자 이름 가져오기
+    func getCurrentUserName(completion: @escaping (String) -> Void) {
+        guard let userID = getCurrentUserID() else {
+            completion("Unknown")
+            return
+        }
+        
+        let db = Firestore.firestore()
+        db.collection("users").document(userID).getDocument { (document, error) in
+            if let error = error {
+                print("Error fetching user name: \(error)")
+                completion("Unknown")
+            } else if let document = document, document.exists,
+                      let userName = document.data()?["name"] as? String {
+                completion(userName)
+            } else {
+                completion("Unknown")
+            }
+        }
+    }
+
     // 모임 선택 및 초기화
     func selectMeeting(meeting: MeetingModel) {
         self.meeting = meeting

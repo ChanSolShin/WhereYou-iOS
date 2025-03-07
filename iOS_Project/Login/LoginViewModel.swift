@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseMessaging  // FCM 토큰 기능 추가
 
 // Alert 타입 enum -> 강제로그아웃 or 중복로그인 알림 case 구분
 enum LoginAlert: Identifiable {
@@ -22,8 +23,6 @@ enum LoginAlert: Identifiable {
     case forcedLogout
     case newDeviceLogin
 }
-import FirebaseMessaging
-import FirebaseFirestore
 
 class LoginViewModel: ObservableObject {
     @Published var user: SignUpUserModel = SignUpUserModel(username: "", password: "")
@@ -42,9 +41,7 @@ class LoginViewModel: ObservableObject {
     // 강제 로그아웃 관련 snapshot 무시 기한 (그레이스 기간)
     private var ignoreForcedLogoutUntil: Date?
     
-    private var db = Firestore.firestore()
-
-    init() {
+    init(){
         checkAutoLogin()
     }
     
@@ -66,14 +63,13 @@ class LoginViewModel: ObservableObject {
             print("로그인 시도")
             guard let self = self else { return }
             
-            // 로그인 성공 시
             if let error = error {
                 self.loginErrorMessage = error.localizedDescription // 로그인 실패 시 오류 메시지 설정
                 self.isLoggedIn = false
                 return
             }
             
-            // 로그인 성공 시, Firestore 업데이트 전, 기기 중복 여부 확인
+            // 로그인 성공 시, FCM 토큰 저장 후, Firestore 업데이트 전 기기 중복 여부 확인
             guard let uid = authResult?.user.uid else { return }
             let userRef = self.db.collection("users").document(uid)
             self.pendingUserRef = userRef
@@ -86,11 +82,17 @@ class LoginViewModel: ObservableObject {
                         self.currentAlert = .newDeviceLogin
                     }
                 } else {
-                    // 기존 기기 로그인 없음 → 바로 Firestore 업데이트 후 로그인 처리
+                    // FCM 토큰 저장
+                    self.getFCMToken { fcmToken in
+                        if let token = fcmToken {
+                            self.saveFCMTokenToFirestore(fcmToken: token)
+                        }
+                    }
+                    // 기존 기기 로그인 없음 -> Firestore 업데이트 후 로그인 처리
                     userRef.setData([
                         "loginStatus": true,
                         "deviceID": self.deviceID,
-                        "lastLogin": Timestamp(date: Date())
+                        "lastLogin": Timestamp(date: Date()),
                     ], merge: true) { error in
                         if let error = error {
                             print("Firestore 업데이트 에러: \(error.localizedDescription)")
@@ -104,78 +106,6 @@ class LoginViewModel: ObservableObject {
                     self.startListeningForForcedLogout(uid: uid)
                 }
             }
-        }
-    }
-    
-    // 새로운 기기 로그인 확인 후 호출되는 함수
-    func confirmNewDeviceLogin() {
-        guard let userRef = pendingUserRef,
-              let uid = Auth.auth().currentUser?.uid else { return }
-        
-        // 새 기기 로그인 확정 후, 강제 로그아웃 처리 무시(그레이스) 기간 설정 -> 2초
-        ignoreForcedLogoutUntil = Date().addingTimeInterval(2)
-        
-        // 기존 listener 제거
-        logoutListener?.remove()
-        logoutListener = nil
-        
-        // 강제 로그아웃 처리 후 새로우 로그인 처리
-        userRef.updateData([
-            "loginStatus": false,
-            "deviceID": FieldValue.delete()
-        ]) { error in
-            if let error = error {
-                print("기존 세션 강제 로그아웃 처리 에러: \(error.localizedDescription)")
-                return
-            }
-            // 0.5초 딜레이 후 새 기기 로그인 정보 업데이트
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                userRef.setData([
-                    "loginStatus": true,
-                    "deviceID": self.deviceID,
-                    "lastLogin": Timestamp(date: Date())
-                ], merge: true) { error in
-                    if let error = error {
-                        print("Firestore 업데이트 에러: \(error.localizedDescription)")
-                    }
-                    DispatchQueue.main.async {
-                        self.isLoggedIn = true
-                        self.loginErrorMessage = nil
-                        UserDefaults.standard.set(true, forKey: "isLoggedIn")
-                        self.currentAlert = nil
-                    }
-                    self.pendingUserRef = nil
-                    self.startListeningForForcedLogout(uid: uid)
-                }
-            }
-        }
-    }
-    
-    // 사용자가 새 기기 로그인 시 강제 로그아웃 확인 알림에서 "취소"를 선택한 경우
-    func cancelNewDeviceLogin() {
-        self.pendingUserRef = nil
-        do {
-            try Auth.auth().signOut()
-            DispatchQueue.main.async {
-                self.isLoggedIn = false
-                self.currentAlert = nil
-                UserDefaults.standard.set(false, forKey: "isLoggedIn")
-            }
-        } catch let signOutError as NSError {
-            print("Error signing out: \(signOutError.localizedDescription)")
-        }
-    }
-    
-            // 로그인 성공 시, FCM 토큰 저장
-            self?.getFCMToken { fcmToken in
-                if let fcmToken = fcmToken {
-                    self?.saveFCMTokenToFirestore(fcmToken: fcmToken)
-                }
-            }
-            
-            self?.isLoggedIn = true
-            self?.loginErrorMessage = nil
-            UserDefaults.standard.set(true, forKey: "isLoggedIn")
         }
     }
     
@@ -201,12 +131,75 @@ class LoginViewModel: ObservableObject {
         
         db.collection("users").document(userId).updateData([
             "fcmToken": fcmToken
-        ]) { [weak self] error in
+        ]) { error in
             if let error = error {
                 print("FCM 토큰 저장 오류: \(error.localizedDescription)")
             } else {
                 print("FCM 토큰 저장 성공")
             }
+        }
+    }
+    
+    // 새로운 기기 로그인 확인 후 호출되는 함수
+    func confirmNewDeviceLogin() {
+        guard let userRef = pendingUserRef,
+              let uid = Auth.auth().currentUser?.uid else { return }
+        
+        // 새 기기 로그인 확정 후, 강제 로그아웃 처리 무시(그레이스) 기간 설정 -> 2초
+        ignoreForcedLogoutUntil = Date().addingTimeInterval(2)
+        
+        // 기존 listener 제거
+        logoutListener?.remove()
+        logoutListener = nil
+        
+        // 강제 로그아웃 처리 후 새 기기 로그인 처리
+        userRef.updateData([
+            "loginStatus": false,
+            "deviceID": FieldValue.delete(),
+            "fcmToken": FieldValue.delete()
+        ]) { error in
+            if let error = error {
+                print("기존 세션 강제 로그아웃 처리 에러: \(error.localizedDescription)")
+                return
+            }
+            // 0.5초 딜레이 후 새 기기 로그인 정보 업데이트
+            self.getFCMToken { newToken in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                userRef.setData([
+                    "loginStatus": true,
+                    "deviceID": self.deviceID,
+                    "lastLogin": Timestamp(date: Date()),
+                    "fcmToken": newToken ?? ""
+                ], merge: true) { error in
+                    if let error = error {
+                        print("Firestore 업데이트 에러: \(error.localizedDescription)")
+                    }
+                    DispatchQueue.main.async {
+                        self.isLoggedIn = true
+                        self.loginErrorMessage = nil
+                        UserDefaults.standard.set(true, forKey: "isLoggedIn")
+                        self.currentAlert = nil
+                    }
+                    self.pendingUserRef = nil
+                    self.startListeningForForcedLogout(uid: uid)
+                }
+                }
+            }
+        }
+    }
+    
+    // 사용자가 새 기기 로그인 시 강제 로그아웃 확인 알림에서 "취소"를 선택한 경우
+    func cancelNewDeviceLogin() {
+        self.pendingUserRef = nil
+        do {
+            try Auth.auth().signOut()
+            DispatchQueue.main.async {
+                self.isLoggedIn = false
+                self.currentAlert = nil
+                UserDefaults.standard.set(false, forKey: "isLoggedIn")
+            }
+        } catch let signOutError as NSError {
+            print("Error signing out: \(signOutError.localizedDescription)")
         }
     }
     
@@ -263,8 +256,8 @@ class LoginViewModel: ObservableObject {
             let userRef = db.collection("users").document(uid)
             userRef.updateData([
                 "loginStatus": false,
-                "deviceID": FieldValue.delete()
-                "fcmToken": FieldValue.delete() 
+                "deviceID": FieldValue.delete(),
+                "fcmToken": FieldValue.delete() // FCM 토큰 삭제
             ]) { error in
                 if let error = error {
                     print("Error updating login status: \(error.localizedDescription)")

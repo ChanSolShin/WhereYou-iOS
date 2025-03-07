@@ -46,11 +46,12 @@ struct MeetingView: View {
                         meetingAddress: meeting.meetingAddress,
                         meetingLocation: meeting.meetingLocation,
                         meetingMemberIDs: meeting.meetingMemberIDs,
-                        meetingMasterID: meeting.meetingMasterID
+                        meetingMasterID: meeting.meetingMasterID,
+                        isLocationTrackingEnabled: meeting.isLocationTrackingEnabled
                     ),
                     meetingViewModel: meetingViewModel
                 )
-                .frame(height: 300)
+                .frame(height: 500)
                 
                 Button(action: {
                     title = "모임장소"
@@ -62,41 +63,42 @@ struct MeetingView: View {
                         .background(Color.green)
                         .foregroundColor(.white)
                         .cornerRadius(10)
+                        .padding(.bottom, 15)
                 }
                 
-                ForEach(0..<meeting.meetingMemberIDs.count / 3 + (meeting.meetingMemberIDs.count % 3 > 0 ? 1 : 0), id: \.self) { rowIndex in
-                    HStack {
-                        ForEach(0..<3) { columnIndex in
-                            let index = rowIndex * 3 + columnIndex
-                            if index < meeting.meetingMemberIDs.count {
-                                let memberID = meeting.meetingMemberIDs[index]
-                                Button(action: {
-                                    if meetingViewModel.trackedMemberID == memberID {
-                                        title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n     추적 중지"
-                                        meetingViewModel.stopTrackingMember()
-                                    } else {
-                                        title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n      추적 중"
-                                        meetingViewModel.moveToUserLocation(userID: memberID)
-                                    }
-                                }) {
-                                    ZStack {
-                                        Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
-                                            .padding()
-                                            .background(Color.blue)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(10)
-                                        
-                                        if memberID == meeting.meetingMasterID {
-                                            Image(systemName: "crown.fill")
-                                                .foregroundColor(.yellow)
-                                                .offset(x: 0, y: -40)
-                                        }
+            
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 16) {
+                        ForEach(0..<meeting.meetingMemberIDs.count) { index in
+                            let memberID = meeting.meetingMemberIDs[index]
+                            
+                            Button(action: {
+                                if meetingViewModel.trackedMemberID == memberID {
+                                    title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n     추적 중지"
+                                    meetingViewModel.stopTrackingMember()
+                                } else {
+                                    title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n      추적 중"
+                                    meetingViewModel.moveToUserLocation(userID: memberID)
+                                }
+                            }) {
+                                ZStack {
+                                    Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
+                                        .padding()
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                    
+                                    if memberID == meeting.meetingMasterID {
+                                        Image(systemName: "crown.fill")
+                                            .foregroundColor(.yellow)
+                                            .offset(x: 0, y: -40)
                                     }
                                 }
-                                .padding(.vertical, 2)
                             }
+                            .padding(.vertical, 2)
                         }
                     }
+                    .padding(.horizontal) 
                 }
             }
             .onAppear {
@@ -235,6 +237,4 @@ struct MeetingView: View {
             }
         }
     }
-
-    
 }
