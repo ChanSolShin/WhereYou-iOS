@@ -63,6 +63,7 @@ struct MeetingView: View {
                         .background(Color.green)
                         .foregroundColor(.white)
                         .cornerRadius(10)
+                        .padding(.bottom, 15)
                 }
                 
                 ForEach(0..<meeting.meetingMemberIDs.count / 3 + (meeting.meetingMemberIDs.count % 3 > 0 ? 1 : 0), id: \.self) { rowIndex in
