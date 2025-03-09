@@ -48,8 +48,13 @@ class ProfileViewModel: ObservableObject {
             return false
         }
         
+        guard isValidPhoneNumber(newPhoneNumber) else {
+            errorMessage = "휴대전화 번호는 11자리 숫자로 입력해 주세요."
+            return false
+        }
+        
         guard isValidBirthday(newBirthday) else {
-            errorMessage = "생일은 8자리 숫자로 입력해야 합니다."
+            errorMessage = "생년월일은 8자리 숫자로 입력해 주세요."
             return false
         }
         
@@ -78,6 +83,11 @@ class ProfileViewModel: ObservableObject {
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
         let emailTest = NSPredicate(format: "SELF MATCHES %@", emailRegEx)
         return emailTest.evaluate(with: email)
+    }
+    
+    // 전화번호 유효성 검사 (11자리 숫자)
+    private func isValidPhoneNumber(_ phoneNumber: String) -> Bool {
+        return phoneNumber.count == 11 && phoneNumber.allSatisfy { $0.isNumber }
     }
     
     // 생일 유효성 검사
