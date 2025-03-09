@@ -41,10 +41,13 @@ class LoginViewModel: ObservableObject {
     // 강제 로그아웃 관련 snapshot 무시 기한 (그레이스 기간)
     private var ignoreForcedLogoutUntil: Date?
     
-    init(){
+    init() {
         checkAutoLogin()
+        
+        NotificationCenter.default.addObserver(forName: Notification.Name("UserDidLogout"), object: nil, queue: .main) { [weak self] _ in
+            self?.signOut(updateFirestore: false)
+        }
     }
-    
     // 이메일 유효성 검사
     var isValidEmail: Bool {
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}"
@@ -164,25 +167,25 @@ class LoginViewModel: ObservableObject {
             }
             // 0.5초 딜레이 후 새 기기 로그인 정보 업데이트
             self.getFCMToken { newToken in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                userRef.setData([
-                    "loginStatus": true,
-                    "deviceID": self.deviceID,
-                    "lastLogin": Timestamp(date: Date()),
-                    "fcmToken": newToken ?? ""
-                ], merge: true) { error in
-                    if let error = error {
-                        print("Firestore 업데이트 에러: \(error.localizedDescription)")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    userRef.setData([
+                        "loginStatus": true,
+                        "deviceID": self.deviceID,
+                        "lastLogin": Timestamp(date: Date()),
+                        "fcmToken": newToken ?? ""
+                    ], merge: true) { error in
+                        if let error = error {
+                            print("Firestore 업데이트 에러: \(error.localizedDescription)")
+                        }
+                        DispatchQueue.main.async {
+                            self.isLoggedIn = true
+                            self.loginErrorMessage = nil
+                            UserDefaults.standard.set(true, forKey: "isLoggedIn")
+                            self.currentAlert = nil
+                        }
+                        self.pendingUserRef = nil
+                        self.startListeningForForcedLogout(uid: uid)
                     }
-                    DispatchQueue.main.async {
-                        self.isLoggedIn = true
-                        self.loginErrorMessage = nil
-                        UserDefaults.standard.set(true, forKey: "isLoggedIn")
-                        self.currentAlert = nil
-                    }
-                    self.pendingUserRef = nil
-                    self.startListeningForForcedLogout(uid: uid)
-                }
                 }
             }
         }
