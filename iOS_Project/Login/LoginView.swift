@@ -135,6 +135,10 @@ struct LoginView: View {
                 .padding(.horizontal, 40)
                 Spacer()
             }
+            .onAppear{
+                let loggedInStatus = UserDefaults.standard.bool(forKey: "isLoggedIn")
+                print(loggedInStatus)
+            }
             // 하나의 Alert로 강제 로그아웃 및 새 기기 로그인 확인 처리
             .alert(item: $viewModel.currentAlert) { alertType in
                 switch alertType {
