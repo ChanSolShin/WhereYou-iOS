@@ -9,7 +9,6 @@ import SwiftUI
 
 struct EditProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
-    @EnvironmentObject var loginViewModel: LoginViewModel // 전역 로그인 상태 사용
     @Environment(\.presentationMode) var presentationMode
     @State private var showDeleteAlert = false
     @State private var name = ""
@@ -62,7 +61,6 @@ struct EditProfileView: View {
                 Spacer()
                 Button(action: {
                     showDeleteAlert = true
-                    print("showDeleteAlert:", showDeleteAlert)
                 }) {
                     Text("탈퇴하기")
                         .foregroundColor(.red)
@@ -87,19 +85,13 @@ struct EditProfileView: View {
             phoneNumber = viewModel.profile?.phoneNumber ?? ""
             birthday = viewModel.profile?.birthday ?? ""
         }
-        .fullScreenCover(isPresented: Binding<Bool>(
-            get: { !loginViewModel.isLoggedIn },
-            set: { _ in }
-        )) {
-            LoginView() // 회원탈퇴 시, 로그인 화면으로 이동
-                .environmentObject(loginViewModel)
+        .fullScreenCover(isPresented: $viewModel.navigateToLogin) {
+            LoginView() // 회원탈퇴 후 로그인 화면으로 이동
         }
         .navigationBarItems(
             trailing: Button("완료") {
                 if viewModel.updateProfileData(newName: name, newEmail: email, newPhoneNumber: phoneNumber, newBirthday: birthday) {
                     presentationMode.wrappedValue.dismiss()
-                } else {
-                    
                 }
             }
         )

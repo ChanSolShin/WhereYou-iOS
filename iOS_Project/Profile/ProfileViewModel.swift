@@ -8,12 +8,14 @@
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
+import SwiftUI
 
 class ProfileViewModel: ObservableObject {
     @Published var profile: ProfileModel?
     @Published var isEditing = false
     @Published var errorMessage: String? // 에러 메시지 상태 추가
-    
+    @Published var navigateToLogin = false // 로그인 화면으로 이동 플래그
+
     private let db = Firestore.firestore()
     
     init() {
@@ -83,7 +85,6 @@ class ProfileViewModel: ObservableObject {
         return birthday.count == 8 && birthday.allSatisfy { $0.isNumber }
     }
     
-    
     // 계정 삭제
     func deleteAccount() {
         guard let user = Auth.auth().currentUser else { return }
@@ -91,15 +92,31 @@ class ProfileViewModel: ObservableObject {
         let uid = user.uid
         db.collection("users").document(uid).delete { [weak self] error in
             if let error = error {
-                print("Error deleting Firestore data: \(error)")
+                self?.errorMessage = "데이터 삭제 중 오류가 발생했습니다: \(error.localizedDescription)"
                 return
             }
             
             user.delete { error in
                 if let error = error {
-                    print("Error deleting user: \(error)")
+                    self?.errorMessage = "계정 삭제 중 오류가 발생했습니다: \(error.localizedDescription)"
                 } else {
+                    // Firebase Auth에서 로그아웃 처리
+                    do {
+                        try Auth.auth().signOut()
+                    } catch {
+                        print("로그아웃 에러: \(error.localizedDescription)")
+                    }
+                    
+                    // UserDefaults 업데이트
                     UserDefaults.standard.set(false, forKey: "isLoggedIn")
+                    
+                    //NotificationCenter를 통해 로그아웃 이벤트 전달(자동로그인 방지)
+                    NotificationCenter.default.post(name: Notification.Name("UserDidLogout"), object: nil)
+                    
+                    // 일정 시간 후 로그인 화면으로 전환
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        self?.navigateToLogin = true
+                    }
                 }
             }
         }
