@@ -137,10 +137,10 @@ struct EditProfileView: View {
                 return Alert(
                     title: Text("수정사항이 있습니다."),
                     message: Text("저장하지 않고 나가시겠습니까?"),
-                    primaryButton: .destructive(Text("예"), action: {
+                    primaryButton: .destructive(Text("나가기"), action: {
                         presentationMode.wrappedValue.dismiss()
                     }),
-                    secondaryButton: .cancel(Text("아니요"))
+                    secondaryButton: .cancel(Text("취소"))
                 )
             }
         }
@@ -171,7 +171,18 @@ struct EditProfileView: View {
         .navigationBarBackButtonHidden(true) // 기본 뒤로가기 버튼 숨김
         .navigationBarItems(
             leading: Button(action: {
-                activeAlert = .back
+                // 변경사항이 있는지 확인
+                if let profile = viewModel.profile,
+                   name == profile.name,
+                   email == profile.email,
+                   phoneNumber == profile.phoneNumber,
+                   birthday == profile.birthday {
+                    // 변경사항 없음 -> 바로 뒤로가기
+                    presentationMode.wrappedValue.dismiss()
+                } else {
+                    // 변경사항 있음 -> 알림 표시
+                    activeAlert = .back
+                }
             }) {
                 HStack {
                     Image(systemName: "chevron.left")
