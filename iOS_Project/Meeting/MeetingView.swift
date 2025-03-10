@@ -51,7 +51,7 @@ struct MeetingView: View {
                     ),
                     meetingViewModel: meetingViewModel
                 )
-                .frame(height: 500)
+                .frame(height: 450)
                 
                 Button(action: {
                     title = "모임장소"

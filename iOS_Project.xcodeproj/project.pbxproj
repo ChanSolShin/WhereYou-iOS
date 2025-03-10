@@ -867,7 +867,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/WhereYou-iOS/iOS_Project/Info.plist";
+				INFOPLIST_FILE = /Users/sinchansol/Desktop/WhereYou_Project/iOS_Project/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
@@ -911,7 +911,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/WhereYou-iOS/iOS_Project/Info.plist";
+				INFOPLIST_FILE = /Users/sinchansol/Desktop/WhereYou_Project/iOS_Project/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
