@@ -79,7 +79,6 @@ exports.sendMeetingInviteNotification = functions.firestore.onDocumentCreated('m
     return null;
 });
 
-// ✅ 1분마다 실행하여 모임 시간을 확인하고, 위치 추적 활성화 여부를 변경 및 알림 전송
 exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (event) => {
     const currentDate = new Date();
     const koreaTimeOffset = 9 * 60; // UTC+9 (한국 시간)
@@ -107,19 +106,18 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
             trackingEnd.setHours(trackingEnd.getHours() + 1); // 모임 1시간 후
 
             if (currentDate >= trackingStart && currentDate <= trackingEnd) {
-                // ✅ 3시간 전 ~ 1시간 후: 위치 추적 활성화
+                // ✅ 위치 추적이 꺼져 있다면 활성화하고, 그때만 알림 전송
                 if (!meetingData.isLocationTrackingEnabled) {
                     await doc.ref.update({ isLocationTrackingEnabled: true });
                     console.log(`모임 ${doc.id}: 위치 추적 활성화 (true)`);
 
-                    // 위치 추적 활성화 후 모임 멤버들에게 알림 전송
+                    // 🔹 위치 추적이 켜진 순간이므로 알림 전송
                     const meetingName = meetingData.meetingName || "알 수 없는 모임";
                     const meetingMembers = meetingData.meetingMembers || [];
-                    const meetingAddress = meetingData.meetingAddress || "주소 정보 없음";
-                    
+
                     if (meetingMembers.length === 0) {
                         console.log(`⚠️ 모임 ${doc.id}에 멤버가 없습니다.`);
-                        return null;
+                        return;
                     }
 
                     let tokens = [];
@@ -146,7 +144,7 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
 
                     if (tokens.length === 0) {
                         console.log(`⚠️ 모임 ${doc.id} 멤버들에게 보낼 FCM 토큰이 없음`);
-                        return null;
+                        return;
                     }
 
                     // 각 멤버에게 FCM 메시지 전송
@@ -258,6 +256,86 @@ exports.notifyMemberAdded = functions.firestore.onDocumentUpdated(
             }
         } catch (error) {
             console.error('❌ 푸시 알림 전송 실패:', error);
+        }
+
+        return null;
+    }
+);
+
+// ✅ 모임 정보 수정 시 알림 전송
+exports.notifyMeetingUpdated = functions.firestore.onDocumentUpdated(
+    { document: 'meetings/{meetingId}' },
+    async (event) => {
+        const beforeData = event.data.before.data();
+        const afterData = event.data.after.data();
+
+        // 변경 감지할 필드
+        const fieldsToCheck = ['meetingAddress', 'meetingDate', 'meetingLocation'];
+        const hasChanged = fieldsToCheck.some(field =>
+            JSON.stringify(beforeData[field]) !== JSON.stringify(afterData[field])
+        );
+
+        if (!hasChanged) {
+            console.log('📌 변경된 모임 정보가 없습니다.');
+            return null;
+        }
+
+        const meetingName = afterData.meetingName || '알 수 없는 모임';
+        const meetingMaster = afterData.meetingMaster;
+        const meetingMembers = afterData.meetingMembers || [];
+
+        // 모임장 제외한 멤버 필터링
+        const targetMembers = meetingMembers.filter(uid => uid !== meetingMaster);
+        if (targetMembers.length === 0) {
+            console.log('📌 알림을 보낼 대상 멤버가 없습니다.');
+            return null;
+        }
+
+        let tokens = [];
+        
+        // 🔹 FCM 토큰 가져오기
+        await Promise.all(targetMembers.map(async (memberUID) => {
+            try {
+                const userDoc = await db.collection("users").doc(memberUID).get();
+                if (!userDoc.exists) {
+                    console.log(`⚠️ 사용자 ${memberUID}의 데이터가 존재하지 않음`);
+                    return;
+                }
+
+                const fcmToken = userDoc.data()?.fcmToken;
+                if (fcmToken) {
+                    tokens.push(fcmToken);  // FCM 토큰 수집
+                } else {
+                    console.log(`⚠️ 사용자 ${memberUID}의 FCM 토큰이 없음`);
+                }
+            } catch (error) {
+                console.error(`❌ 사용자 ${memberUID} 데이터 가져오기 실패:`, error);
+            }
+        }));
+
+        if (tokens.length === 0) {
+            console.log('⚠️ 전송할 FCM 토큰이 없습니다.');
+            return null;
+        }
+
+        // 🔹 FCM 메시지 생성
+        const message = {
+            notification: {
+                title: '웨어유',
+                body: `${meetingName} 모임의 정보가 수정되었습니다!`,
+            },
+        };
+
+        try {
+            // 🔹 각 멤버에게 개별적으로 메시지 전송
+            for (const token of tokens) {
+                message.token = token;
+                await messaging.send(message);
+            }
+
+            console.log(`✅ '${meetingName}' 모임 - 푸시 알림 전송 성공`);
+        } catch (error) {
+            console.error(`❌ '${meetingName}' 모임 - 푸시 알림 전송 실패:`, error);
         }
 
         return null;
