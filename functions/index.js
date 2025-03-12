@@ -341,3 +341,36 @@ exports.notifyMeetingUpdated = functions.firestore.onDocumentUpdated(
         return null;
     }
 );
+
+exports.deleteExpiredMeetings = onSchedule("every 1 minutes", async (event) => {
+    const currentDate = new Date();
+    const koreaTimeOffset = 9 * 60;
+    currentDate.setMinutes(currentDate.getMinutes() + currentDate.getTimezoneOffset() + koreaTimeOffset);
+    
+    // 현재 시간에서 2시간 전의 Timestamp 계산
+    const deleteThreshold = new Date(currentDate);
+    deleteThreshold.setHours(deleteThreshold.getHours() - 2);
+
+    try {
+        // 쿼리를 사용해 2시간 지난 모임만 가져오기
+        const meetingsSnapshot = await db.collection("meetings")
+            .where("meetingDate", "<=", deleteThreshold)
+            .get();
+
+        if (meetingsSnapshot.empty) {
+            console.log("🔍 삭제할 만료된 모임 없음");
+            return;
+        }
+
+        // 모든 만료된 모임 삭제
+        await Promise.all(meetingsSnapshot.docs.map(async (doc) => {
+            await doc.ref.delete();
+            console.log(`🗑 모임 ${doc.id} 삭제 완료`);
+        }));
+
+    } catch (error) {
+        console.error("❌ Firestore에서 모임 삭제 중 오류 발생:", error);
+    }
+
+    return null;
+});
