@@ -163,6 +163,7 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
                         }
 
                         console.log(`✅ 모임 ${doc.id} - 푸시 알림 전송 성공`);
+                        await doc.ref.update({ isNotificationSent: true }); // 알림이 전송된 상태로 업데이트
                     } catch (error) {
                         console.error(`❌ 모임 ${doc.id} - 푸시 알림 전송 실패:`, error);
                     }
@@ -173,6 +174,12 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
                     await doc.ref.update({ isLocationTrackingEnabled: false });
                     console.log(`모임 ${doc.id}: 위치 추적 비활성화 (false)`);
                 }
+
+                // 위치 추적 비활성화 상태에서 isNotificationSent 필드 리셋 (필요에 따라)
+                if (meetingData.isNotificationSent) {
+                    await doc.ref.update({ isNotificationSent: false });
+                    console.log(`모임 ${doc.id}: 알림 상태 리셋`);
+                }
             }
         }));
     } catch (error) {
@@ -181,7 +188,6 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
 
     return null;
 });
-
 
 // ✅ 모임에 새로운 멤버가 추가되었을 때 알림 전송
 exports.notifyMemberAdded = functions.firestore.onDocumentUpdated(
