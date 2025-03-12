@@ -69,8 +69,7 @@ struct MeetingView: View {
             
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 16) {
-                        ForEach(0..<meeting.meetingMemberIDs.count) { index in
-                            let memberID = meeting.meetingMemberIDs[index]
+                        ForEach(meeting.meetingMemberIDs, id: \.self) { memberID in
                             
                             Button(action: {
                                 if meetingViewModel.trackedMemberID == memberID {
