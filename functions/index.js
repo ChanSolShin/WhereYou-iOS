@@ -344,28 +344,33 @@ exports.notifyMeetingUpdated = functions.firestore.onDocumentUpdated(
 
 exports.deleteExpiredMeetings = onSchedule("every 1 minutes", async (event) => {
     const currentDate = new Date();
-    const koreaTimeOffset = 9 * 60;
+    const koreaTimeOffset = 9 * 60; // UTC+9
     currentDate.setMinutes(currentDate.getMinutes() + currentDate.getTimezoneOffset() + koreaTimeOffset);
-    
-    // 현재 시간에서 2시간 전의 Timestamp 계산
-    const deleteThreshold = new Date(currentDate);
-    deleteThreshold.setHours(deleteThreshold.getHours() - 2);
 
     try {
-        // 쿼리를 사용해 2시간 지난 모임만 가져오기
-        const meetingsSnapshot = await db.collection("meetings")
-            .where("meetingDate", "<=", deleteThreshold)
-            .get();
+        // Firestore에서 모임들을 조회하고, meetingDate가 현재 시간보다 2시간 이전인 모임들 찾기
+        const meetingsSnapshot = await db.collection("meetings").get();
 
         if (meetingsSnapshot.empty) {
             console.log("🔍 삭제할 만료된 모임 없음");
             return;
         }
 
-        // 모든 만료된 모임 삭제
+        // 모든 모임을 검사하여, meetingDate + 2시간이 지나면 삭제
         await Promise.all(meetingsSnapshot.docs.map(async (doc) => {
-            await doc.ref.delete();
-            console.log(`🗑 모임 ${doc.id} 삭제 완료`);
+            const meetingDate = doc.data().meetingDate.toDate(); // Firestore에서 가져온 meetingDate 변환 (UTC)
+            const meetingDateKorea = new Date(meetingDate.getTime() + koreaTimeOffset * 60 * 1000); // 한국 시간으로 변환
+            const deleteThreshold = new Date(meetingDateKorea); // 한국 시간 기준으로 2시간 후
+            deleteThreshold.setHours(deleteThreshold.getHours() + 2); // 모임시간에 2시간 추가
+
+            console.log("현재 시간:", currentDate);
+            console.log("삭제 기준 시간 (meetingDate + 2시간):", deleteThreshold);
+
+            // currentDate가 deleteThreshold보다 크면 삭제
+            if (currentDate >= deleteThreshold) {
+                await doc.ref.delete();
+                console.log(`🗑 모임 ${doc.id} 삭제 완료`);
+            }
         }));
 
     } catch (error) {
