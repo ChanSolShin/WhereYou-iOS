@@ -105,6 +105,7 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
             const trackingEnd = new Date(meetingDateKST);
             trackingEnd.setHours(trackingEnd.getHours() + 1); // 모임 1시간 후
 
+            // 위치 추적 범위에 있는지 확인
             if (currentDate >= trackingStart && currentDate <= trackingEnd) {
                 // ✅ 위치 추적이 꺼져 있다면 활성화하고, 그때만 알림 전송
                 if (!meetingData.isLocationTrackingEnabled) {
@@ -147,6 +148,12 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
                         return;
                     }
 
+                    // 이미 알림이 전송된 경우 추가로 알림을 보내지 않도록 처리
+                    if (meetingData.isNotificationSent) {
+                        console.log(`⚠️ 모임 ${doc.id}: 이미 알림이 전송되었습니다.`);
+                        return;  // 알림을 이미 전송했으므로 더 이상 보내지 않음
+                    }
+
                     // 각 멤버에게 FCM 메시지 전송
                     const message = {
                         notification: {
@@ -163,13 +170,13 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
                         }
 
                         console.log(`✅ 모임 ${doc.id} - 푸시 알림 전송 성공`);
-                        await doc.ref.update({ isNotificationSent: true }); // 알림이 전송된 상태로 업데이트
+                        await doc.ref.update({ isNotificationSent: true }); // 알림 전송 후 상태 업데이트
                     } catch (error) {
                         console.error(`❌ 모임 ${doc.id} - 푸시 알림 전송 실패:`, error);
                     }
                 }
             } else {
-                // ❌ 범위를 벗어나면 위치 추적 비활성화
+                // 위치 추적 범위를 벗어나면 위치 추적 비활성화
                 if (meetingData.isLocationTrackingEnabled) {
                     await doc.ref.update({ isLocationTrackingEnabled: false });
                     console.log(`모임 ${doc.id}: 위치 추적 비활성화 (false)`);
