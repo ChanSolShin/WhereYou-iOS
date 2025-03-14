@@ -15,7 +15,7 @@ struct MeetingView: View {
     var meeting: MeetingListModel
     @ObservedObject var meetingViewModel: MeetingViewModel
     @State private var title: String = "모임장소"
-    @State private var meetingDate: String = "모임시간: 불러오는 중..."
+    @State var meetingDate: Date? = nil
     @State private var showingAddFriendModal = false
     @State private var leaderSelctionModal = false
     @State private var showAlert: Bool = false
@@ -23,17 +23,16 @@ struct MeetingView: View {
     @State private var showActionSheet = false
     @State private var showingEditMeetingModal = false
     @State private var showingKickOutModal = false
-
+    
     var body: some View {
         NavigationStack {
             VStack {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(meetingDate)
-                        .font(.headline)
-                        .foregroundColor(.gray)
+                    Text(meetingViewModel.meetingDate != nil ? formattedDate(meetingViewModel.meetingDate!) : "모임시간: 불러오는 중...")
+                                    .font(.headline)
+                                    .foregroundColor(.gray)
                 }
                 .padding(.bottom, 10)
-
                 Text(title)
                     .font(.title2)
                 
@@ -66,7 +65,7 @@ struct MeetingView: View {
                         .padding(.bottom, 15)
                 }
                 
-            
+                
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 16) {
                         ForEach(meeting.meetingMemberIDs, id: \.self) { memberID in
@@ -97,11 +96,11 @@ struct MeetingView: View {
                             .padding(.vertical, 2)
                         }
                     }
-                    .padding(.horizontal) 
+                    .padding(.horizontal)
                 }
             }
             .onAppear {
-                fetchMeetingData()
+                meetingViewModel.fetchMeetingData(meetingID: meeting.id)
             }
             .onDisappear {
                 meetingViewModel.stopTrackingMember()
@@ -213,27 +212,10 @@ struct MeetingView: View {
             }
         }
     }
-
-    private func fetchMeetingData() {
-        let db = Firestore.firestore()
-        let docRef = db.collection("meetings").document(meeting.id)
-
-        docRef.getDocument { (document, error) in
-            if let error = error {
-                print("meetings 컬렉션에서 문서를 가져오는 중 오류: \(error.localizedDescription)")
-                return
-            }
-
-            guard let document = document, document.exists else {
-                print("meetings 컬렉션에서 문서가 존재하지 않습니다.")
-                return
-            }
-
-            if let date = document.data()?["meetingDate"] as? Timestamp {
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy년 MM월 dd일 HH:mm"
-                meetingDate = "모임시간: \(formatter.string(from: date.dateValue()))"
-            }
-        }
+        
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy년 MM월 dd일 HH:mm"
+        return "모임시간: \(formatter.string(from: date))"
     }
 }

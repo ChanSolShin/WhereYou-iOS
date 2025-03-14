@@ -21,41 +21,31 @@ class MeetingViewModel: NSObject, ObservableObject {
     @Published var meetingMasterID: String?
     @Published var selectedUserLocation: CLLocationCoordinate2D? // 유저 위치 표시
     @Published var trackedMemberID: String? // 현재 추적 중인 멤버 ID
+    @Published var meetingDate: Date?
     
     private var meeting: MeetingModel? // 현재 선택된 모임
     private let realtimeDB = Database.database().reference()
     
     private let locationCoordinator: AppLocationCoordinator // 위치 코디네이터
     
+    private var meetingListener: ListenerRegistration?
+       private var memberListener: ListenerRegistration?
+    
+    private var db = Firestore.firestore()
+    
     init(locationCoordinator: AppLocationCoordinator = AppLocationCoordinator.shared) {
         self.locationCoordinator = locationCoordinator
         super.init()
     }
     
+    deinit {
+        meetingListener?.remove()
+        memberListener?.remove()
+    }
+    
     // 현재 로그인한 사용자 ID 가져오기
     func getCurrentUserID() -> String? {
         return Auth.auth().currentUser?.uid
-    }
-    
-    // 현재 로그인한 사용자 이름 가져오기
-    func getCurrentUserName(completion: @escaping (String) -> Void) {
-        guard let userID = getCurrentUserID() else {
-            completion("Unknown")
-            return
-        }
-        
-        let db = Firestore.firestore()
-        db.collection("users").document(userID).getDocument { (document, error) in
-            if let error = error {
-                print("Error fetching user name: \(error)")
-                completion("Unknown")
-            } else if let document = document, document.exists,
-                      let userName = document.data()?["name"] as? String {
-                completion(userName)
-            } else {
-                completion("Unknown")
-            }
-        }
     }
 
     // 모임 선택 및 초기화
@@ -74,6 +64,42 @@ class MeetingViewModel: NSObject, ObservableObject {
         // AppLocationCoordinator에 모임 등록
         locationCoordinator.registerMeeting(meeting)
     }
+    
+    private func listenToMeetingChanges(meetingID: String) {
+           meetingListener?.remove()
+           
+           let db = Firestore.firestore()
+           meetingListener = db.collection("meetings").document(meetingID).addSnapshotListener { [weak self] (document, error) in
+               guard let self = self else { return }
+               if let document = document, document.exists {
+                   if let timestamp = document.data()?["meetingDate"] as? Timestamp {
+                       DispatchQueue.main.async {
+                           self.meetingDate = timestamp.dateValue()
+                       }
+                   }
+               }
+           }
+       }
+    
+    private func listenToMemberNameChanges(memberIDs: [String]) {
+           memberListener?.remove()
+           
+           let db = Firestore.firestore()
+           memberListener = db.collection("users").whereField(FieldPath.documentID(), in: memberIDs)
+               .addSnapshotListener { [weak self] (querySnapshot, error) in
+                   guard let self = self else { return }
+                   guard let documents = querySnapshot?.documents else { return }
+                   
+                   DispatchQueue.main.async {
+                       for document in documents {
+                           if let name = document.data()["name"] as? String {
+                               self.meetingMemberNames[document.documentID] = name
+                           }
+                       }
+                   }
+               }
+       }
+
     
     
     // 특정 유저 위치 가져오기 및 추적 시작
@@ -192,11 +218,9 @@ class MeetingViewModel: NSObject, ObservableObject {
     }
     
     private func fetchMeetingDocumentID(for meetingName: String, completion: @escaping (String?) -> Void) {
-        let db = Firestore.firestore()
-        
         db.collection("meetings").whereField("meetingName", isEqualTo: meetingName).getDocuments { (snapshot, error) in
             if let error = error {
-                print("Error fetching meeting document ID: \(error)")
+            print("Error fetching meeting document ID: \(error)")
                 completion(nil)
             } else if let document = snapshot?.documents.first {
                 // 첫 번째 문서의 ID 반환
@@ -206,6 +230,31 @@ class MeetingViewModel: NSObject, ObservableObject {
             }
         }
     }
+    
+    func fetchMeetingData(meetingID: String) {
+           db.collection("meetings").document(meetingID)
+               .addSnapshotListener { [weak self] document, error in
+                   if let error = error {
+                       self?.errorMessage = "데이터 로딩 중 오류 발생: \(error.localizedDescription)"
+                       return
+                   }
+                   
+                   guard let document = document, document.exists else {
+                       self?.errorMessage = "문서가 존재하지 않습니다."
+                       return
+                   }
+                   
+                   // Firestore에서 날짜를 받아와 업데이트
+                   if let date = document.data()?["meetingDate"] as? Timestamp {
+                       self?.meetingDate = date.dateValue()
+                   }
+                   
+                   // 모임 멤버 이름 업데이트
+                   if let memberNames = document.data()?["meetingMemberNames"] as? [String: String] {
+                       self?.meetingMemberNames = memberNames
+                   }
+               }
+       }
     
     // 친구들에게 모임 초대 요청 보내기
     func sendMeetingRequest(toUserIDs: [String], meetingName: String, fromUserID: String, fromUserName: String) {
