@@ -37,7 +37,6 @@
 		EA86C1482CC2F7A100989E43 /* AddLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1472CC2F79A00989E43 /* AddLocationView.swift */; };
 		EA86C14C2CC2FBAD00989E43 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1492CC2FBAD00989E43 /* Coordinator.swift */; };
 		EA86C14D2CC2FBAD00989E43 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C14A2CC2FBAD00989E43 /* MapView.swift */; };
-		EA9E7E332D67454200CF572A /* MeetingRequestNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA9E7E322D67454000CF572A /* MeetingRequestNotification.swift */; };
 		EAA9ACE32CDC18B0002F2C79 /* LeaderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE22CDC18AE002F2C79 /* LeaderSelectionView.swift */; };
 		EAA9ACE52CDC18BF002F2C79 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE42CDC18BD002F2C79 /* User.swift */; };
 		EAA9ACE82CDC1E2F002F2C79 /* LeaderSelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE72CDC1E2A002F2C79 /* LeaderSelectionViewModel.swift */; };
@@ -72,7 +71,6 @@
 		F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */; };
 		F5D76AE82CDCB1B700CB652B /* PermissionRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */; };
 		F5E8486B2D66DBF200047AA1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */; };
-		F5E8486E2D66F68B00047AA1 /* FriendRequestNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E8486C2D66F68B00047AA1 /* FriendRequestNotification.swift */; };
 		F5E848752D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
 		F5E848762D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
 		F5E848772D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
@@ -128,7 +126,6 @@
 		EA86C1472CC2F79A00989E43 /* AddLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLocationView.swift; sourceTree = "<group>"; };
 		EA86C1492CC2FBAD00989E43 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
 		EA86C14A2CC2FBAD00989E43 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
-		EA9E7E322D67454000CF572A /* MeetingRequestNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRequestNotification.swift; sourceTree = "<group>"; };
 		EAA9ACE22CDC18AE002F2C79 /* LeaderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderSelectionView.swift; sourceTree = "<group>"; };
 		EAA9ACE42CDC18BD002F2C79 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		EAA9ACE72CDC1E2A002F2C79 /* LeaderSelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderSelectionViewModel.swift; sourceTree = "<group>"; };
@@ -161,7 +158,6 @@
 		F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocationCoordinator.swift; sourceTree = "<group>"; };
 		F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRequiredView.swift; sourceTree = "<group>"; };
 		F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		F5E8486C2D66F68B00047AA1 /* FriendRequestNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRequestNotification.swift; sourceTree = "<group>"; };
 		F5E848732D66F89900047AA1 /* iOS_Project.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS_Project.entitlements; sourceTree = "<group>"; };
 		F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		FB3FFC42D97330368AC296CF /* Pods-iOS_Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS_Project.debug.xcconfig"; path = "Target Support Files/Pods-iOS_Project/Pods-iOS_Project.debug.xcconfig"; sourceTree = "<group>"; };
@@ -316,7 +312,6 @@
 				F5E848732D66F89900047AA1 /* iOS_Project.entitlements */,
 				F50FDDB72CD3A814006E96B2 /* FindAuth */,
 				EA6EE1DF2CD39BBB002961A9 /* Request */,
-				F5E8486D2D66F68B00047AA1 /* Notification */,
 				EA86C14B2CC2FBAD00989E43 /* Map */,
 				EA86C1062CC2F15700989E43 /* AddMeeting */,
 				EA86C1082CC2F15700989E43 /* Friend */,
@@ -438,15 +433,6 @@
 				F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */,
 			);
 			path = LocationManagers;
-			sourceTree = "<group>";
-		};
-		F5E8486D2D66F68B00047AA1 /* Notification */ = {
-			isa = PBXGroup;
-			children = (
-				EA9E7E322D67454000CF572A /* MeetingRequestNotification.swift */,
-				F5E8486C2D66F68B00047AA1 /* FriendRequestNotification.swift */,
-			);
-			path = Notification;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -638,9 +624,7 @@
 			files = (
 				F52E2FF92CD3CC9000520042 /* FindPasswordView.swift in Sources */,
 				EA86C1212CC2F15700989E43 /* AddMeetingModel.swift in Sources */,
-				F5E8486E2D66F68B00047AA1 /* FriendRequestNotification.swift in Sources */,
 				F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */,
-				EA9E7E332D67454200CF572A /* MeetingRequestNotification.swift in Sources */,
 				F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */,
 				EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */,
 				EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */,
