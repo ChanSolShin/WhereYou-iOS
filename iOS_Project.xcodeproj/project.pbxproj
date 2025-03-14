@@ -54,6 +54,7 @@
 		EAEA149F2CDCD04800C7FD9D /* EditLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA149E2CDCD04000C7FD9D /* EditLocationView.swift */; };
 		EAEA14A62CE5F72D00C7FD9D /* KickOutMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA14A52CE5F71100C7FD9D /* KickOutMember.swift */; };
 		EAEA14A82CE5F92400C7FD9D /* KickOutMemberViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA14A72CE5F91E00C7FD9D /* KickOutMemberViewModel.swift */; };
+		F5038ECE2D841D0100347F13 /* country_codes.json in Resources */ = {isa = PBXBuildFile; fileRef = F5038ECD2D841CF800347F13 /* country_codes.json */; };
 		F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */; };
 		F50FDDBC2CD3AA12006E96B2 /* FindEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */; };
 		F50FDDBE2CD3AA2C006E96B2 /* FindEmailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */; };
@@ -146,6 +147,7 @@
 		EAEA149E2CDCD04000C7FD9D /* EditLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditLocationView.swift; sourceTree = "<group>"; };
 		EAEA14A52CE5F71100C7FD9D /* KickOutMember.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KickOutMember.swift; sourceTree = "<group>"; };
 		EAEA14A72CE5F91E00C7FD9D /* KickOutMemberViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KickOutMemberViewModel.swift; sourceTree = "<group>"; };
+		F5038ECD2D841CF800347F13 /* country_codes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = country_codes.json; sourceTree = "<group>"; };
 		F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailModel.swift; sourceTree = "<group>"; };
 		F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailView.swift; sourceTree = "<group>"; };
 		F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailViewModel.swift; sourceTree = "<group>"; };
@@ -154,7 +156,6 @@
 		F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordView.swift; sourceTree = "<group>"; };
 		F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordViewModel.swift; sourceTree = "<group>"; };
 		F53F124A2D7DC0F300E434D4 /* KeyboardAvoidingModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardAvoidingModifier.swift; sourceTree = "<group>"; };
-		F540A7A22D81D512004EED08 /* country_codes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = country_codes.json; sourceTree = "<group>"; };
 		F5ADB1CF2CD90DA500A1011C /* ProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileModel.swift; sourceTree = "<group>"; };
 		F5ADB1D32CD9295E00A1011C /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		F5ADB1D52CD92AF600A1011C /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
@@ -304,10 +305,10 @@
 		EA86C11A2CC2F15700989E43 /* SignUp */ = {
 			isa = PBXGroup;
 			children = (
+				F5038ECD2D841CF800347F13 /* country_codes.json */,
 				EA86C1172CC2F15700989E43 /* SignUpUserModel.swift */,
 				EA86C1182CC2F15700989E43 /* SignUpView.swift */,
 				EA86C1192CC2F15700989E43 /* SignUpViewModel.swift */,
-				F540A7A22D81D512004EED08 /* country_codes.json */,
 			);
 			path = SignUp;
 			sourceTree = "<group>";
@@ -570,6 +571,7 @@
 				EA86C1322CC2F15700989E43 /* Preview Assets.xcassets in Resources */,
 				EA86C1332CC2F15700989E43 /* Assets.xcassets in Resources */,
 				F51148BD2D80076000137679 /* GoogleService-Info.plist in Resources */,
+				F5038ECE2D841D0100347F13 /* country_codes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

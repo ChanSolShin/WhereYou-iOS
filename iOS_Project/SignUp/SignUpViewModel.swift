@@ -20,6 +20,7 @@ class SignUpViewModel: ObservableObject {
     @Published var signUpErrorMessage: String?
     @Published var signUpErrorMessageColor: Color = .red 
     @Published var signUpSuccess: Bool = false
+    @Published var verificationCode: String = ""
 
     private var db = Firestore.firestore()
 
