@@ -37,6 +37,7 @@
 		EA86C1482CC2F7A100989E43 /* AddLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1472CC2F79A00989E43 /* AddLocationView.swift */; };
 		EA86C14C2CC2FBAD00989E43 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1492CC2FBAD00989E43 /* Coordinator.swift */; };
 		EA86C14D2CC2FBAD00989E43 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C14A2CC2FBAD00989E43 /* MapView.swift */; };
+		EA9E7E332D67454200CF572A /* MeetingRequestNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA9E7E322D67454000CF572A /* MeetingRequestNotification.swift */; };
 		EAA9ACE32CDC18B0002F2C79 /* LeaderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE22CDC18AE002F2C79 /* LeaderSelectionView.swift */; };
 		EAA9ACE52CDC18BF002F2C79 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE42CDC18BD002F2C79 /* User.swift */; };
 		EAA9ACE82CDC1E2F002F2C79 /* LeaderSelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA9ACE72CDC1E2A002F2C79 /* LeaderSelectionViewModel.swift */; };
@@ -53,9 +54,13 @@
 		EAEA149F2CDCD04800C7FD9D /* EditLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA149E2CDCD04000C7FD9D /* EditLocationView.swift */; };
 		EAEA14A62CE5F72D00C7FD9D /* KickOutMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA14A52CE5F71100C7FD9D /* KickOutMember.swift */; };
 		EAEA14A82CE5F92400C7FD9D /* KickOutMemberViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA14A72CE5F91E00C7FD9D /* KickOutMemberViewModel.swift */; };
+		F5038ECE2D841D0100347F13 /* country_codes.json in Resources */ = {isa = PBXBuildFile; fileRef = F5038ECD2D841CF800347F13 /* country_codes.json */; };
 		F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */; };
 		F50FDDBC2CD3AA12006E96B2 /* FindEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */; };
 		F50FDDBE2CD3AA2C006E96B2 /* FindEmailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */; };
+		F51148BC2D80076000137679 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F51148BB2D80076000137679 /* GoogleService-Info.plist */; };
+		F51148BD2D80076000137679 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F51148BB2D80076000137679 /* GoogleService-Info.plist */; };
+		F51148BE2D80076000137679 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F51148BB2D80076000137679 /* GoogleService-Info.plist */; };
 		F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FF62CD3CC5D00520042 /* FindPasswordModel.swift */; };
 		F52E2FF92CD3CC9000520042 /* FindPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */; };
 		F52E2FFB2CD3CEB500520042 /* FindPasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */; };
@@ -71,9 +76,7 @@
 		F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */; };
 		F5D76AE82CDCB1B700CB652B /* PermissionRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */; };
 		F5E8486B2D66DBF200047AA1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */; };
-		F5E848752D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
-		F5E848762D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
-		F5E848772D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
+		F5E8486E2D66F68B00047AA1 /* FriendRequestNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E8486C2D66F68B00047AA1 /* FriendRequestNotification.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -126,6 +129,7 @@
 		EA86C1472CC2F79A00989E43 /* AddLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLocationView.swift; sourceTree = "<group>"; };
 		EA86C1492CC2FBAD00989E43 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
 		EA86C14A2CC2FBAD00989E43 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
+		EA9E7E322D67454000CF572A /* MeetingRequestNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRequestNotification.swift; sourceTree = "<group>"; };
 		EAA9ACE22CDC18AE002F2C79 /* LeaderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderSelectionView.swift; sourceTree = "<group>"; };
 		EAA9ACE42CDC18BD002F2C79 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		EAA9ACE72CDC1E2A002F2C79 /* LeaderSelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderSelectionViewModel.swift; sourceTree = "<group>"; };
@@ -143,14 +147,15 @@
 		EAEA149E2CDCD04000C7FD9D /* EditLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditLocationView.swift; sourceTree = "<group>"; };
 		EAEA14A52CE5F71100C7FD9D /* KickOutMember.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KickOutMember.swift; sourceTree = "<group>"; };
 		EAEA14A72CE5F91E00C7FD9D /* KickOutMemberViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KickOutMemberViewModel.swift; sourceTree = "<group>"; };
+		F5038ECD2D841CF800347F13 /* country_codes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = country_codes.json; sourceTree = "<group>"; };
 		F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailModel.swift; sourceTree = "<group>"; };
 		F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailView.swift; sourceTree = "<group>"; };
 		F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailViewModel.swift; sourceTree = "<group>"; };
+		F51148BB2D80076000137679 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F52E2FF62CD3CC5D00520042 /* FindPasswordModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordModel.swift; sourceTree = "<group>"; };
 		F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordView.swift; sourceTree = "<group>"; };
 		F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordViewModel.swift; sourceTree = "<group>"; };
 		F53F124A2D7DC0F300E434D4 /* KeyboardAvoidingModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardAvoidingModifier.swift; sourceTree = "<group>"; };
-		F540A7A22D81D512004EED08 /* country_codes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = country_codes.json; sourceTree = "<group>"; };
 		F5ADB1CF2CD90DA500A1011C /* ProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileModel.swift; sourceTree = "<group>"; };
 		F5ADB1D32CD9295E00A1011C /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		F5ADB1D52CD92AF600A1011C /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
@@ -159,8 +164,8 @@
 		F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocationCoordinator.swift; sourceTree = "<group>"; };
 		F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRequiredView.swift; sourceTree = "<group>"; };
 		F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		F5E8486C2D66F68B00047AA1 /* FriendRequestNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRequestNotification.swift; sourceTree = "<group>"; };
 		F5E848732D66F89900047AA1 /* iOS_Project.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS_Project.entitlements; sourceTree = "<group>"; };
-		F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		FB3FFC42D97330368AC296CF /* Pods-iOS_Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS_Project.debug.xcconfig"; path = "Target Support Files/Pods-iOS_Project/Pods-iOS_Project.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -300,10 +305,10 @@
 		EA86C11A2CC2F15700989E43 /* SignUp */ = {
 			isa = PBXGroup;
 			children = (
+				F5038ECD2D841CF800347F13 /* country_codes.json */,
 				EA86C1172CC2F15700989E43 /* SignUpUserModel.swift */,
 				EA86C1182CC2F15700989E43 /* SignUpView.swift */,
 				EA86C1192CC2F15700989E43 /* SignUpViewModel.swift */,
-				F540A7A22D81D512004EED08 /* country_codes.json */,
 			);
 			path = SignUp;
 			sourceTree = "<group>";
@@ -314,6 +319,7 @@
 				F5E848732D66F89900047AA1 /* iOS_Project.entitlements */,
 				F50FDDB72CD3A814006E96B2 /* FindAuth */,
 				EA6EE1DF2CD39BBB002961A9 /* Request */,
+				F5E8486D2D66F68B00047AA1 /* Notification */,
 				EA86C14B2CC2FBAD00989E43 /* Map */,
 				EA86C1062CC2F15700989E43 /* AddMeeting */,
 				EA86C1082CC2F15700989E43 /* Friend */,
@@ -333,7 +339,7 @@
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
 				F53F124A2D7DC0F300E434D4 /* KeyboardAvoidingModifier.swift */,
-				F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */,
+				F51148BB2D80076000137679 /* GoogleService-Info.plist */,
 			);
 			path = iOS_Project;
 			sourceTree = "<group>";
@@ -435,6 +441,15 @@
 				F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */,
 			);
 			path = LocationManagers;
+			sourceTree = "<group>";
+		};
+		F5E8486D2D66F68B00047AA1 /* Notification */ = {
+			isa = PBXGroup;
+			children = (
+				EA9E7E322D67454000CF572A /* MeetingRequestNotification.swift */,
+				F5E8486C2D66F68B00047AA1 /* FriendRequestNotification.swift */,
+			);
+			path = Notification;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -554,8 +569,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA86C1322CC2F15700989E43 /* Preview Assets.xcassets in Resources */,
-				F5E848752D66F8D800047AA1 /* GoogleService-Info.plist in Resources */,
 				EA86C1332CC2F15700989E43 /* Assets.xcassets in Resources */,
+				F51148BD2D80076000137679 /* GoogleService-Info.plist in Resources */,
+				F5038ECE2D841D0100347F13 /* country_codes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -563,7 +579,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F5E848762D66F8D800047AA1 /* GoogleService-Info.plist in Resources */,
+				F51148BE2D80076000137679 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -571,7 +587,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F5E848772D66F8D800047AA1 /* GoogleService-Info.plist in Resources */,
+				F51148BC2D80076000137679 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -626,7 +642,9 @@
 			files = (
 				F52E2FF92CD3CC9000520042 /* FindPasswordView.swift in Sources */,
 				EA86C1212CC2F15700989E43 /* AddMeetingModel.swift in Sources */,
+				F5E8486E2D66F68B00047AA1 /* FriendRequestNotification.swift in Sources */,
 				F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */,
+				EA9E7E332D67454200CF572A /* MeetingRequestNotification.swift in Sources */,
 				F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */,
 				EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */,
 				EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */,
@@ -853,7 +871,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "/Users/sinchansol/Desktop/WhereYou-iOS/iOS_Project/Info.plist";
+				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/WhereYou-iOS/iOS_Project/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
@@ -897,7 +915,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "/Users/sinchansol/Desktop/WhereYou-iOS/iOS_Project/Info.plist";
+				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/WhereYou-iOS/iOS_Project/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
