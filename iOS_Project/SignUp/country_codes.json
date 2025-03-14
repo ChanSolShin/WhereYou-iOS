@@ -1,0 +1,22 @@
+[
+  { "code": "+82", "country": "South Korea", "emoji": "🇰🇷" },
+  { "code": "+1", "country": "United States", "emoji": "🇺🇸" },
+  { "code": "+44", "country": "United Kingdom", "emoji": "🇬🇧" },
+  { "code": "+81", "country": "Japan", "emoji": "🇯🇵" },
+  { "code": "+49", "country": "Germany", "emoji": "🇩🇪" },
+  { "code": "+33", "country": "France", "emoji": "🇫🇷" },
+  { "code": "+39", "country": "Italy", "emoji": "🇮🇹" },
+  { "code": "+34", "country": "Spain", "emoji": "🇪🇸" },
+  { "code": "+86", "country": "China", "emoji": "🇨🇳" },
+  { "code": "+852", "country": "Hong Kong", "emoji": "🇭🇰" },
+  { "code": "+853", "country": "Macau", "emoji": "🇲🇴" },
+  { "code": "+886", "country": "Taiwan", "emoji": "🇹🇼" },
+  { "code": "+62", "country": "Indonesia", "emoji": "🇮🇩" },
+  { "code": "+60", "country": "Malaysia", "emoji": "🇲🇾" },
+  { "code": "+65", "country": "Singapore", "emoji": "🇸🇬" },
+  { "code": "+66", "country": "Thailand", "emoji": "🇹🇭" },
+  { "code": "+91", "country": "India", "emoji": "🇮🇳" },
+  { "code": "+7", "country": "Russia", "emoji": "🇷🇺" },
+  { "code": "+61", "country": "Australia", "emoji": "🇦🇺" },
+  { "code": "+64", "country": "New Zealand", "emoji": "🇳🇿" }
+]
