@@ -19,15 +19,25 @@ func loadCountryCodes() -> [CountryCode] {
     return codes
 }
 
+// MARK: - ActiveAlert list
+enum SignUpActiveAlert: Identifiable {
+    case codeSent
+    case verificationSuccess
+    case verificationFailure
+    case signUpSuccess
+    
+    var id: Int { hashValue }
+}
+
 struct SignUpView: View {
     @StateObject private var viewModel = SignUpViewModel()
     @Environment(\.presentationMode) var presentationMode
     @State private var showPassword = false
     @State private var currentStep = 0
-    @State private var showAlert = false
     @State private var emailChecked = false
     @State private var countryCodes: [CountryCode] = []
     @State private var selectedCountry: CountryCode? = nil
+    @State private var activeAlert: SignUpActiveAlert? = nil
     
     var body: some View {
         VStack {
@@ -70,37 +80,90 @@ struct SignUpView: View {
                 
                 Spacer()
                 
-                Button(currentStep == 6 ? "회원가입" : "다음") {
-                    withAnimation {
-                        if currentStep == 6 {
-                            // 회원가입 버튼 액션 (기능 미구현)
-                        } else {
-                            currentStep += 1
+                if currentStep != 2 {
+                    Button(currentStep == 6 ? "회원가입" : "다음") {
+                        withAnimation {
+                            if currentStep == 6 {
+                                // 회원가입 버튼 액션: 이메일, 비밀번호 입력 후 회원가입
+                                viewModel.signUp()
+                            } else {
+                                currentStep += 1
+                            }
                         }
                     }
+                    .padding()
+                    .frame(width: 200, height: 50)
+                    .background(isNextButtonEnabled ? Color.blue : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(25)
+                    .font(.title3)
+                    .disabled(!isNextButtonEnabled)
                 }
-                .padding()
-                .frame(width: 200, height: 50)
-                .background(isNextButtonEnabled ? Color.blue : Color.gray)
-                .foregroundColor(.white)
-                .cornerRadius(25)
-                .font(.title3)
-                .disabled(!isNextButtonEnabled)
             }
             .padding(.bottom, 40)
         }
         .padding()
         .navigationTitle("회원가입")
-        .alert(isPresented: $showAlert) {
-            Alert(
-                title: Text("회원가입 성공"),
-                message: Text("회원가입이 성공적으로 완료되었습니다."),
-                dismissButton: .default(Text("확인"))
-            )
+        // 기존 회원가입 성공 alert를 ActiveAlert로 통합
+        .alert(item: $activeAlert) { alert in
+            switch alert {
+            case .codeSent:
+                return Alert(
+                    title: Text("인증번호 전송"),
+                    message: Text("인증번호가 전송되었습니다."),
+                    dismissButton: .default(Text("확인"), action: {
+                        withAnimation {
+                            currentStep = 3
+                        }
+                    })
+                )
+            case .verificationSuccess:
+                return Alert(
+                    title: Text("인증 성공"),
+                    message: Text("인증번호가 일치합니다."),
+                    dismissButton: .default(Text("확인"))
+                )
+            case .verificationFailure:
+                return Alert(
+                    title: Text("인증 실패"),
+                    message: Text("인증번호가 일치하지 않습니다."),
+                    dismissButton: .default(Text("확인"))
+                )
+            case .signUpSuccess:
+                return Alert(
+                    title: Text("회원가입 성공"),
+                    message: Text("회원가입이 성공적으로 완료되었습니다."),
+                    dismissButton: .default(Text("확인"), action: {
+                        // 회원가입 성공 후 LoginView로 이동
+                        presentationMode.wrappedValue.dismiss()
+                    })
+                )
+            }
         }
         .onAppear {
             countryCodes = loadCountryCodes()
-            selectedCountry = nil
+        }
+        // ViewModel 상태 변화에 따른 alert 표시
+        .onChange(of: viewModel.isVerificationCodeSent) { newValue in
+            if newValue {
+                activeAlert = .codeSent
+            }
+        }
+        .onChange(of: viewModel.isVerificationSuccessful) { newValue in
+            if newValue {
+                activeAlert = .verificationSuccess
+            }
+        }
+        .onChange(of: viewModel.signUpErrorMessage) { newValue in
+            if currentStep == 3, newValue == "인증번호가 일치하지 않습니다." {
+                activeAlert = .verificationFailure
+            }
+        }
+        // 회원가입 성공 상태 변화 감지
+        .onChange(of: viewModel.signUpSuccess) { success in
+            if success {
+                activeAlert = .signUpSuccess
+            }
         }
     }
     
@@ -108,8 +171,8 @@ struct SignUpView: View {
         switch currentStep {
         case 0: return !viewModel.realName.isEmpty
         case 1: return !viewModel.birthday.isEmpty && viewModel.birthday.count == 8
-        case 2: return isPhoneNumberValid
-        case 3: return !viewModel.verificationCode.isEmpty
+        case 2: return false  // 전화번호 입력 단계에서는 다음 버튼 비활성화
+        case 3: return viewModel.isVerificationSuccessful  // 인증 성공 시에만 다음 버튼 활성화
         case 4: return viewModel.isValidEmail && emailChecked
         case 5: return viewModel.password.count >= 6
         case 6: return viewModel.passwordMatches
@@ -125,7 +188,7 @@ struct SignUpView: View {
         switch selected.code {
         case "+82":
             // "010"으로 시작: 11자리
-            // "10"으로 시작: 10자리여야 함
+            // "10"으로 시작: 10자리
             if phone.hasPrefix("010") {
                 return phone.count == 11
             } else if phone.hasPrefix("10") {
@@ -266,10 +329,14 @@ struct SignUpView: View {
             
             Button("인증번호 전송") {
                 // 인증번호 전송 기능
+                if let selected = selectedCountry {
+                    let fullPhoneNumber = selected.code + viewModel.phoneNumber
+                    viewModel.sendVerificationCode(fullPhoneNumber: fullPhoneNumber)
+                }
             }
             .padding()
             .frame(maxWidth: .infinity)
-            .background(Color.blue)
+            .background(isPhoneNumberValid ? Color.blue : Color.gray)
             .foregroundColor(.white)
             .cornerRadius(8)
             .padding(.horizontal, 30)
@@ -291,7 +358,8 @@ struct SignUpView: View {
                         .padding()
                         .background(Color.gray.opacity(0.1))
                         .cornerRadius(8)
-                    Text("05:00")
+                    // 타이머 표시
+                    Text("\(String(format: "%02d:%02d", viewModel.timerValue/60, viewModel.timerValue % 60))")
                         .font(.caption)
                         .foregroundColor(.red)
                         .padding(.trailing, 10)
@@ -299,6 +367,10 @@ struct SignUpView: View {
                 
                 Button("재전송") {
                     // 인증번호 재전송 기능
+                    if let selected = selectedCountry {
+                        let fullPhoneNumber = selected.code + viewModel.phoneNumber
+                        viewModel.resendCode(fullPhoneNumber: fullPhoneNumber)
+                    }
                 }
                 .foregroundColor(.blue)
             }
@@ -306,6 +378,7 @@ struct SignUpView: View {
             
             Button("인증번호 확인") {
                 // 인증번호 확인 기능
+                viewModel.verifyCode()
             }
             .padding()
             .frame(maxWidth: .infinity)
@@ -343,13 +416,6 @@ struct SignUpView: View {
             .cornerRadius(10)
             .padding(.horizontal, 30)
             
-            if !viewModel.isValidEmail && !viewModel.username.isEmpty {
-                Text("유효한 이메일 주소가 아닙니다.")
-                    .foregroundColor(.red)
-                    .font(.caption)
-                    .padding(.leading, 200)
-            }
-            
             Button("이메일 확인") {
                 viewModel.signUpErrorMessage = nil
                 if viewModel.isValidEmail {
@@ -370,12 +436,20 @@ struct SignUpView: View {
             .padding(.top, 10)
             .disabled(!viewModel.isValidEmail)
             
-            if let errorMessage = viewModel.signUpErrorMessage, !errorMessage.isEmpty {
-                Text(errorMessage)
-                    .foregroundColor(viewModel.signUpErrorMessageColor)
-                    .font(.caption)
-                    .padding(.top, 10)
+            VStack(alignment: .leading) {
+                if !viewModel.isValidEmail && !viewModel.username.isEmpty {
+                    Text("유효한 이메일 주소가 아닙니다.")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+                if let errorMessage = viewModel.signUpErrorMessage, !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .foregroundColor(viewModel.signUpErrorMessageColor)
+                        .font(.caption)
+                }
             }
+            .padding(.top, 10)
+            .padding(.horizontal, 30)
         }
     }
     

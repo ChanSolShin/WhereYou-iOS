@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import FirebaseAuth
 import FirebaseMessaging
 import UserNotifications
 
@@ -47,6 +48,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // 원격 알림 등록
         application.registerForRemoteNotifications()
     }
+    
+    // Auth 전화번호 인증 처리
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+            if Auth.auth().canHandleNotification(userInfo) {
+                completionHandler(.noData)
+                return
+            }
+            
+            // 추가적인 FCM 메시지 처리 (필요 시)
+            completionHandler(.newData)
+        }
     
     // 디바이스 토큰을 받았을 때 FCM에 등록하는 함수
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
