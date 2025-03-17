@@ -28,6 +28,13 @@ class SignUpViewModel: ObservableObject {
     @Published var isVerificationSuccessful: Bool = false
     @Published var timerValue: Int = 300 // 5분
     @Published var isTimerActive: Bool = false
+    @Published var isVerificationUIEnabled: Bool = true  // 인증 성공 후 버튼, 타이머 제어
+    @Published var showAlertType: SignUpActiveAlert? = nil
+    
+    // 에러 메시지 변수
+    @Published var phoneVerificationErrorMessage: String? = nil  // 전화번호 인증 관련
+    @Published var emailVerificationErrorMessage: String? = nil  // 이메일 확인 관련
+    @Published var generalErrorMessage: String? = nil            // 기타(회원가입 실패 등)
     
     private var timer: AnyCancellable?
     private var db = Firestore.firestore()
@@ -72,7 +79,7 @@ class SignUpViewModel: ObservableObject {
                 if let errCode = AuthErrorCode(rawValue: error._code) {
                     switch errCode {
                     case .emailAlreadyInUse:
-                        self?.signUpErrorMessage = "이미 가입된 이메일입니다."
+                        self?.emailVerificationErrorMessage = "이미 가입된 이메일입니다."
                     default:
                         self?.signUpErrorMessage = error.localizedDescription
                     }
@@ -86,6 +93,7 @@ class SignUpViewModel: ObservableObject {
                 return
             }
             
+            // Firestore에 사용자 정보 저장
             // 전화번호 Credential 연결
             if let credential = self?.phoneAuthCredential {
                 user.link(with: credential) { result, error in
@@ -95,7 +103,6 @@ class SignUpViewModel: ObservableObject {
                         return
                     }
                     print("전화번호 연결 성공")
-                    // Firestore에 사용자 정보 저장
                     self?.saveUserDataToFirestore(uid: user.uid)
                 }
             } else {
@@ -133,17 +140,32 @@ class SignUpViewModel: ObservableObject {
         self.signUpErrorMessage = nil
         self.isVerificationCodeSent = false
         self.isVerificationSuccessful = false
+        self.isVerificationUIEnabled = true  // 재시도 시 버튼 활성화
         
-        PhoneAuthProvider.provider().verifyPhoneNumber(fullPhoneNumber, uiDelegate: nil) { [weak self] verificationID, error in
+        // Firestore에서 전화번호 중복 확인 추가
+        db.collection("users").whereField("phoneNumber", isEqualTo: phoneNumber).getDocuments { [weak self] snapshot, error in
             if let error = error {
-                print("전화번호 인증 에러: \(error.localizedDescription)")
-                self?.signUpErrorMessage = error.localizedDescription
+                print("전화번호 중복 확인 에러: \(error.localizedDescription)")
+                self?.signUpErrorMessage = "전화번호 중복 확인 중 오류가 발생했습니다."
                 return
             }
-            print("인증번호 발송 성공, verificationID: \(verificationID ?? "")")
-            self?.verificationID = verificationID
-            self?.isVerificationCodeSent = true
-            self?.startTimer()
+            if let snapshot = snapshot, !snapshot.isEmpty {
+                print("이미 가입된 전화번호")
+                self?.phoneVerificationErrorMessage = "이미 가입된 전화번호입니다."
+                return
+            }
+            // 인증번호 발송 진행
+            PhoneAuthProvider.provider().verifyPhoneNumber(fullPhoneNumber, uiDelegate: nil) { [weak self] verificationID, error in
+                if let error = error {
+                    print("전화번호 인증 에러: \(error.localizedDescription)")
+                    self?.signUpErrorMessage = error.localizedDescription
+                    return
+                }
+                print("인증번호 발송 성공, verificationID: \(verificationID ?? "")")
+                self?.verificationID = verificationID
+                self?.isVerificationCodeSent = true
+                self?.startTimer()
+            }
         }
     }
     
@@ -167,15 +189,51 @@ class SignUpViewModel: ObservableObject {
     func verifyCode() {
         guard let verificationID = verificationID else { return }
         
+
+        // 인증번호 입력 여부 확인
+        if verificationCode.isEmpty {
+            self.signUpErrorMessage = "인증번호를 입력해주세요."
+            DispatchQueue.main.async {
+                self.showAlertType = .emptyVerificationCode
+            }
+            return
+        }
+
+        // 타이머 만료 여부 확인
+        if timerValue == 0 {
+            self.signUpErrorMessage = "인증 시간이 만료되었습니다."
+            DispatchQueue.main.async {
+                self.showAlertType = .verificationTimeout
+            }
+            return
+        }
+        
+        // Credential 생성
         let credential = PhoneAuthProvider.provider().credential(
             withVerificationID: verificationID,
             verificationCode: verificationCode
         )
         
-        // Credential 저장만 하고 로그인 안 함
-        self.phoneAuthCredential = credential
-        self.isVerificationSuccessful = true  // 인증 성공
-        print("전화번호 인증 성공, Credential 저장됨")
+        // 실제로 인증번호가 맞는지 Firebase 인증 서버에 요청
+        Auth.auth().signIn(with: credential) { [weak self] authResult, error in
+            if let error = error {
+                print("인증번호 불일치: \(error.localizedDescription)")
+                self?.phoneVerificationErrorMessage = "인증번호가 일치하지 않습니다."
+                DispatchQueue.main.async {
+                    self?.showAlertType = .verificationFailure  // 인증 실패 알림
+                }
+                return
+            }
+            
+            // 인증 성공 처리
+            print("전화번호 인증 성공, Credential 저장됨")
+            self?.phoneAuthCredential = credential  // 이후 회원가입 시 link용
+            self?.isVerificationSuccessful = true   // 인증 성공 표시
+            self?.isVerificationUIEnabled = false   // 인증 버튼 비활성화
+            self?.isTimerActive = false             // 타이머 멈춤
+            self?.timer?.cancel()
+            
+        }
     }
     
     // MARK: - 재전송

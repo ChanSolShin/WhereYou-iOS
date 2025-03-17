@@ -21,11 +21,14 @@ func loadCountryCodes() -> [CountryCode] {
 
 // MARK: - ActiveAlert list
 enum SignUpActiveAlert: Identifiable {
-    case codeSent
-    case verificationSuccess
-    case verificationFailure
-    case signUpSuccess
-    
+    case codeSent                 // 인증번호 전송
+    case verificationSuccess      // 인증번호 일치
+    case verificationFailure      // 인증번호 일치X
+    case signUpSuccess            // 회원가입 성공
+    case phoneNumberDuplicate     // 중복 전화번호
+    case emptyVerificationCode     // 인증번호 미입력
+    case verificationTimeout      // 인증시간 만료
+
     var id: Int { hashValue }
 }
 
@@ -138,6 +141,24 @@ struct SignUpView: View {
                         presentationMode.wrappedValue.dismiss()
                     })
                 )
+            case .phoneNumberDuplicate:
+                return Alert(
+                    title: Text("이미 가입된 전화번호"),
+                    message: Text("이미 가입된 전화번호입니다."),
+                    dismissButton: .default(Text("확인"))
+                )
+            case .emptyVerificationCode:
+                return Alert(
+                    title: Text("인증번호 확인"),
+                    message: Text("인증번호를 입력해주세요."),
+                    dismissButton: .default(Text("확인"))
+                )
+            case .verificationTimeout:
+                return Alert(
+                    title: Text("시간 만료"),
+                    message: Text("인증 시간이 만료되었습니다."),
+                    dismissButton: .default(Text("확인"))
+                )
             }
         }
         .onAppear {
@@ -159,10 +180,24 @@ struct SignUpView: View {
                 activeAlert = .verificationFailure
             }
         }
+        .onChange(of: viewModel.phoneVerificationErrorMessage) { newValue in
+            if currentStep == 2, newValue == "이미 가입된 전화번호입니다." {
+                activeAlert = .phoneNumberDuplicate
+                // Alert 띄운 후 에러 초기화
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    viewModel.phoneVerificationErrorMessage = nil
+                }
+            }
+        }
         // 회원가입 성공 상태 변화 감지
         .onChange(of: viewModel.signUpSuccess) { success in
             if success {
                 activeAlert = .signUpSuccess
+            }
+        }
+        .onChange(of: viewModel.showAlertType) { newAlert in
+            if let alert = newAlert {
+                activeAlert = alert
             }
         }
     }
@@ -372,7 +407,8 @@ struct SignUpView: View {
                         viewModel.resendCode(fullPhoneNumber: fullPhoneNumber)
                     }
                 }
-                .foregroundColor(.blue)
+                .foregroundColor(viewModel.isVerificationUIEnabled ? .blue : .gray)
+                .disabled(!viewModel.isVerificationUIEnabled)
             }
             .padding(.horizontal, 30)
             
@@ -382,10 +418,11 @@ struct SignUpView: View {
             }
             .padding()
             .frame(maxWidth: .infinity)
-            .background(Color.blue)
+            .background(viewModel.isVerificationUIEnabled ? Color.blue : Color.gray)
             .foregroundColor(.white)
             .cornerRadius(8)
             .padding(.horizontal, 30)
+            .disabled(!viewModel.isVerificationUIEnabled)
         }
     }
     
@@ -422,11 +459,11 @@ struct SignUpView: View {
                     viewModel.checkEmailAvailability { isAvailable in
                         if isAvailable {
                             emailChecked = true
-                            viewModel.signUpErrorMessage = "가입 가능한 이메일입니다."
+                            viewModel.emailVerificationErrorMessage = "가입 가능한 이메일입니다."
                             viewModel.signUpErrorMessageColor = .green
                         } else {
                             emailChecked = false
-                            viewModel.signUpErrorMessage = "이미 가입된 이메일입니다."
+                            viewModel.emailVerificationErrorMessage = "이미 가입된 이메일입니다."
                             viewModel.signUpErrorMessageColor = .red
                         }
                     }
@@ -442,8 +479,8 @@ struct SignUpView: View {
                         .foregroundColor(.red)
                         .font(.caption)
                 }
-                if let errorMessage = viewModel.signUpErrorMessage, !errorMessage.isEmpty {
-                    Text(errorMessage)
+                if let emailCheckMessage = viewModel.emailVerificationErrorMessage, !emailCheckMessage.isEmpty {
+                    Text(emailCheckMessage)
                         .foregroundColor(viewModel.signUpErrorMessageColor)
                         .font(.caption)
                 }
@@ -489,7 +526,9 @@ struct SignUpView: View {
                 Text("비밀번호를 6자리 이상 입력해 주세요.")
                     .foregroundColor(.red)
                     .font(.caption)
-                    .padding(.leading, 200)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 5)
+                    .padding(.horizontal, 30)
             }
         }
     }
