@@ -52,21 +52,25 @@ struct MeetingView: View {
                 .frame(height: 450)
                 
                 Button(action: {
-                                   meetingViewModel.stopTrackingMember()
-                                   meetingViewModel.selectedUserLocation = meeting.meetingLocation
-                                   selectedMemberID = nil  // 멤버 선택 초기화
-                                   selectedButton = "meetingLocation"  // 모임장소 버튼 선택 상태로 설정
-                               }) {
-                                   Text("모임장소")
-                                       .padding()
-                                       .background(Color.green)
-                                       .foregroundColor(.white)
-                                       .cornerRadius(10)
-                                       .overlay(
-                                           RoundedRectangle(cornerRadius: 10)
-                                               .stroke(selectedButton == "meetingLocation" ? Color.yellow : Color.clear, lineWidth: 4)
-                                       )
-                               }
+                    meetingViewModel.stopTrackingMember()
+                    meetingViewModel.selectedUserLocation = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        meetingViewModel.selectedUserLocation = meeting.meetingLocation
+                    }
+
+                    selectedMemberID = nil
+                    selectedButton = "meetingLocation"
+                }) {
+                    Text("모임장소")
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(selectedButton == "meetingLocation" ? Color.yellow : Color.clear, lineWidth: 4)
+                        )
+                }
 
                 
                 
