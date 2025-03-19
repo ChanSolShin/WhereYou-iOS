@@ -14,7 +14,6 @@ struct MeetingView: View {
     @Environment(\.dismiss) var dismiss
     var meeting: MeetingListModel
     @ObservedObject var meetingViewModel: MeetingViewModel
-    @State private var title: String = "모임장소"
     @State var meetingDate: Date? = nil
     @State private var showingAddFriendModal = false
     @State private var leaderSelctionModal = false
@@ -23,18 +22,18 @@ struct MeetingView: View {
     @State private var showActionSheet = false
     @State private var showingEditMeetingModal = false
     @State private var showingKickOutModal = false
+    @State private var selectedMemberID: String? = nil 
+    @State private var selectedButton: String? = nil
     
     var body: some View {
         NavigationStack {
             VStack {
                 VStack(alignment: .leading, spacing: 5) {
                     Text(meetingViewModel.meetingDate != nil ? formattedDate(meetingViewModel.meetingDate!) : "모임시간: 불러오는 중...")
-                                    .font(.headline)
-                                    .foregroundColor(.gray)
+                        .font(.headline)
+                        .foregroundColor(.gray)
                 }
                 .padding(.bottom, 10)
-                Text(title)
-                    .font(.title2)
                 
                 MeetingMapView(
                     selectedUserLocation: $meetingViewModel.selectedUserLocation,
@@ -53,49 +52,63 @@ struct MeetingView: View {
                 .frame(height: 450)
                 
                 Button(action: {
-                    title = "모임장소"
                     meetingViewModel.stopTrackingMember()
-                    meetingViewModel.selectedUserLocation = meeting.meetingLocation
+                    meetingViewModel.selectedUserLocation = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        meetingViewModel.selectedUserLocation = meeting.meetingLocation
+                    }
+
+                    selectedMemberID = nil
+                    selectedButton = "meetingLocation"
                 }) {
                     Text("모임장소")
                         .padding()
                         .background(Color.green)
                         .foregroundColor(.white)
                         .cornerRadius(10)
-                        .padding(.bottom, 15)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(selectedButton == "meetingLocation" ? Color.yellow : Color.clear, lineWidth: 4)
+                        )
                 }
+
                 
                 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHStack(spacing: 16) {
-                        ForEach(meeting.meetingMemberIDs, id: \.self) { memberID in
-                            
-                            Button(action: {
-                                if meetingViewModel.trackedMemberID == memberID {
-                                    title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n     추적 중지"
-                                    meetingViewModel.stopTrackingMember()
-                                } else {
-                                    title = (meetingViewModel.meetingMemberNames[memberID] ?? "멤버") + "의 위치 \n      추적 중"
-                                    meetingViewModel.moveToUserLocation(userID: memberID)
-                                }
-                            }) {
-                                ZStack {
-                                    Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
-                                        .padding()
-                                        .background(Color.blue)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(10)
-                                    
-                                    if memberID == meeting.meetingMasterID {
-                                        Image(systemName: "crown.fill")
-                                            .foregroundColor(.yellow)
-                                            .offset(x: 0, y: -40)
-                                    }
-                                }
-                            }
-                            .padding(.vertical, 2)
-                        }
-                    }
+                                  LazyHStack(spacing: 16) {
+                                      ForEach(meeting.meetingMemberIDs, id: \.self) { memberID in
+                                          Button(action: {
+                                              if meetingViewModel.trackedMemberID == memberID {
+                                                  meetingViewModel.stopTrackingMember()
+                                                  selectedMemberID = nil
+                                              } else {
+                                                  meetingViewModel.moveToUserLocation(userID: memberID)
+                                                  selectedMemberID = memberID
+                                              }
+                                              selectedButton = memberID // 멤버 버튼 선택 상태로 설정
+                                          }) {
+                                              ZStack {
+                                                  Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
+                                                      .padding()
+                                                      .background(Color.blue)
+                                                      .foregroundColor(.white)
+                                                      .cornerRadius(10)
+                                                      .overlay(
+                                                          RoundedRectangle(cornerRadius: 10)
+                                                              .stroke(selectedMemberID == memberID ? Color.yellow : Color.clear, lineWidth: 4) // 노란색 테두리
+                                                      )
+                                                  
+                                                  if memberID == meeting.meetingMasterID {
+                                                      Image(systemName: "crown.fill")
+                                                          .foregroundColor(.yellow)
+                                                          .offset(x: 0, y: -40)
+                                                  }
+                                              }
+                                          }
+                                          .padding(.vertical, 2)
+                                      }
+                                  }
+                                  .padding(.horizontal)
                     .padding(.horizontal)
                 }
             }
