@@ -18,7 +18,7 @@ struct AddMeetingView: View {
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
-        NavigationView {
+        ScrollView {
             VStack(spacing: 20) {
                 Spacer().frame(height: 20)
                 Text("모임 이름을 입력하세요")
@@ -125,6 +125,7 @@ struct AddMeetingView: View {
         }
         .navigationTitle("모임추가")
         .font(.largeTitle)
+        
     }
     
     var dateFormatter: DateFormatter {
