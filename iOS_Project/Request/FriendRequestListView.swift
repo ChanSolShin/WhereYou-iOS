@@ -58,7 +58,7 @@ struct FriendRequestListView: View {
         }
         .navigationTitle("친구 요청")
         .onAppear {
-            viewModel.fetchPendingRequests()
+            viewModel.observePendingRequests()
         }
     }
     
