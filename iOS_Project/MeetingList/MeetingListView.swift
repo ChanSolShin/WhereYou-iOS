@@ -2,10 +2,16 @@ import SwiftUI
 import NMapsMap
 
 struct MeetingListView: View {
-    @ObservedObject private var viewModel = MeetingListViewModel()
+    @StateObject private var viewModel = MeetingListViewModel()
+    @ObservedObject private var meetingViewModel: MeetingViewModel
     @State private var searchText = "" // 검색 텍스트
     @Binding var isTabBarHidden: Bool
 
+    init(isTabBarHidden: Binding<Bool>) {
+           self._isTabBarHidden = isTabBarHidden
+           self._meetingViewModel = ObservedObject(wrappedValue: MeetingViewModel())
+       }
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -98,8 +104,8 @@ struct MeetingListView: View {
                         .onDisappear { isTabBarHidden = false }) {
                         HStack {
                             Image(systemName: "bell")
-                            if viewModel.meetingViewModel.pendingMeetingRequests.count > 0 {
-                                Text("\(viewModel.meetingViewModel.pendingMeetingRequests.count)")
+                            if viewModel.pendingRequestCount > 0 {
+                                Text("\(viewModel.pendingRequestCount)")
                                     .font(.caption)
                                     .foregroundColor(.white)
                                     .padding(3)
