@@ -74,7 +74,16 @@ class SignUpViewModel: ObservableObject {
     func signUp() {
         signUpErrorMessage = nil
         
-        Auth.auth().createUser(withEmail: username, password: password) { [weak self] authResult, error in
+        // 전화번호 인증 후 생성 된 임시계정에 입력한 이메일/비밀번호를 link
+        guard let currentUser = Auth.auth().currentUser else {
+            self.signUpErrorMessage = "전화번호 인증을 완료해주세요."
+            self.signUpSuccess = false
+            return
+        }
+        
+        let emailCredential = EmailAuthProvider.credential(withEmail: username, password: password)
+        
+        currentUser.link(with: emailCredential) { [weak self] authResult, error in
             if let error = error {
                 if let errCode = AuthErrorCode(rawValue: error._code) {
                     switch errCode {
@@ -93,23 +102,8 @@ class SignUpViewModel: ObservableObject {
                 return
             }
             
-            // Firestore에 사용자 정보 저장
-            // 전화번호 Credential 연결
-            if let credential = self?.phoneAuthCredential {
-                user.link(with: credential) { result, error in
-                    if let error = error {
-                        print("전화번호 연결 실패: \(error.localizedDescription)")
-                        self?.signUpErrorMessage = "전화번호 연결 실패: \(error.localizedDescription)"
-                        return
-                    }
-                    print("전화번호 연결 성공")
-                    self?.saveUserDataToFirestore(uid: user.uid)
-                }
-            } else {
-                // 전화번호 인증이 되지 않았다면 에러 처리
-                self?.signUpErrorMessage = "전화번호 인증을 완료해주세요."
-                self?.signUpSuccess = false
-            }
+            print("이메일 연결 성공")
+            self?.saveUserDataToFirestore(uid: user.uid)
         }
     }
     
@@ -188,7 +182,6 @@ class SignUpViewModel: ObservableObject {
     // MARK: - 인증번호 확인
     func verifyCode() {
         guard let verificationID = verificationID else { return }
-        
 
         // 인증번호 입력 여부 확인
         if verificationCode.isEmpty {
@@ -205,6 +198,7 @@ class SignUpViewModel: ObservableObject {
             DispatchQueue.main.async {
                 self.showAlertType = .verificationTimeout
             }
+            self.verificationID = nil
             return
         }
         
@@ -213,25 +207,38 @@ class SignUpViewModel: ObservableObject {
             withVerificationID: verificationID,
             verificationCode: verificationCode
         )
-        
-        // 실제로 인증번호가 맞는지 Firebase 인증 서버에 요청
+
+        // Firebase 서버에 유효성 확인
         Auth.auth().signIn(with: credential) { [weak self] authResult, error in
+            guard let self = self else { return }
+
             if let error = error {
-                print("인증번호 불일치: \(error.localizedDescription)")
-                self?.phoneVerificationErrorMessage = "인증번호가 일치하지 않습니다."
-                DispatchQueue.main.async {
-                    self?.showAlertType = .verificationFailure  // 인증 실패 알림
+                let errorCode = (error as NSError).code
+                print("인증 실패 오류 코드: \(errorCode), 메시지: \(error.localizedDescription)")
+
+                if let authError = AuthErrorCode(rawValue: errorCode) {
+                    switch authError {
+                    case .invalidVerificationCode:
+                        self.phoneVerificationErrorMessage = "인증번호가 일치하지 않습니다."
+                        self.showAlertType = .verificationFailure
+                    case .sessionExpired:
+                        self.phoneVerificationErrorMessage = "인증번호가 만료되었습니다. 다시 요청해주세요."
+                        self.showAlertType = .verificationTimeout
+                        self.verificationID = nil
+                    default:
+                        self.phoneVerificationErrorMessage = "알 수 없는 오류가 발생했습니다."
+                    }
                 }
                 return
             }
             
             // 인증 성공 처리
             print("전화번호 인증 성공, Credential 저장됨")
-            self?.phoneAuthCredential = credential  // 이후 회원가입 시 link용
-            self?.isVerificationSuccessful = true   // 인증 성공 표시
-            self?.isVerificationUIEnabled = false   // 인증 버튼 비활성화
-            self?.isTimerActive = false             // 타이머 멈춤
-            self?.timer?.cancel()
+            self.phoneAuthCredential = credential  // 이후 회원가입 시 link용
+            self.isVerificationSuccessful = true   // 인증 성공 표시
+            self.isVerificationUIEnabled = false   // 인증 버튼 비활성화
+            self.isTimerActive = false             // 타이머 멈춤
+            self.timer?.cancel()
             
         }
     }
