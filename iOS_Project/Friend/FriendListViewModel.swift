@@ -20,6 +20,8 @@ class FriendListViewModel: ObservableObject {
     }
     var currentUserName: String?
     
+    private var requestListener: ListenerRegistration?
+
     func getCurrentUserID() -> String? {
            return currentUserID
        }
@@ -29,7 +31,7 @@ class FriendListViewModel: ObservableObject {
     init() {
         fetchCurrentUserName()
         observeFriends()
-        fetchPendingRequests()
+        observePendingRequests()
     }
     
     private func fetchCurrentUserName() {
@@ -86,15 +88,17 @@ class FriendListViewModel: ObservableObject {
         }
     }
     
-    func fetchPendingRequests() {
+    func observePendingRequests() {
         guard let userID = currentUserID else { return }
-        
-        db.collection("friendRequests")
+
+        requestListener?.remove()
+
+        requestListener = db.collection("friendRequests")
             .whereField("toUserID", isEqualTo: userID)
             .whereField("status", isEqualTo: "pending")
-            .getDocuments { (snapshot, error) in
+            .addSnapshotListener { (snapshot, error) in
                 guard let documents = snapshot?.documents else {
-                    print("No pending requests")
+                    print("No pending requests or error: \(error?.localizedDescription ?? "nil")")
                     return
                 }
                 self.pendingRequests = documents.compactMap { queryDocumentSnapshot -> FriendRequestModel? in

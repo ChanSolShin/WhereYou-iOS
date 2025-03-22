@@ -2,10 +2,16 @@ import SwiftUI
 import NMapsMap
 
 struct MeetingListView: View {
-    @ObservedObject private var viewModel = MeetingListViewModel()
+    @StateObject private var viewModel = MeetingListViewModel()
+    @ObservedObject private var meetingViewModel: MeetingViewModel
     @State private var searchText = "" // 검색 텍스트
     @Binding var isTabBarHidden: Bool
 
+    init(isTabBarHidden: Binding<Bool>) {
+           self._isTabBarHidden = isTabBarHidden
+           self._meetingViewModel = ObservedObject(wrappedValue: MeetingViewModel())
+       }
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -66,29 +72,23 @@ struct MeetingListView: View {
                         .padding(.top, 10)
                     }
                 }
-                
-                // + 버튼을 화면 오른쪽 하단에 고정
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel())
-                            .onAppear { isTabBarHidden = true }
-                            .onDisappear { isTabBarHidden = false }
-                        ) {
-                            Image(systemName: "plus")
-                                .font(.largeTitle)
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .clipShape(Circle())
-                                .shadow(radius: 5)
-                        }
-                        .padding(.bottom, 20)
-                        .padding(.trailing, 20)
-                    }
-                }
             }
+            .overlay(
+                NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel())
+                    .onAppear { isTabBarHidden = true }
+                    .onDisappear { isTabBarHidden = false }) {
+                        Image(systemName: "plus")
+                            .font(.largeTitle)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .clipShape(Circle())
+                            .shadow(radius: 5)
+                }
+                .padding(.trailing, 20)
+                .padding(.bottom, 40),
+                alignment: .bottomTrailing
+            )
             .navigationTitle("모임")
             .searchable(text: $searchText, prompt: "검색어를 입력하세요")
             .toolbar {
@@ -98,8 +98,8 @@ struct MeetingListView: View {
                         .onDisappear { isTabBarHidden = false }) {
                         HStack {
                             Image(systemName: "bell")
-                            if viewModel.meetingViewModel.pendingMeetingRequests.count > 0 {
-                                Text("\(viewModel.meetingViewModel.pendingMeetingRequests.count)")
+                            if viewModel.pendingRequestCount > 0 {
+                                Text("\(viewModel.pendingRequestCount)")
                                     .font(.caption)
                                     .foregroundColor(.white)
                                     .padding(3)

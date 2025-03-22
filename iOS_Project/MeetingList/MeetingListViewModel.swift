@@ -12,6 +12,7 @@ import FirebaseAuth
 
 class MeetingListViewModel: ObservableObject {
     @Published var meetings: [MeetingListModel] = []
+    @Published var pendingRequestCount: Int = 0
     
     private var db = Firestore.firestore()
     var meetingViewModel: MeetingViewModel // MeetingViewModel 인스턴스 추가
@@ -21,6 +22,10 @@ class MeetingListViewModel: ObservableObject {
     
     init(meetingViewModel: MeetingViewModel = MeetingViewModel()) {
             self.meetingViewModel = meetingViewModel
+            meetingViewModel.$pendingMeetingRequests
+                .map { $0.count }
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$pendingRequestCount)
             fetchMeetings()
         }
         
