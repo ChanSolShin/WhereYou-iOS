@@ -393,6 +393,7 @@ exports.deleteExpiredMeetings = onSchedule("every 1 minutes", async (event) => {
     return null;
 });
 
+
 // 5분 지난 임시 계정 중 이메일이 없는 계정 삭제
 exports.deleteUnlinkedTempAccounts = onSchedule("every 5 minutes", async (event) => {
     const now = new Date();
