@@ -105,6 +105,7 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
             const trackingEnd = new Date(meetingDateKST);
             trackingEnd.setHours(trackingEnd.getHours() + 1); // 모임 1시간 후
 
+            // 위치 추적 범위에 있는지 확인
             if (currentDate >= trackingStart && currentDate <= trackingEnd) {
                 // ✅ 위치 추적이 꺼져 있다면 활성화하고, 그때만 알림 전송
                 if (!meetingData.isLocationTrackingEnabled) {
@@ -147,6 +148,12 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
                         return;
                     }
 
+                    // 이미 알림이 전송된 경우 추가로 알림을 보내지 않도록 처리
+                    if (meetingData.isNotificationSent) {
+                        console.log(`⚠️ 모임 ${doc.id}: 이미 알림이 전송되었습니다.`);
+                        return;  // 알림을 이미 전송했으므로 더 이상 보내지 않음
+                    }
+
                     // 각 멤버에게 FCM 메시지 전송
                     const message = {
                         notification: {
@@ -163,15 +170,22 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
                         }
 
                         console.log(`✅ 모임 ${doc.id} - 푸시 알림 전송 성공`);
+                        await doc.ref.update({ isNotificationSent: true }); // 알림 전송 후 상태 업데이트
                     } catch (error) {
                         console.error(`❌ 모임 ${doc.id} - 푸시 알림 전송 실패:`, error);
                     }
                 }
             } else {
-                // ❌ 범위를 벗어나면 위치 추적 비활성화
+                // 위치 추적 범위를 벗어나면 위치 추적 비활성화
                 if (meetingData.isLocationTrackingEnabled) {
                     await doc.ref.update({ isLocationTrackingEnabled: false });
                     console.log(`모임 ${doc.id}: 위치 추적 비활성화 (false)`);
+                }
+
+                // 위치 추적 비활성화 상태에서 isNotificationSent 필드 리셋 (필요에 따라)
+                if (meetingData.isNotificationSent) {
+                    await doc.ref.update({ isNotificationSent: false });
+                    console.log(`모임 ${doc.id}: 알림 상태 리셋`);
                 }
             }
         }));
@@ -181,7 +195,6 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
 
     return null;
 });
-
 
 // ✅ 모임에 새로운 멤버가 추가되었을 때 알림 전송
 exports.notifyMemberAdded = functions.firestore.onDocumentUpdated(
@@ -341,3 +354,76 @@ exports.notifyMeetingUpdated = functions.firestore.onDocumentUpdated(
         return null;
     }
 );
+
+exports.deleteExpiredMeetings = onSchedule("every 1 minutes", async (event) => {
+    const currentDate = new Date();
+    const koreaTimeOffset = 9 * 60; // UTC+9
+    currentDate.setMinutes(currentDate.getMinutes() + currentDate.getTimezoneOffset() + koreaTimeOffset);
+
+    try {
+        // Firestore에서 모임들을 조회하고, meetingDate가 현재 시간보다 2시간 이전인 모임들 찾기
+        const meetingsSnapshot = await db.collection("meetings").get();
+
+        if (meetingsSnapshot.empty) {
+            console.log("🔍 삭제할 만료된 모임 없음");
+            return;
+        }
+
+        // 모든 모임을 검사하여, meetingDate + 2시간이 지나면 삭제
+        await Promise.all(meetingsSnapshot.docs.map(async (doc) => {
+            const meetingDate = doc.data().meetingDate.toDate(); // Firestore에서 가져온 meetingDate 변환 (UTC)
+            const meetingDateKorea = new Date(meetingDate.getTime() + koreaTimeOffset * 60 * 1000); // 한국 시간으로 변환
+            const deleteThreshold = new Date(meetingDateKorea); // 한국 시간 기준으로 2시간 후
+            deleteThreshold.setHours(deleteThreshold.getHours() + 2); // 모임시간에 2시간 추가
+
+            console.log("현재 시간:", currentDate);
+            console.log("삭제 기준 시간 (meetingDate + 2시간):", deleteThreshold);
+
+            // currentDate가 deleteThreshold보다 크면 삭제
+            if (currentDate >= deleteThreshold) {
+                await doc.ref.delete();
+                console.log(`🗑 모임 ${doc.id} 삭제 완료`);
+            }
+        }));
+
+    } catch (error) {
+        console.error("❌ Firestore에서 모임 삭제 중 오류 발생:", error);
+    }
+
+    return null;
+});
+
+// 5분 지난 임시 계정 중 이메일이 없는 계정 삭제
+exports.deleteUnlinkedTempAccounts = onSchedule("every 5 minutes", async (event) => {
+    const now = new Date();
+    const koreaTimeOffset = 9 * 60;
+    now.setMinutes(now.getMinutes() + now.getTimezoneOffset() + koreaTimeOffset / (60 * 1000));
+
+    const threshold = new Date(now.getTime() - 5 * 60 * 1000); // 5분 전
+
+    try {
+        const snapshot = await db.collection("tempUsers").get();
+
+        for (const doc of snapshot.docs) {
+            const data = doc.data();
+            const createdAt = data.createdAt?.toDate?.();
+
+            if (!createdAt || createdAt > threshold) continue;
+
+            const uid = doc.id;
+
+            const userRecord = await admin.auth().getUser(uid);
+
+            // 이메일이 없으면 (링크 안됐으면) 삭제
+            if (!userRecord.email) {
+                await admin.auth().deleteUser(uid);
+                await db.collection("tempUsers").doc(uid).delete();
+                console.log(`🗑️ 임시 계정 삭제됨: ${uid}`);
+            }
+        }
+    } catch (error) {
+        console.error("❌ 임시 계정 삭제 중 오류 발생:", error);
+    }
+
+    return null;
+});

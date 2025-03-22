@@ -134,6 +134,31 @@ class SignUpViewModel: ObservableObject {
             } else {
                 print("Firestore 저장 성공")
                 self?.signUpSuccess = true
+                
+                self?.db.collection("tempUsers").document(uid).delete { error in
+                    if let error = error {
+                        print("tempUsers 문서 삭제 실패: \(error.localizedDescription)")
+                    } else {
+                        print("tempUsers 문서 삭제 완료")
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - 임시 계정 정보를 Firestore에 저장 (임시 계정 생성 시간 기록)
+    private func saveTempUserToFirestore(uid: String) {
+        let data: [String: Any] = [
+            "uid": uid,
+            "createdAt": Timestamp(date: Date()),
+            "linked": false  // 아직 이메일 링크가 완료되지 않음을 표시
+        ]
+        
+        db.collection("tempUsers").document(uid).setData(data) { error in
+            if let error = error {
+                print("Firestore에 임시 계정 저장 실패: \(error.localizedDescription)")
+            } else {
+                print("Firestore에 임시 계정 저장 성공")
             }
         }
     }
@@ -232,10 +257,9 @@ class SignUpViewModel: ObservableObject {
                     case .invalidVerificationCode:
                         self.phoneVerificationErrorMessage = "인증번호가 일치하지 않습니다."
                         self.showAlertType = nil
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                                self.showAlertType = .verificationFailure
-                            }
-                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                            self.showAlertType = .verificationFailure
+                        }
                     case .sessionExpired:
                         self.phoneVerificationErrorMessage = "인증번호가 만료되었습니다. 다시 요청해주세요."
                         self.showAlertType = .verificationTimeout
@@ -255,6 +279,10 @@ class SignUpViewModel: ObservableObject {
             self.isTimerActive = false             // 타이머 멈춤
             self.timer?.cancel()
             
+            // 추가된 부분: 임시 계정 정보를 Firestore에 저장 (생성 시간 기록)
+            if let uid = authResult?.user.uid {
+                self.saveTempUserToFirestore(uid: uid)
+            }
         }
     }
     
