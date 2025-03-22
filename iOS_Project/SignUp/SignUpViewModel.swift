@@ -39,8 +39,11 @@ class SignUpViewModel: ObservableObject {
     private var timer: AnyCancellable?
     private var db = Firestore.firestore()
     
+    var selectedCountryCode: String = ""
+    
     // Credential 저장 변수
     private var phoneAuthCredential: PhoneAuthCredential?
+    
     
     var successCreate: Bool {
         return username.isEmpty || !isValidEmail || password.count < 6 || confirmPassword.isEmpty || !passwordMatches || realName.isEmpty || birthday.count != 8 || phoneNumber.count != 11
@@ -108,10 +111,12 @@ class SignUpViewModel: ObservableObject {
     }
     
     private func saveUserDataToFirestore(uid: String) {
+        // 전화번호 형식 변환 후 저장
+        let formattedPhone = formatPhoneNumber(phoneNumber)
         let userData: [String: Any] = [
             "email": username,
             "name": realName,
-            "phoneNumber": phoneNumber,
+            "phoneNumber": formattedPhone,
             "birthday": birthday,
             "loginStatus": false,                  // 로그인 여부
             "createdAt": Timestamp(date: Date())  // 회원가입 날짜
@@ -246,5 +251,22 @@ class SignUpViewModel: ObservableObject {
     // MARK: - 재전송
     func resendCode(fullPhoneNumber: String) {
         sendVerificationCode(fullPhoneNumber: fullPhoneNumber)
+    }
+    
+    // MARK: - Helper: 전화번호 형식 변환 (선택된 국가코드 기준)
+    private func formatPhoneNumber(_ number: String) -> String {
+        // +82: 010으로 시작할 경우 10으로 시작하도록 변환
+        if selectedCountryCode == "+82" {
+            var digits = number
+            if digits.hasPrefix("0") {
+                digits = String(digits.dropFirst())
+            }
+            return selectedCountryCode + digits
+        } else {
+            if number.hasPrefix("+") {
+                return number
+            }
+            return selectedCountryCode + number
+        }
     }
 }
