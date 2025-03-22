@@ -25,8 +25,9 @@ enum SignUpActiveAlert: Identifiable {
     case verificationSuccess      // 인증번호 일치
     case verificationFailure      // 인증번호 일치X
     case signUpSuccess            // 회원가입 성공
+    case signUpFailure            // 회원가입 실페
     case phoneNumberDuplicate     // 중복 전화번호
-    case emptyVerificationCode     // 인증번호 미입력
+    case emptyVerificationCode    // 인증번호 미입력
     case verificationTimeout      // 인증시간 만료
 
     var id: Int { hashValue }
@@ -41,6 +42,7 @@ struct SignUpView: View {
     @State private var countryCodes: [CountryCode] = []
     @State private var selectedCountry: CountryCode? = nil
     @State private var activeAlert: SignUpActiveAlert? = nil
+    @State private var isLoading = false
     
     var body: some View {
         VStack {
@@ -86,11 +88,15 @@ struct SignUpView: View {
                 if currentStep != 2 {
                     Button(currentStep == 6 ? "회원가입" : "다음") {
                         withAnimation {
+                            hideKeyboard()
+                            isLoading = true  // 버튼 클릭 시 로딩 시작
+                            
                             if currentStep == 6 {
                                 // 회원가입 버튼 액션: 이메일, 비밀번호 입력 후 회원가입
                                 viewModel.signUp()
                             } else {
                                 currentStep += 1
+                                isLoading = false // 다음 스텝으로 이동하면 로딩 종료
                             }
                         }
                     }
@@ -159,6 +165,12 @@ struct SignUpView: View {
                     message: Text("인증 시간이 만료되었습니다."),
                     dismissButton: .default(Text("확인"))
                 )
+            case .signUpFailure:
+                return Alert(
+                    title: Text("회원가입 실패"),
+                    message: Text("잠시 후 다시 시도해주세요."),
+                    dismissButton: .default(Text("확인"))
+                )
             }
         }
         .onAppear {
@@ -167,21 +179,25 @@ struct SignUpView: View {
         // ViewModel 상태 변화에 따른 alert 표시
         .onChange(of: viewModel.isVerificationCodeSent) { newValue in
             if newValue {
+                isLoading = false
                 activeAlert = .codeSent
             }
         }
         .onChange(of: viewModel.isVerificationSuccessful) { newValue in
             if newValue {
+                isLoading = false
                 activeAlert = .verificationSuccess
             }
         }
         .onChange(of: viewModel.signUpErrorMessage) { newValue in
             if currentStep == 3, newValue == "인증번호가 일치하지 않습니다." {
+                isLoading = false
                 activeAlert = .verificationFailure
             }
         }
         .onChange(of: viewModel.phoneVerificationErrorMessage) { newValue in
             if currentStep == 2, newValue == "이미 가입된 전화번호입니다." {
+                isLoading = false
                 activeAlert = .phoneNumberDuplicate
                 // Alert 띄운 후 에러 초기화
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -192,14 +208,29 @@ struct SignUpView: View {
         // 회원가입 성공 상태 변화 감지
         .onChange(of: viewModel.signUpSuccess) { success in
             if success {
+                isLoading = false
                 activeAlert = .signUpSuccess
             }
         }
         .onChange(of: viewModel.showAlertType) { newAlert in
             if let alert = newAlert {
+                isLoading = false
                 activeAlert = alert
             }
         }
+        //전체 화면에 ProgressView 오버레이 및 터치 차단
+        .overlay(
+            Group {
+                if isLoading {
+                    Color.black.opacity(0.3)
+                        .edgesIgnoringSafeArea(.all)
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.5)
+                }
+            }
+        )
+        .disabled(isLoading)
     }
     
     private var isNextButtonEnabled: Bool {
@@ -365,7 +396,9 @@ struct SignUpView: View {
             Button("인증번호 전송") {
                 // 인증번호 전송 기능
                 if let selected = selectedCountry {
+                    viewModel.selectedCountryCode = selected.code
                     let fullPhoneNumber = selected.code + viewModel.phoneNumber
+                    isLoading = true  // 진행 중: 로딩 시작
                     viewModel.sendVerificationCode(fullPhoneNumber: fullPhoneNumber)
                 }
             }
@@ -404,6 +437,7 @@ struct SignUpView: View {
                     // 인증번호 재전송 기능
                     if let selected = selectedCountry {
                         let fullPhoneNumber = selected.code + viewModel.phoneNumber
+                        isLoading = true  // 진행 중: 로딩 시작
                         viewModel.resendCode(fullPhoneNumber: fullPhoneNumber)
                     }
                 }
@@ -414,6 +448,7 @@ struct SignUpView: View {
             
             Button("인증번호 확인") {
                 // 인증번호 확인 기능
+                isLoading = true  // 진행 중: 로딩 시작
                 viewModel.verifyCode()
             }
             .padding()
@@ -446,6 +481,7 @@ struct SignUpView: View {
                         emailChecked = false
                         viewModel.signUpErrorMessage = nil
                         viewModel.signUpErrorMessageColor = .red
+                        viewModel.emailVerificationErrorMessage = nil
                     }
             }
             .padding()
@@ -562,5 +598,12 @@ struct SignUpView: View {
             .cornerRadius(10)
             .padding(.horizontal, 30)
         }
+    }
+}
+
+extension View{
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                        to: nil, from: nil, for: nil)
     }
 }

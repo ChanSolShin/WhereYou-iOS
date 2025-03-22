@@ -81,6 +81,7 @@ class SignUpViewModel: ObservableObject {
         guard let currentUser = Auth.auth().currentUser else {
             self.signUpErrorMessage = "전화번호 인증을 완료해주세요."
             self.signUpSuccess = false
+            self.showAlertType = .signUpFailure
             return
         }
         
@@ -97,11 +98,14 @@ class SignUpViewModel: ObservableObject {
                     }
                 }
                 self?.signUpSuccess = false
+                self?.showAlertType = .signUpFailure
                 return
             }
             
             guard let user = authResult?.user else {
                 self?.signUpErrorMessage = "사용자 정보를 가져올 수 없습니다."
+                self?.signUpSuccess = false
+                self?.showAlertType = .signUpFailure
                 return
             }
             
@@ -141,8 +145,10 @@ class SignUpViewModel: ObservableObject {
         self.isVerificationSuccessful = false
         self.isVerificationUIEnabled = true  // 재시도 시 버튼 활성화
         
+        let formattedPhone = formatPhoneNumber(phoneNumber)
+        
         // Firestore에서 전화번호 중복 확인 추가
-        db.collection("users").whereField("phoneNumber", isEqualTo: phoneNumber).getDocuments { [weak self] snapshot, error in
+        db.collection("users").whereField("phoneNumber", isEqualTo: formattedPhone).getDocuments { [weak self] snapshot, error in
             if let error = error {
                 print("전화번호 중복 확인 에러: \(error.localizedDescription)")
                 self?.signUpErrorMessage = "전화번호 중복 확인 중 오류가 발생했습니다."
@@ -225,7 +231,11 @@ class SignUpViewModel: ObservableObject {
                     switch authError {
                     case .invalidVerificationCode:
                         self.phoneVerificationErrorMessage = "인증번호가 일치하지 않습니다."
-                        self.showAlertType = .verificationFailure
+                        self.showAlertType = nil
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                                self.showAlertType = .verificationFailure
+                            }
+                        
                     case .sessionExpired:
                         self.phoneVerificationErrorMessage = "인증번호가 만료되었습니다. 다시 요청해주세요."
                         self.showAlertType = .verificationTimeout
