@@ -86,7 +86,7 @@ struct FriendListView: View {
             }
         }
         .onAppear {
-            viewModel.fetchPendingRequests() // 친구 요청 목록 업데이트
+            viewModel.observePendingRequests() // 친구 요청 목록 업데이트
         }
     }
     
