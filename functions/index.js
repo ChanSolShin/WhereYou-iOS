@@ -392,3 +392,39 @@ exports.deleteExpiredMeetings = onSchedule("every 1 minutes", async (event) => {
 
     return null;
 });
+
+
+// 5분 지난 임시 계정 중 이메일이 없는 계정 삭제
+exports.deleteUnlinkedTempAccounts = onSchedule("every 5 minutes", async (event) => {
+    const now = new Date();
+    const koreaTimeOffset = 9 * 60;
+    now.setMinutes(now.getMinutes() + now.getTimezoneOffset() + koreaTimeOffset / (60 * 1000));
+
+    const threshold = new Date(now.getTime() - 5 * 60 * 1000); // 5분 전
+
+    try {
+        const snapshot = await db.collection("tempUsers").get();
+
+        for (const doc of snapshot.docs) {
+            const data = doc.data();
+            const createdAt = data.createdAt?.toDate?.();
+
+            if (!createdAt || createdAt > threshold) continue;
+
+            const uid = doc.id;
+
+            const userRecord = await admin.auth().getUser(uid);
+
+            // 이메일이 없으면 (링크 안됐으면) 삭제
+            if (!userRecord.email) {
+                await admin.auth().deleteUser(uid);
+                await db.collection("tempUsers").doc(uid).delete();
+                console.log(`🗑️ 임시 계정 삭제됨: ${uid}`);
+            }
+        }
+    } catch (error) {
+        console.error("❌ 임시 계정 삭제 중 오류 발생:", error);
+    }
+
+    return null;
+});
