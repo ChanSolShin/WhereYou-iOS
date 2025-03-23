@@ -465,7 +465,7 @@ struct SignUpView: View {
             .padding(.horizontal, 30)
             .disabled(!viewModel.isVerificationUIEnabled)
             
-            Text("인증번호가 오지 않으셨다면, 번호가 잘못되었을 수 있습니다.")
+            Text("인증번호가 오지 않았다면, 번호가 잘못되었을 수 있습니다.")
                 .font(.caption)
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
