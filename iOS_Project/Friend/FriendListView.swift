@@ -75,7 +75,7 @@ struct FriendListView: View {
                               Image(systemName: "plus")
                           }
                       }
-            .confirmationDialog("친구 추가 방법 선택", isPresented: $showAddFriendActionSheet, titleVisibility: .visible) {
+            .confirmationDialog("친구 추가", isPresented: $showAddFriendActionSheet, titleVisibility: .visible) {
                 Button("이메일로 친구 추가") {
                     addFriendType = .email
                 }
