@@ -43,6 +43,7 @@ struct SignUpView: View {
     @State private var selectedCountry: CountryCode? = nil
     @State private var activeAlert: SignUpActiveAlert? = nil
     @State private var isLoading = false
+    @State private var isButtonLocked = false
     
     var body: some View {
         VStack {
@@ -76,7 +77,7 @@ struct SignUpView: View {
                 if currentStep > 0 {
                     Button("뒤로") {
                         withAnimation {
-                            currentStep -= 1
+                            currentStep = max(0, currentStep - 1)
                         }
                     }
                     .padding()
@@ -87,16 +88,18 @@ struct SignUpView: View {
                 
                 if currentStep != 2 {
                     Button(currentStep == 6 ? "회원가입" : "다음") {
+                        guard !isButtonLocked else { return }
+                        isButtonLocked = true
                         withAnimation {
                             hideKeyboard()
-                            isLoading = true  // 버튼 클릭 시 로딩 시작
                             
                             if currentStep == 6 {
-                                // 회원가입 버튼 액션: 이메일, 비밀번호 입력 후 회원가입
                                 viewModel.signUp()
                             } else {
                                 currentStep += 1
-                                isLoading = false // 다음 스텝으로 이동하면 로딩 종료
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                                    isButtonLocked = false
+                                }
                             }
                         }
                     }
