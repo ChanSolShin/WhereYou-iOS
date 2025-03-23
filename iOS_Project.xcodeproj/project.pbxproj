@@ -75,10 +75,6 @@
 		F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */; };
 		F5D76AE82CDCB1B700CB652B /* PermissionRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */; };
 		F5E8486B2D66DBF200047AA1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */; };
-		F5E8486E2D66F68B00047AA1 /* FriendRequestNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E8486C2D66F68B00047AA1 /* FriendRequestNotification.swift */; };
-		F5E848752D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
-		F5E848762D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
-		F5E848772D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -859,7 +855,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/WhereYou-iOS/iOS_Project/Info.plist";
+				INFOPLIST_FILE = "/Users/sinchansol/Desktop/WhereYou-iOS/iOS_Project/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
@@ -903,7 +899,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "/Users/yonghun/Documents/개발/xcode/WhereYou-iOS/iOS_Project/Info.plist";
+				INFOPLIST_FILE = "/Users/sinchansol/Desktop/WhereYou-iOS/iOS_Project/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
