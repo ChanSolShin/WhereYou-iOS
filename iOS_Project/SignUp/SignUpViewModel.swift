@@ -46,7 +46,20 @@ class SignUpViewModel: ObservableObject {
     
     
     var successCreate: Bool {
-        return username.isEmpty || !isValidEmail || password.count < 6 || confirmPassword.isEmpty || !passwordMatches || realName.isEmpty || birthday.count != 8 || phoneNumber.count != 11
+        let trimmedUsername = username.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedConfirmPassword = confirmPassword.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedRealName = realName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedBirthday = birthday.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPhoneNumber = phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        return trimmedUsername.isEmpty || !isValidEmail ||
+               trimmedPassword.count < 6 ||
+               trimmedConfirmPassword.isEmpty ||
+               trimmedPassword != trimmedConfirmPassword ||
+               trimmedRealName.isEmpty ||
+               trimmedBirthday.count != 8 ||
+               trimmedPhoneNumber.count != 11
     }
     
     var passwordMatches: Bool {

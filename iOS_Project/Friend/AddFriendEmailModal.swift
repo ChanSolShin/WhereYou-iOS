@@ -1,5 +1,5 @@
 //
-//  AddFriendModal.swift
+//  AddFriendEmailModal.swift
 //  iOS_Project
 //
 //  Created by 신찬솔 on 10/29/24.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AddFriendModal: View {
+struct AddFriendEmailModal: View {
     @ObservedObject var viewModel: FriendListViewModel
     @Binding var isPresented: Bool
     @State private var friendEmail = ""

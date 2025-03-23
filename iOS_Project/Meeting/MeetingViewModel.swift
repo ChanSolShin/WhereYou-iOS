@@ -240,7 +240,6 @@ class MeetingViewModel: NSObject, ObservableObject {
                    }
                    
                    guard let document = document, document.exists else {
-                       self?.errorMessage = "문서가 존재하지 않습니다."
                        return
                    }
                    
