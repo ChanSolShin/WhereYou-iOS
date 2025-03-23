@@ -6,18 +6,36 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 import NMapsMap
-
-import SwiftUI
 
 struct MainTabView: View {
     @State private var isTabBarHidden = false
+    @EnvironmentObject var loginViewModel: LoginViewModel
     
     var body: some View {
         CustomTabView(isTabBarHidden: $isTabBarHidden)
             .onAppear {
                 isTabBarHidden = false
+                checkUserValidity()  //사용자 유효성 검사 호출
             }
+    }
+    
+    private func checkUserValidity() {
+        guard let currentUser = Auth.auth().currentUser else {
+            print("Firebase 계정이 존재하지 않습니다. 로그아웃 처리합니다.")
+            loginViewModel.signOut()
+            return
+        }
+        
+        currentUser.reload { error in
+            if let error = error {
+                print("사용자 정보 갱신 실패: \(error.localizedDescription)")
+                loginViewModel.signOut()
+            } else {
+                print("사용자 정보 갱신 성공")
+            }
+        }
     }
 }
 
