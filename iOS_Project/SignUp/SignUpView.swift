@@ -237,8 +237,9 @@ struct SignUpView: View {
     switch currentStep {
     case 0:
         let trimmedName = viewModel.realName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let koreanNameRegex = "^[가-힣]{2,10}$"  // 최소 2자, 최대 10자 한글 이름만 허용
-        let namePredicate = NSPredicate(format: "SELF MATCHES %@", koreanNameRegex)
+        let koreanNameRegex = "^[가-힣]{2,10}$"
+        let englishNameRegex = "^[A-Za-z]{2,}(\\s[A-Za-z]+)*$"
+        let namePredicate = NSPredicate(format: "SELF MATCHES %@ OR SELF MATCHES %@", koreanNameRegex, englishNameRegex)
         return namePredicate.evaluate(with: trimmedName)
     case 1:
         let trimmedBirthday = viewModel.birthday.trimmingCharacters(in: .whitespacesAndNewlines)
