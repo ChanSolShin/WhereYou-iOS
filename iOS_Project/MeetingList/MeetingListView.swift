@@ -19,10 +19,13 @@ struct MeetingListView: View {
                     if viewModel.meetings.isEmpty {
                         VStack {
                             Spacer()
-                            Text("+ 버튼을 눌러서 새로운 모임을 생성하세요!")
-                                .font(.headline)
-                                .foregroundColor(.gray)
-                                .padding()
+                            HStack {
+                                Text("+ 버튼을 눌러서 새로운 모임을 생성하세요!")
+                                    .font(.headline)
+                                    .foregroundColor(.gray)
+                                    .padding()
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
                             Spacer()
                         }
                     } else {
@@ -73,6 +76,7 @@ struct MeetingListView: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
             .overlay(
                 NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel())
                     .onAppear { isTabBarHidden = true }
