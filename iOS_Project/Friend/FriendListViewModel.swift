@@ -193,6 +193,15 @@ class FriendListViewModel: ObservableObject {
 
         let formattedPhone = phoneNumber.replacingOccurrences(of: "-", with: "").replacingOccurrences(of: " ", with: "")
         
+        if let currentUserPhone = Auth.auth().currentUser?.phoneNumber?.replacingOccurrences(of: "-", with: "").replacingOccurrences(of: " ", with: ""),
+           currentUserPhone == formattedPhone {
+            DispatchQueue.main.async {
+                self.alertMessage = "자신에게 친구 요청을 보낼 수 없습니다."
+                self.showAlert = true
+            }
+            return
+        }
+        
         db.collection("users").whereField("phoneNumber", isEqualTo: formattedPhone).getDocuments { (snapshot, error) in
             guard let document = snapshot?.documents.first else {
                 DispatchQueue.main.async {
