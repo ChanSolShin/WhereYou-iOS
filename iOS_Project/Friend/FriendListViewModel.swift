@@ -187,6 +187,68 @@ class FriendListViewModel: ObservableObject {
                 }
         }
     }
+
+    func sendFriendRequest(toPhoneNumber phoneNumber: String) {
+        guard let userID = currentUserID, let userName = currentUserName else { return }
+
+        let formattedPhone = phoneNumber.replacingOccurrences(of: "-", with: "").replacingOccurrences(of: " ", with: "")
+        
+        db.collection("users").whereField("phoneNumber", isEqualTo: formattedPhone).getDocuments { (snapshot, error) in
+            guard let document = snapshot?.documents.first else {
+                DispatchQueue.main.async {
+                    self.alertMessage = "회원정보를 찾을 수 없습니다."
+                    self.showAlert = true
+                }
+                return
+            }
+
+            let recipientID = document.documentID
+
+            self.db.collection("friendRequests")
+                .whereField("fromUserID", isEqualTo: userID)
+                .whereField("toUserID", isEqualTo: recipientID)
+                .whereField("status", isEqualTo: "pending")
+                .getDocuments { (snapshot, error) in
+                    if let documents = snapshot?.documents, !documents.isEmpty {
+                        DispatchQueue.main.async {
+                            self.alertMessage = "해당 사용자에게 친구 요청을 보낸 상태입니다."
+                            self.showAlert = true
+                        }
+                        return
+                    }
+
+                    self.db.collection("friendRequests")
+                        .whereField("fromUserID", isEqualTo: recipientID)
+                        .whereField("toUserID", isEqualTo: userID)
+                        .whereField("status", isEqualTo: "pending")
+                        .getDocuments { (snapshot, error) in
+                            if let documents = snapshot?.documents, !documents.isEmpty {
+                                DispatchQueue.main.async {
+                                    self.alertMessage = "해당 사용자에게 친구 요청이 온 상태입니다."
+                                    self.showAlert = true
+                                }
+                                return
+                            }
+
+                            self.db.collection("friendRequests").addDocument(data: [
+                                "fromUserID": userID,
+                                "fromUserName": userName,
+                                "toUserID": recipientID,
+                                "status": "pending"
+                            ]) { error in
+                                if let error = error {
+                                    print("친구 요청 전송에 실패했습니다: \(error)")
+                                } else {
+                                    DispatchQueue.main.async {
+                                        self.alertMessage = "친구 요청을 보냈습니다!"
+                                        self.showAlert = true
+                                    }
+                                }
+                            }
+                        }
+                }
+        }
+    }
     
     func acceptFriendRequest(requestID: String, fromUserID: String) {
         guard let userID = currentUserID else { return }
