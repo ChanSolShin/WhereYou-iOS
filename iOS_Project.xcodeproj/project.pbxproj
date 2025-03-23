@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		D3DAC0BC663E9922C2AE4C22 /* Pods_iOS_Project.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B866D8C9DA73463FAADA7A1A /* Pods_iOS_Project.framework */; };
+		EA27C0A12D8FCB3A0053F213 /* AddFriendNumberModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA27C0A02D8FCB2D0053F213 /* AddFriendNumberModal.swift */; };
+		EA27C0A32D8FCD2A0053F213 /* AddFriendType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA27C0A22D8FCD290053F213 /* AddFriendType.swift */; };
 		EA28F4F82CC83C64004827A3 /* MeetingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */; };
 		EA28F4FA2CC83C6D004827A3 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */; };
 		EA6EE1D92CD39060002961A9 /* AddSelectedFriend.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */; };
@@ -45,7 +47,7 @@
 		EAB9CBC42CCFEDD400BFA8DD /* FriendModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBC32CCFEDCF00BFA8DD /* FriendModel.swift */; };
 		EAB9CBC62CCFF18900BFA8DD /* FriendRequestListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBC52CCFF17200BFA8DD /* FriendRequestListView.swift */; };
 		EAB9CBC82CCFF2B700BFA8DD /* FriendRequestModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBC72CCFF2B600BFA8DD /* FriendRequestModel.swift */; };
-		EAB9CBCE2CD0037300BFA8DD /* AddFriendModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBCD2CD0036D00BFA8DD /* AddFriendModal.swift */; };
+		EAB9CBCE2CD0037300BFA8DD /* AddFriendEmailModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBCD2CD0036D00BFA8DD /* AddFriendEmailModal.swift */; };
 		EAD481B02CBD7D4B0052D22B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EAD481AF2CBD7D4B0052D22B /* FirebaseAuth */; };
 		EAD481B22CBD7D4B0052D22B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EAD481B12CBD7D4B0052D22B /* FirebaseFirestore */; };
 		EAEA149B2CDCC0EE00C7FD9D /* EditMeetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA149A2CDCC0E900C7FD9D /* EditMeetingView.swift */; };
@@ -97,6 +99,8 @@
 /* Begin PBXFileReference section */
 		65CEBCF697E48C2A255A57B7 /* Pods-iOS_Project.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS_Project.release.xcconfig"; path = "Target Support Files/Pods-iOS_Project/Pods-iOS_Project.release.xcconfig"; sourceTree = "<group>"; };
 		B866D8C9DA73463FAADA7A1A /* Pods_iOS_Project.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iOS_Project.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA27C0A02D8FCB2D0053F213 /* AddFriendNumberModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendNumberModal.swift; sourceTree = "<group>"; };
+		EA27C0A22D8FCD290053F213 /* AddFriendType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendType.swift; sourceTree = "<group>"; };
 		EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModel.swift; sourceTree = "<group>"; };
 		EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingViewModel.swift; sourceTree = "<group>"; };
 		EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSelectedFriend.swift; sourceTree = "<group>"; };
@@ -135,7 +139,7 @@
 		EAB9CBC32CCFEDCF00BFA8DD /* FriendModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendModel.swift; sourceTree = "<group>"; };
 		EAB9CBC52CCFF17200BFA8DD /* FriendRequestListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRequestListView.swift; sourceTree = "<group>"; };
 		EAB9CBC72CCFF2B600BFA8DD /* FriendRequestModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRequestModel.swift; sourceTree = "<group>"; };
-		EAB9CBCD2CD0036D00BFA8DD /* AddFriendModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendModal.swift; sourceTree = "<group>"; };
+		EAB9CBCD2CD0036D00BFA8DD /* AddFriendEmailModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendEmailModal.swift; sourceTree = "<group>"; };
 		EABADF2B2CB9223E00962A40 /* iOS_Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOS_Project.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EABADF3B2CB9224100962A40 /* iOS_ProjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOS_ProjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EABADF452CB9224100962A40 /* iOS_ProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOS_ProjectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -238,7 +242,9 @@
 		EA86C1082CC2F15700989E43 /* Friend */ = {
 			isa = PBXGroup;
 			children = (
-				EAB9CBCD2CD0036D00BFA8DD /* AddFriendModal.swift */,
+				EA27C0A22D8FCD290053F213 /* AddFriendType.swift */,
+				EA27C0A02D8FCB2D0053F213 /* AddFriendNumberModal.swift */,
+				EAB9CBCD2CD0036D00BFA8DD /* AddFriendEmailModal.swift */,
 				EAB9CBC32CCFEDCF00BFA8DD /* FriendModel.swift */,
 				EAB9CBBF2CCFEC6C00BFA8DD /* FriendListViewModel.swift */,
 				EA86C1072CC2F15700989E43 /* FriendListView.swift */,
@@ -646,6 +652,7 @@
 				EA86C1272CC2F15700989E43 /* LoginViewModel.swift in Sources */,
 				F52E2FFB2CD3CEB500520042 /* FindPasswordViewModel.swift in Sources */,
 				F5ADB1D02CD90DAA00A1011C /* ProfileModel.swift in Sources */,
+				EA27C0A12D8FCB3A0053F213 /* AddFriendNumberModal.swift in Sources */,
 				EA86C1282CC2F15700989E43 /* MeetingView.swift in Sources */,
 				F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */,
 				EA6EE1DD2CD39B07002961A9 /* MeetingRequestModel.swift in Sources */,
@@ -665,6 +672,7 @@
 				EAEA149B2CDCC0EE00C7FD9D /* EditMeetingView.swift in Sources */,
 				EAEA14A82CE5F92400C7FD9D /* KickOutMemberViewModel.swift in Sources */,
 				EAB9CBC02CCFEC7400BFA8DD /* FriendListViewModel.swift in Sources */,
+				EA27C0A32D8FCD2A0053F213 /* AddFriendType.swift in Sources */,
 				EAA9ACE52CDC18BF002F2C79 /* User.swift in Sources */,
 				EAB9CBC62CCFF18900BFA8DD /* FriendRequestListView.swift in Sources */,
 				EA6EE1D92CD39060002961A9 /* AddSelectedFriend.swift in Sources */,
@@ -676,7 +684,7 @@
 				EAA9ACE82CDC1E2F002F2C79 /* LeaderSelectionViewModel.swift in Sources */,
 				EA86C1302CC2F15700989E43 /* iOS_ProjectApp.swift in Sources */,
 				EA6EE1DB2CD39AE9002961A9 /* MeetingRequestListView.swift in Sources */,
-				EAB9CBCE2CD0037300BFA8DD /* AddFriendModal.swift in Sources */,
+				EAB9CBCE2CD0037300BFA8DD /* AddFriendEmailModal.swift in Sources */,
 				EAB9CBC82CCFF2B700BFA8DD /* FriendRequestModel.swift in Sources */,
 				EA86C1312CC2F15700989E43 /* MainTapView.swift in Sources */,
 			);
