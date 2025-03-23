@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -75,10 +75,6 @@
 		F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */; };
 		F5D76AE82CDCB1B700CB652B /* PermissionRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */; };
 		F5E8486B2D66DBF200047AA1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */; };
-		F5E8486E2D66F68B00047AA1 /* FriendRequestNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E8486C2D66F68B00047AA1 /* FriendRequestNotification.swift */; };
-		F5E848752D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
-		F5E848762D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
-		F5E848772D66F8D800047AA1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5E848742D66F8D800047AA1 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -168,6 +164,10 @@
 		F5E848732D66F89900047AA1 /* iOS_Project.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS_Project.entitlements; sourceTree = "<group>"; };
 		FB3FFC42D97330368AC296CF /* Pods-iOS_Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS_Project.debug.xcconfig"; path = "Target Support Files/Pods-iOS_Project/Pods-iOS_Project.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		F5EA74C42D9047A100EAC863 /* Extension */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Extension; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		EABADF282CB9223E00962A40 /* Frameworks */ = {
@@ -334,6 +334,7 @@
 				F5D76AE42CDCAF9C00CB652B /* LocationManagers */,
 				EA86C11B2CC2F15700989E43 /* Assets.xcassets */,
 				EA86C11D2CC2F15700989E43 /* Info.plist */,
+				F5EA74C42D9047A100EAC863 /* Extension */,
 				F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */,
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
@@ -458,6 +459,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				F5EA74C42D9047A100EAC863 /* Extension */,
 			);
 			name = iOS_Project;
 			packageProductDependencies = (
