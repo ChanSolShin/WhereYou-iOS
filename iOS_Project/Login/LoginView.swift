@@ -86,7 +86,6 @@ struct LoginView: View {
                 NavigationLink(destination: MainTabView(), isActive: $viewModel.isLoggedIn) {
                     Button(action: {
                         viewModel.login()
-                        showAlert = false
                     }) {
                         Text("이메일로 로그인") // 버튼에 표시할 텍스트
                             .frame(width: 350, height: 50)
@@ -99,19 +98,6 @@ struct LoginView: View {
                 }
                 .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
                     MainTabView() // 로그인 성공 시 MainTabView로 전환
-                }
-                .alert(isPresented: $showAlert) {
-                    Alert(
-                        title: Text("로그인 실패"),
-                        message: Text("이메일 또는 비밀번호가 일치하지 않습니다."),
-                        dismissButton: .default(Text("확인"))
-                    )
-                }
-                .onChange(of: viewModel.loginErrorMessage) { errorMessage in
-                    if errorMessage != nil {
-                        showAlert = true // 로그인 실패 시 알림창 표시
-                        viewModel.loginErrorMessage = nil // 재발 표시를 위해 초기화
-                    }
                 }
                 .padding(.bottom, 20)
                 
@@ -135,32 +121,55 @@ struct LoginView: View {
                 .padding(.horizontal, 40)
                 Spacer()
             }
-            .onAppear{
+            .onAppear {
                 let loggedInStatus = UserDefaults.standard.bool(forKey: "isLoggedIn")
                 print(loggedInStatus)
             }
-            // 하나의 Alert로 강제 로그아웃 및 새 기기 로그인 확인 처리
-            .alert(item: $viewModel.currentAlert) { alertType in
-                switch alertType {
-                case .forcedLogout:
+            .alert(isPresented: Binding<Bool>(
+                get: {
+                    showAlert || viewModel.currentAlert != nil
+                },
+                set: { newValue in
+                    if !newValue {
+                        showAlert = false
+                        viewModel.currentAlert = nil
+                    }
+                }
+            )) {
+                if showAlert {
                     return Alert(
-                        title: Text("강제 로그아웃"),
-                        message: Text("다른 기기에서 로그인되어 로그아웃되었습니다."),
-                        dismissButton: .default(Text("확인"), action: {
-                            viewModel.currentAlert = nil
-                        })
+                        title: Text("로그인 실패"),
+                        message: Text("이메일 또는 비밀번호가 일치하지 않습니다."),
+                        dismissButton: .default(Text("확인"))
                     )
-                case .newDeviceLogin:
-                    return Alert(
-                        title: Text("다른 기기에서 로그인 중입니다."),
-                        message: Text("강제 로그아웃하고, 현재 기기에서 로그인 하시겠습니까?"),
-                        primaryButton: .destructive(Text("확인"), action: {
-                            viewModel.confirmNewDeviceLogin()
-                        }),
-                        secondaryButton: .cancel(Text("취소"), action: {
-                            viewModel.cancelNewDeviceLogin()
-                        })
-                    )
+                } else if let alertType = viewModel.currentAlert {
+                    switch alertType {
+                    case .forcedLogout:
+                        return Alert(
+                            title: Text("강제 로그아웃"),
+                            message: Text("다른 기기에서 로그인되어 로그아웃되었습니다."),
+                            dismissButton: .default(Text("확인"))
+                        )
+                    case .newDeviceLogin:
+                        return Alert(
+                            title: Text("다른 기기에서 로그인 중입니다."),
+                            message: Text("강제 로그아웃하고, 현재 기기에서 로그인 하시겠습니까?"),
+                            primaryButton: .destructive(Text("확인"), action: {
+                                viewModel.confirmNewDeviceLogin()
+                            }),
+                            secondaryButton: .cancel(Text("취소"), action: {
+                                viewModel.cancelNewDeviceLogin()
+                            })
+                        )
+                    }
+                } else {
+                    return Alert(title: Text(""), message: Text(""), dismissButton: .default(Text("확인")))
+                }
+            }
+            .onChange(of: viewModel.loginErrorMessage) { errorMessage in
+                if errorMessage != nil {
+                    showAlert = true
+                    viewModel.loginErrorMessage = nil
                 }
             }
         }
