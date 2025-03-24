@@ -60,30 +60,6 @@ struct EditProfileView: View {
                             .focused($focusedField, equals: .name)
                             .submitLabel(.done)
                     }
-
-                    Group {
-                        Text("이메일")
-                            .font(.title3)
-                        TextField("이메일", text: $email)
-                            .padding()
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(10)
-                            .keyboardType(.emailAddress)
-                            .focused($focusedField, equals: .email)
-                            .submitLabel(.done)
-                    }
-
-                    Group {
-                        Text("연락처")
-                            .font(.title3)
-                        TextField("전화번호", text: $phoneNumber)
-                            .padding()
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(10)
-                            .keyboardType(.numberPad)
-                            .focused($focusedField, equals: .phone)
-                    }
-
                     Group {
                         Text("생년월일 (YYDDMM)")
                             .font(.title3)
@@ -94,6 +70,33 @@ struct EditProfileView: View {
                             .keyboardType(.numberPad)
                             .focused($focusedField, equals: .birthday)
                     }
+
+                    Group {
+                        Text("이메일")
+                            .font(.title3)
+                        TextField("이메일", text: $email)
+                            .disabled(true)
+                            .padding()
+                            .background(Color.gray.opacity(0.08))
+                            .cornerRadius(10)
+                            .keyboardType(.emailAddress)
+                            .focused($focusedField, equals: .email)
+                            .submitLabel(.done)
+                    }
+
+                    Group {
+                        Text("연락처")
+                            .font(.title3)
+                        TextField("전화번호", text: $phoneNumber)
+                            .disabled(true)
+                            .padding()
+                            .background(Color.gray.opacity(0.08))
+                            .cornerRadius(10)
+                            .keyboardType(.numberPad)
+                            .focused($focusedField, equals: .phone)
+                    }
+
+                    
 
                     Spacer(minLength: 50) // 입력 필드와 하단 버튼 간 여백 확보
                 }
