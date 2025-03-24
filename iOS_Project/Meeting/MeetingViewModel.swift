@@ -77,6 +77,11 @@ class MeetingViewModel: NSObject, ObservableObject {
                            self.meetingDate = timestamp.dateValue()
                        }
                    }
+                   
+                   // 새로 추가된 멤버까지 반영되도록 리스너 갱신
+                   if let updatedMemberIDs = document.data()?["meetingMembers"] as? [String] {
+                       self.listenToMemberNameChanges(memberIDs: updatedMemberIDs)
+                   }
                }
            }
        }
