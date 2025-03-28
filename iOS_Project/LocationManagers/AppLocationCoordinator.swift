@@ -44,6 +44,8 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
     }
     
     func startUpdatingLocation() {
+        guard locationUpdateTimer == nil else { return }
+        
         locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         locationManager.distanceFilter = kCLDistanceFilterNone
         locationManager.allowsBackgroundLocationUpdates = true
@@ -67,6 +69,10 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
     private func uploadLocation() {
         guard let currentLocation = currentLocation else {
             print("위치를 가져올 수 없습니다.")
+            return
+        }
+        
+        guard !activeMeetings.isEmpty else {
             return
         }
         
