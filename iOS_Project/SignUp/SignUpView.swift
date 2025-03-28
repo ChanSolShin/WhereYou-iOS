@@ -1,4 +1,30 @@
 import SwiftUI
+import SafariServices
+// MARK: - 체크박스 커스텀
+struct CheckboxToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Button(action: {
+            configuration.isOn.toggle()
+        }) {
+            HStack {
+                Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
+                    .foregroundColor(configuration.isOn ? .blue : .gray)
+                configuration.label
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: UIViewControllerRepresentableContext<SafariView>) -> SFSafariViewController {
+        return SFSafariViewController(url: url)
+    }
+
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: UIViewControllerRepresentableContext<SafariView>) {}
+}
 
 // MARK: - CountryCode 모델
 struct CountryCode: Codable, Identifiable, Hashable {
@@ -43,7 +69,7 @@ struct SignUpView: View {
     @State private var selectedCountry: CountryCode? = nil
     @State private var activeAlert: SignUpActiveAlert? = nil
     @State private var isLoading = false
-    @State private var isButtonLocked = false
+    @State private var showSafariView = false
     
     var body: some View {
         VStack {
@@ -77,7 +103,7 @@ struct SignUpView: View {
                 if currentStep > 0 {
                     Button("뒤로") {
                         withAnimation {
-                            currentStep = max(0, currentStep - 1)
+                            currentStep -= 1
                         }
                     }
                     .padding()
@@ -88,18 +114,16 @@ struct SignUpView: View {
                 
                 if currentStep != 2 {
                     Button(currentStep == 6 ? "회원가입" : "다음") {
-                        guard !isButtonLocked else { return }
-                        isButtonLocked = true
                         withAnimation {
                             hideKeyboard()
+                            isLoading = true  // 버튼 클릭 시 로딩 시작
                             
                             if currentStep == 6 {
+                                // 회원가입 버튼 액션: 이메일, 비밀번호 입력 후 회원가입
                                 viewModel.signUp()
                             } else {
                                 currentStep += 1
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                                    isButtonLocked = false
-                                }
+                                isLoading = false // 다음 스텝으로 이동하면 로딩 종료
                             }
                         }
                     }
@@ -237,37 +261,27 @@ struct SignUpView: View {
     }
     
     private var isNextButtonEnabled: Bool {
-    switch currentStep {
-    case 0:
-        let trimmedName = viewModel.realName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let koreanNameRegex = "^[가-힣]{2,10}$"
-        let englishNameRegex = "^[A-Za-z]{2,}(\\s[A-Za-z]+)*$"
-        let namePredicate = NSPredicate(format: "SELF MATCHES %@ OR SELF MATCHES %@", koreanNameRegex, englishNameRegex)
-        return namePredicate.evaluate(with: trimmedName)
-    case 1:
-        let trimmedBirthday = viewModel.birthday.trimmingCharacters(in: .whitespacesAndNewlines)
-        return !trimmedBirthday.isEmpty && trimmedBirthday.count == 8 && trimmedBirthday.allSatisfy { $0.isNumber }
-    case 2: return false  // 전화번호 입력 단계에서는 다음 버튼 비활성화
-    case 3: return viewModel.isVerificationSuccessful  // 인증 성공 시에만 다음 버튼 활성화
-    case 4: return viewModel.isValidEmail && emailChecked && !viewModel.username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    case 5:
-        let trimmedPassword = viewModel.password.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmedPassword.count >= 6 && !trimmedPassword.isEmpty && !trimmedPassword.contains(" ")
-    case 6: return viewModel.passwordMatches && !viewModel.confirmPassword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    default: return false
-    }
+        switch currentStep {
+        case 0: return !viewModel.realName.isEmpty
+        case 1: return !viewModel.birthday.isEmpty && viewModel.birthday.count == 8
+        case 2: return false  // 전화번호 입력 단계에서는 다음 버튼 비활성화
+        case 3: return viewModel.isVerificationSuccessful  // 인증 성공 시에만 다음 버튼 활성화
+        case 4: return viewModel.isValidEmail && emailChecked
+        case 5: return viewModel.password.count >= 6
+        case 6: return viewModel.passwordMatches && viewModel.agreedToTerms
+        default: return false
+        }
     }
     
     // 국가코드별 전화번호 유효성 검사
     private var isPhoneNumberValid: Bool {
         guard let selected = selectedCountry else { return false }
-        let phone = viewModel.phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
+        let phone = viewModel.phoneNumber
         
-        // 공백 포함 여부 확인
-        if phone.contains(" ") { return false }
-
         switch selected.code {
         case "+82":
+            // "010"으로 시작: 11자리
+            // "10"으로 시작: 10자리
             if phone.hasPrefix("010") {
                 return phone.count == 11
             } else if phone.hasPrefix("10") {
@@ -276,10 +290,13 @@ struct SignUpView: View {
                 return false
             }
         case "+1":
+            // 미국: 10자리
             return phone.count == 10
         case "+44":
+            // 영국: 10자리 또는 11자리
             return phone.count == 10 || phone.count == 11
         default:
+            // 기타 국가: 비어있지 않음을 체크
             return !phone.isEmpty
         }
     }
@@ -468,12 +485,6 @@ struct SignUpView: View {
             .cornerRadius(8)
             .padding(.horizontal, 30)
             .disabled(!viewModel.isVerificationUIEnabled)
-            
-            Text("인증번호가 오지 않았다면, 번호가 잘못되었을 수 있습니다.")
-                .font(.caption)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.top, 4)
         }
     }
     
@@ -573,24 +584,13 @@ struct SignUpView: View {
             .background(Color.gray.opacity(0.1))
             .cornerRadius(8)
             .padding(.horizontal, 30)
-            .onChange(of: viewModel.password) { newValue in
-                viewModel.password = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-            }
-
+            
             if viewModel.password.count < 6 && !viewModel.password.isEmpty {
                 Text("비밀번호를 6자리 이상 입력해 주세요.")
                     .foregroundColor(.red)
                     .font(.caption)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, 5)
-                    .padding(.horizontal, 30)
-            }
-            if viewModel.password.contains(" ") {
-                Text("비밀번호에 공백을 포함할 수 없습니다.")
-                    .foregroundColor(.red)
-                    .font(.caption)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, 2)
                     .padding(.horizontal, 30)
             }
         }
@@ -624,6 +624,33 @@ struct SignUpView: View {
             .background(Color.gray.opacity(0.1))
             .cornerRadius(10)
             .padding(.horizontal, 30)
+            
+            Spacer().frame(height: 20) 
+            
+            Toggle(isOn: $viewModel.agreedToTerms) {
+                Text("개인정보 처리방침에 동의합니다.")
+                    .font(.subheadline)
+            }
+            .toggleStyle(CheckboxToggleStyle())
+            .padding(.horizontal, 30)
+            .padding(.top, 10)
+            
+            HStack {
+                Spacer()
+                Button(action: {
+                    showSafariView = true
+                }) {
+                    Text("약관 확인하기")
+                        .font(.caption)
+                        .underline()
+                        .foregroundColor(.blue)
+                }
+                .sheet(isPresented: $showSafariView) {
+                    SafariView(url: URL(string: "https://www.notion.so/1c3bd8a38451804eb200f4fd5e19ca22?pvs=4")!)
+                }
+                Spacer()
+            }
+            .padding(.top, 10)
         }
     }
 }
