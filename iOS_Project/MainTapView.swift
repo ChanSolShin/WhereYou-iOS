@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 import NMapsMap
 
 struct MainTabView: View {
@@ -34,6 +35,16 @@ struct MainTabView: View {
                 loginViewModel.signOut()
             } else {
                 print("사용자 정보 갱신 성공")
+                let uid = currentUser.uid
+                let db = Firestore.firestore()
+                db.collection("users").document(uid).getDocument { snapshot, error in
+                    if let document = snapshot, document.exists {
+                        print("회원가입 완료된 사용자입니다.")
+                    } else {
+                        print("회원가입 미완료 사용자입니다. 로그아웃 처리합니다.")
+                        loginViewModel.signOut()
+                    }
+                }
             }
         }
     }
