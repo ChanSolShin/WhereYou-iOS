@@ -12,18 +12,21 @@ import FirebaseAuth
 class ReportViewModel: ObservableObject {
     @Published var reportContent = ""
     @Published var submissionStatus: String?
-    
+    @Published var isSubmitting: Bool = false
     
     private let db = Firestore.firestore()
     
     func submitReport() {
+        isSubmitting = true
         guard reportContent.count >= 10 else {
             submissionStatus = "신고 내용을 10자 이상 입력해 주세요."
+            isSubmitting = false
             return
         }
         
         guard let userEmail = Auth.auth().currentUser?.email else {
             submissionStatus = "로그인이 필요합니다."
+            isSubmitting = false
             return
         }
         
@@ -35,6 +38,7 @@ class ReportViewModel: ObservableObject {
         
         // Firestore에 문서를 추가하고 문서 ID는 자동 생성
         db.collection("report").addDocument(data: reportData) { error in
+            self.isSubmitting = false
             if let error = error {
                 print("Error submitting report: \(error)")
                 self.submissionStatus = "신고 제출 실패: \(error.localizedDescription)"

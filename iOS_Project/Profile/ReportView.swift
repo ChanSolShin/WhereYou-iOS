@@ -10,6 +10,7 @@ import SwiftUI
 struct ReportView: View {
     @ObservedObject private var viewModel = ReportViewModel()
     @Environment(\.presentationMode) var presentationMode
+    @FocusState private var isTextEditorFocused: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -30,6 +31,7 @@ struct ReportView: View {
                 )
                 .background(Color.white)
                 .frame(height: 200)
+                .focused($isTextEditorFocused)
                 .overlay(
                     Text(viewModel.reportContent.isEmpty ? "ex) 신고내용을 입력해주세요. (10자 이상)" : "")
                         .foregroundColor(.gray)
@@ -38,9 +40,16 @@ struct ReportView: View {
                     alignment: .topLeading
                 )
             
+            if let statusMessage = viewModel.submissionStatus {
+                Text(statusMessage)
+                    .foregroundColor(.gray)
+                    .padding(.top)
+            }
+            
             Spacer()
             
             Button(action: {
+                isTextEditorFocused = false
                 viewModel.submitReport()
             }) {
                 Text("신고하기")
@@ -51,14 +60,18 @@ struct ReportView: View {
                     .background(Color.blue)
                     .cornerRadius(8)
             }
-            
-            if let statusMessage = viewModel.submissionStatus {
-                Text(statusMessage)
-                    .foregroundColor(.gray)
-                    .padding(.top)
-            }
         }
         .padding()
-        
+        .overlay(
+            Group {
+                if viewModel.isSubmitting {
+                    Color.black.opacity(0.3).ignoresSafeArea()
+                    ProgressView("신고 제출 중...")
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                }
+            }
+        )
     }
 }
