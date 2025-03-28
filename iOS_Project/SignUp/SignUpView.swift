@@ -1,4 +1,30 @@
 import SwiftUI
+import SafariServices
+// MARK: - 체크박스 커스텀
+struct CheckboxToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Button(action: {
+            configuration.isOn.toggle()
+        }) {
+            HStack {
+                Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
+                    .foregroundColor(configuration.isOn ? .blue : .gray)
+                configuration.label
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: UIViewControllerRepresentableContext<SafariView>) -> SFSafariViewController {
+        return SFSafariViewController(url: url)
+    }
+
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: UIViewControllerRepresentableContext<SafariView>) {}
+}
 
 // MARK: - CountryCode 모델
 struct CountryCode: Codable, Identifiable, Hashable {
@@ -43,6 +69,7 @@ struct SignUpView: View {
     @State private var selectedCountry: CountryCode? = nil
     @State private var activeAlert: SignUpActiveAlert? = nil
     @State private var isLoading = false
+    @State private var showSafariView = false
     
     var body: some View {
         VStack {
@@ -241,7 +268,7 @@ struct SignUpView: View {
         case 3: return viewModel.isVerificationSuccessful  // 인증 성공 시에만 다음 버튼 활성화
         case 4: return viewModel.isValidEmail && emailChecked
         case 5: return viewModel.password.count >= 6
-        case 6: return viewModel.passwordMatches
+        case 6: return viewModel.passwordMatches && viewModel.agreedToTerms
         default: return false
         }
     }
@@ -597,6 +624,33 @@ struct SignUpView: View {
             .background(Color.gray.opacity(0.1))
             .cornerRadius(10)
             .padding(.horizontal, 30)
+            
+            Spacer().frame(height: 20) 
+            
+            Toggle(isOn: $viewModel.agreedToTerms) {
+                Text("개인정보 처리방침에 동의합니다.")
+                    .font(.subheadline)
+            }
+            .toggleStyle(CheckboxToggleStyle())
+            .padding(.horizontal, 30)
+            .padding(.top, 10)
+            
+            HStack {
+                Spacer()
+                Button(action: {
+                    showSafariView = true
+                }) {
+                    Text("약관 확인하기")
+                        .font(.caption)
+                        .underline()
+                        .foregroundColor(.blue)
+                }
+                .sheet(isPresented: $showSafariView) {
+                    SafariView(url: URL(string: "https://www.notion.so/1c3bd8a38451804eb200f4fd5e19ca22?pvs=4")!)
+                }
+                Spacer()
+            }
+            .padding(.top, 10)
         }
     }
 }

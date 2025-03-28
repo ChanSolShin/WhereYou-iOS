@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import SafariServices
 
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
     @EnvironmentObject var loginViewModel: LoginViewModel  // 전역 로그인 상태 사용
     @State private var showLogoutAlert = false // 로그아웃 알림 상태
+    @State private var showPrivacyPolicy = false
     @Binding var isTabBarHidden: Bool
     
     var body: some View {
@@ -57,16 +59,24 @@ struct ProfileView: View {
                         .font(.title3)
                         .padding(.top,10)
                         .bold()
-                    HStack {
-                        Image(systemName: "person")
-                            .font(.title2)
-                        Text("개인정보 처리방침")
-                            .font(.body)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
+                    Button(action: {
+                        showPrivacyPolicy = true
+                    }) {
+                        HStack {
+                            Image(systemName: "person")
+                                .font(.title2)
+                            Text("개인정보 처리방침")
+                                .font(.body)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.vertical, 8)
+                        .foregroundColor(.primary)
                     }
-                    .padding(.vertical, 8)
+                    .sheet(isPresented: $showPrivacyPolicy) {
+                        SafariView(url: URL(string: "https://www.notion.so/1c3bd8a38451804eb200f4fd5e19ca22?pvs=4")!)
+                    }
                     
                     NavigationLink(destination: ReportView()
                         .onAppear { isTabBarHidden = true }
