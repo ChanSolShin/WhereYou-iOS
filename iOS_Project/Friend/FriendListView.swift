@@ -1,15 +1,12 @@
-//  FriendListView.swift
-//  iOS_Project
-//
-//  Created by 신찬솔 on 10/13/24.
-//
-
 import SwiftUI
+import Foundation
 
 struct FriendListView: View {
     @ObservedObject var viewModel = FriendListViewModel()
     @State private var showAddFriendModal = false
     @Binding var isTabBarHidden: Bool
+    @State private var addFriendType: AddFriendType? // Added this line
+    @State private var showAddFriendActionSheet = false
 
     var body: some View {
         NavigationView {
@@ -74,12 +71,26 @@ struct FriendListView: View {
                                   }
                               }
                           }
-                          Button(action: { showAddFriendModal = true }) {
+                          Button(action: { showAddFriendActionSheet = true }) {
                               Image(systemName: "plus")
                           }
                       }
-            .sheet(isPresented: $showAddFriendModal) {
-                AddFriendModal(viewModel: viewModel, isPresented: $showAddFriendModal)
+            .confirmationDialog("친구 추가", isPresented: $showAddFriendActionSheet, titleVisibility: .visible) {
+                Button("이메일로 친구 추가") {
+                    addFriendType = .email
+                }
+                Button("전화번호로 친구 추가") {
+                    addFriendType = .phone
+                }
+                Button("취소", role: .cancel) {}
+            }
+            .sheet(item: $addFriendType) { type in
+                switch type {
+                case .email:
+                    AddFriendEmailModal(viewModel: viewModel, isPresented: Binding(get: { addFriendType != nil }, set: { _ in addFriendType = nil }))
+                case .phone:
+                    AddFriendNumberModal(viewModel: viewModel, isPresented: Binding(get: { addFriendType != nil }, set: { _ in addFriendType = nil }))
+                }
             }
             .alert(isPresented: $viewModel.showAlert) {
                 Alert(title: Text("알림"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("확인")))
