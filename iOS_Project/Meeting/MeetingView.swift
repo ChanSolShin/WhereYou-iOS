@@ -114,6 +114,9 @@ struct MeetingView: View {
             }
             .onAppear {
                 meetingViewModel.fetchMeetingData(meetingID: meeting.id)
+                meetingViewModel.stopTrackingMember()
+                selectedMemberID = nil
+                selectedButton = nil
             }
             .onDisappear {
                 meetingViewModel.stopTrackingMember()

@@ -7,14 +7,31 @@
 
 import Foundation
 import FirebaseFirestore
+import FirebaseDatabase
 import FirebaseAuth
 import SwiftUI
+
+enum ActiveAlert: Identifiable {
+    case delete, validation, back, passwordError
+    var id: Int {
+        switch self {
+        case .delete: return 1
+        case .validation: return 2
+        case .back: return 3
+        case .passwordError: return 4
+        }
+    }
+}
 
 class ProfileViewModel: ObservableObject {
     @Published var profile: ProfileModel?
     @Published var isEditing = false
     @Published var errorMessage: String? // 에러 메시지 상태 추가
     @Published var navigateToLogin = false // 로그인 화면으로 이동 플래그
+    @Published var isProcessing = false // 처리 중 상태 추가
+    
+    @Published var activeAlert: ActiveAlert? = nil
+    @Published var showPasswordAlert: Bool = false
 
     private let db = Firestore.firestore()
     
@@ -45,11 +62,6 @@ class ProfileViewModel: ObservableObject {
     func updateProfileData(newName: String, newEmail: String, newPhoneNumber: String, newBirthday: String) -> Bool {
         guard isValidEmail(newEmail) else {
             errorMessage = "유효하지 않은 이메일 형식입니다."
-            return false
-        }
-        
-        guard isValidPhoneNumber(newPhoneNumber) else {
-            errorMessage = "휴대전화 번호는 11자리 숫자로 입력해 주세요."
             return false
         }
         
@@ -85,46 +97,168 @@ class ProfileViewModel: ObservableObject {
         return emailTest.evaluate(with: email)
     }
     
-    // 전화번호 유효성 검사 (11자리 숫자)
-    private func isValidPhoneNumber(_ phoneNumber: String) -> Bool {
-        return phoneNumber.count == 11 && phoneNumber.allSatisfy { $0.isNumber }
-    }
-    
     // 생일 유효성 검사
     private func isValidBirthday(_ birthday: String) -> Bool {
         return birthday.count == 8 && birthday.allSatisfy { $0.isNumber }
     }
     
-    // 계정 삭제
-    func deleteAccount() {
-        guard let user = Auth.auth().currentUser else { return }
+    // MARK: - 계정 탈퇴 (재인증 후 진행)
+    
+    // 재인증 후 계정 삭제 (비밀번호 입력 후 호출)
+    func reauthenticateAndDelete(password: String) {
+        guard let user = Auth.auth().currentUser, let email = user.email else {
+            self.errorMessage = "사용자 정보가 없습니다."
+            return
+        }
         
-        let uid = user.uid
-        db.collection("users").document(uid).delete { [weak self] error in
+        self.isProcessing = true
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        user.reauthenticate(with: credential) { [weak self] result, error in
             if let error = error {
-                self?.errorMessage = "데이터 삭제 중 오류가 발생했습니다: \(error.localizedDescription)"
+                DispatchQueue.main.async {
+                    // 재인증 실패 시, activeAlert를 passwordError로 설정하여 alert 표시
+                    self?.activeAlert = .passwordError
+                    self?.isProcessing = false
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        self?.showPasswordAlert = true
+                    }
+                }
+                return
+            }
+            // 재인증 성공 시, 관련 데이터 정리 및 최종 삭제 진행
+            self?.performDeletionCleanup()
+        }
+    }
+    
+    // 관련 데이터 정리 후 Firestore 사용자 문서와 Auth 계정 삭제
+    func performDeletionCleanup() {
+        guard let user = Auth.auth().currentUser else { return }
+        let uid = user.uid
+        let group = DispatchGroup()
+        var encounteredError: Error?
+        
+        // friendRequests: 해당 uid 관련 문서 삭제
+        for field in ["fromUserID", "toUserID"] {
+            group.enter()
+            db.collection("friendRequests")
+                .whereField(field, isEqualTo: uid)
+                .getDocuments { snapshot, error in
+                    if let error = error { encounteredError = error; group.leave(); return }
+                    let batch = self.db.batch()
+                    snapshot?.documents.forEach { batch.deleteDocument($0.reference) }
+                    batch.commit { error in
+                        if let error = error { encounteredError = error }
+                        group.leave()
+                    }
+                }
+        }
+        
+        // meetingRequests: 해당 uid 관련 문서 삭제
+        for field in ["fromUserID", "toUserID"] {
+            group.enter()
+            db.collection("meetingRequests")
+                .whereField(field, isEqualTo: uid)
+                .getDocuments { snapshot, error in
+                    if let error = error { encounteredError = error; group.leave(); return }
+                    let batch = self.db.batch()
+                    snapshot?.documents.forEach { batch.deleteDocument($0.reference) }
+                    batch.commit { error in
+                        if let error = error { encounteredError = error }
+                        group.leave()
+                    }
+                }
+        }
+        
+        // Firestore meetings: meetingMembers 배열에서 해당 uid 제거
+        group.enter()
+        db.collection("meetings")
+            .whereField("meetingMembers", arrayContains: uid)
+            .getDocuments { snapshot, error in
+                if let error = error { encounteredError = error; group.leave(); return }
+                let batch = self.db.batch()
+                snapshot?.documents.forEach { doc in
+                    var members = doc.get("meetingMembers") as? [String] ?? []
+                    members.removeAll { $0 == uid }
+                    batch.updateData(["meetingMembers": members], forDocument: doc.reference)
+
+                    // Check for meetingMaster and delete or update master
+                    let master = doc.get("meetingMaster") as? String ?? ""
+                    if master == uid {
+                        if members.isEmpty {
+                            // Delete the whole meeting document if no members left
+                            batch.deleteDocument(doc.reference)
+                        } else {
+                            // Assign new random master
+                            let newMaster = members.randomElement() ?? ""
+                            batch.updateData(["meetingMaster": newMaster], forDocument: doc.reference)
+                        }
+                    }
+                }
+                batch.commit { error in
+                    if let error = error { encounteredError = error }
+                    group.leave()
+                }
+            }
+        
+        // Realtime DB meetings: participants 배열에서 해당 uid 제거
+        group.enter()
+        let rtdbRef = Database.database().reference().child("meetings")
+        rtdbRef.observeSingleEvent(of: .value) { snapshot in
+            var updates: [String: Any?] = [:]
+            for child in snapshot.children {
+                if let meetingSnap = child as? DataSnapshot,
+                   var meetingData = meetingSnap.value as? [String: Any],
+                   var participants = meetingData["participants"] as? [String],
+                   participants.contains(uid) {
+                    participants.removeAll { $0 == uid }
+                    updates["\(meetingSnap.key)/participants"] = participants
+                }
+            }
+            rtdbRef.updateChildValues(updates) { error, _ in
+                if let error = error { encounteredError = error }
+                group.leave()
+            }
+        }
+        
+        // Firestore users: 다른 사용자의 friends 배열에서 해당 uid 제거
+        group.enter()
+        db.collection("users")
+            .whereField("friends", arrayContains: uid)
+            .getDocuments { snapshot, error in
+                if let error = error { encounteredError = error; group.leave(); return }
+                let batch = self.db.batch()
+                snapshot?.documents.forEach { doc in
+                    var friends = doc.get("friends") as? [String] ?? []
+                    friends.removeAll { $0 == uid }
+                    batch.updateData(["friends": friends], forDocument: doc.reference)
+                }
+                batch.commit { error in
+                    if let error = error { encounteredError = error }
+                    group.leave()
+                }
+            }
+        
+        group.notify(queue: .main) {
+            self.isProcessing = false
+            if let error = encounteredError {
+                self.errorMessage = "계정 삭제 전 오류: \(error.localizedDescription)"
                 return
             }
             
-            user.delete { error in
+            self.db.collection("users").document(uid).delete { [weak self] error in
                 if let error = error {
-                    self?.errorMessage = "계정 삭제 중 오류가 발생했습니다: \(error.localizedDescription)"
-                } else {
-                    // Firebase Auth에서 로그아웃 처리
-                    do {
-                        try Auth.auth().signOut()
-                    } catch {
-                        print("로그아웃 에러: \(error.localizedDescription)")
-                    }
-                    
-                    // UserDefaults 업데이트
-                    UserDefaults.standard.set(false, forKey: "isLoggedIn")
-                    
-                    //NotificationCenter를 통해 로그아웃 이벤트 전달(자동로그인 방지)
-                    NotificationCenter.default.post(name: Notification.Name("UserDidLogout"), object: nil)
-                    
-                    // 일정 시간 후 로그인 화면으로 전환
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self?.errorMessage = "계정 삭제 중 오류: \(error.localizedDescription)"
+                    return
+                }
+                
+                user.delete { error in
+                    if let error = error {
+                        self?.errorMessage = "계정 삭제 중 오류: \(error.localizedDescription)"
+                    } else {
+                        do { try Auth.auth().signOut() } catch { print("로그아웃 오류: \(error)") }
+                        UserDefaults.standard.set(false, forKey: "isLoggedIn")
+                        NotificationCenter.default.post(name: Notification.Name("UserDidLogout"), object: nil)
                         self?.navigateToLogin = true
                     }
                 }

@@ -14,6 +14,7 @@ class SignUpViewModel: ObservableObject {
     @Published var username: String = ""
     @Published var password: String = ""
     @Published var confirmPassword: String = ""
+    @Published var agreedToTerms: Bool = false
     @Published var realName: String = ""
     @Published var birthday: String = ""
     @Published var phoneNumber: String = ""

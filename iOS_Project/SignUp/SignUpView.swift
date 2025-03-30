@@ -1,4 +1,30 @@
 import SwiftUI
+import SafariServices
+// MARK: - 체크박스 커스텀
+struct CheckboxToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Button(action: {
+            configuration.isOn.toggle()
+        }) {
+            HStack {
+                Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
+                    .foregroundColor(configuration.isOn ? .blue : .gray)
+                configuration.label
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: UIViewControllerRepresentableContext<SafariView>) -> SFSafariViewController {
+        return SFSafariViewController(url: url)
+    }
+
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: UIViewControllerRepresentableContext<SafariView>) {}
+}
 
 // MARK: - CountryCode 모델
 struct CountryCode: Codable, Identifiable, Hashable {
@@ -43,6 +69,7 @@ struct SignUpView: View {
     @State private var selectedCountry: CountryCode? = nil
     @State private var activeAlert: SignUpActiveAlert? = nil
     @State private var isLoading = false
+    @State private var showSafariView = false
     @State private var isButtonLocked = false
     
     var body: some View {
@@ -237,25 +264,46 @@ struct SignUpView: View {
     }
     
     private var isNextButtonEnabled: Bool {
-    switch currentStep {
-    case 0:
-        let trimmedName = viewModel.realName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let koreanNameRegex = "^[가-힣]{2,10}$"
-        let englishNameRegex = "^[A-Za-z]{2,}(\\s[A-Za-z]+)*$"
-        let namePredicate = NSPredicate(format: "SELF MATCHES %@ OR SELF MATCHES %@", koreanNameRegex, englishNameRegex)
-        return namePredicate.evaluate(with: trimmedName)
-    case 1:
-        let trimmedBirthday = viewModel.birthday.trimmingCharacters(in: .whitespacesAndNewlines)
-        return !trimmedBirthday.isEmpty && trimmedBirthday.count == 8 && trimmedBirthday.allSatisfy { $0.isNumber }
-    case 2: return false  // 전화번호 입력 단계에서는 다음 버튼 비활성화
-    case 3: return viewModel.isVerificationSuccessful  // 인증 성공 시에만 다음 버튼 활성화
-    case 4: return viewModel.isValidEmail && emailChecked && !viewModel.username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    case 5:
-        let trimmedPassword = viewModel.password.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmedPassword.count >= 6 && !trimmedPassword.isEmpty && !trimmedPassword.contains(" ")
-    case 6: return viewModel.passwordMatches && !viewModel.confirmPassword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    default: return false
-    }
+switch currentStep {
+case 0:
+    // 이름 입력 단계
+    let trimmedName = viewModel.realName.trimmingCharacters(in: .whitespacesAndNewlines)
+    let koreanNameRegex = "^[가-힣]{2,10}$"
+    let englishNameRegex = "^[A-Za-z]{2,}(\\s[A-Za-z]+)*$"
+    let namePredicate = NSPredicate(format: "SELF MATCHES %@ OR SELF MATCHES %@", koreanNameRegex, englishNameRegex)
+    return namePredicate.evaluate(with: trimmedName)
+
+case 1:
+    // 생년월일 입력 단계
+    let trimmedBirthday = viewModel.birthday.trimmingCharacters(in: .whitespacesAndNewlines)
+    return !trimmedBirthday.isEmpty && trimmedBirthday.count == 8 && trimmedBirthday.allSatisfy { $0.isNumber }
+
+case 2:
+    return false  // 전화번호 입력 단계에서는 다음 버튼 비활성화
+
+case 3:
+    return viewModel.isVerificationSuccessful  // 인증 성공 시에만 다음 버튼 활성화
+
+case 4:
+    return viewModel.isValidEmail && emailChecked &&
+        !viewModel.username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+case 5:
+    // 비밀번호 입력 단계
+    let trimmedPassword = viewModel.password.trimmingCharacters(in: .whitespacesAndNewlines)
+    return trimmedPassword.count >= 6 &&
+           !trimmedPassword.isEmpty &&
+           !trimmedPassword.contains(" ")
+
+case 6:
+    // 비밀번호 확인 및 약관 동의 단계
+    return viewModel.passwordMatches &&
+           !viewModel.confirmPassword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+           viewModel.agreedToTerms
+
+default:
+    return false
+}
     }
     
     // 국가코드별 전화번호 유효성 검사
@@ -624,6 +672,33 @@ struct SignUpView: View {
             .background(Color.gray.opacity(0.1))
             .cornerRadius(10)
             .padding(.horizontal, 30)
+            
+            Spacer().frame(height: 20) 
+            
+            Toggle(isOn: $viewModel.agreedToTerms) {
+                Text("개인정보 처리방침에 동의합니다.")
+                    .font(.subheadline)
+            }
+            .toggleStyle(CheckboxToggleStyle())
+            .padding(.horizontal, 30)
+            .padding(.top, 10)
+            
+            HStack {
+                Spacer()
+                Button(action: {
+                    showSafariView = true
+                }) {
+                    Text("약관 확인하기")
+                        .font(.caption)
+                        .underline()
+                        .foregroundColor(.blue)
+                }
+                .sheet(isPresented: $showSafariView) {
+                    SafariView(url: URL(string: "https://www.notion.so/1c3bd8a38451804eb200f4fd5e19ca22?pvs=4")!)
+                }
+                Spacer()
+            }
+            .padding(.top, 10)
         }
     }
 }

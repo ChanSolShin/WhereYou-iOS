@@ -190,7 +190,9 @@ class MeetingViewModel: NSObject, ObservableObject {
             } else {
                 print("Failed to fetch location for user \(userID). Snapshot: \(snapshot.value ?? "nil")")
                 DispatchQueue.main.async {
-                    self?.errorMessage = "멤버의 위치 정보를 불러올 수 없습니다."
+                    if self?.errorMessage != "멤버의 위치 정보를 불러올 수 없습니다." {
+                        self?.errorMessage = "멤버의 위치 정보를 불러올 수 없습니다."
+                    }
                 }
             }
         }
