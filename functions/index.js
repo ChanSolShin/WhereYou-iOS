@@ -4,8 +4,11 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require('firebase-functions/scheduler'); // V2에서는 onSchedule 사용
 const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
 
-admin.initializeApp(); // Firebase Admin SDK 초기화
-const db = admin.firestore(); // Firestore 인스턴스 가져오기
+admin.initializeApp({
+  databaseURL: "https://meetingapp-2985d-default-rtdb.firebaseio.com"
+});
+
+const db = getFirestore(); // Firestore 인스턴스 가져오기
 const messaging = admin.messaging(); // Firebase Cloud Messaging 인스턴스 가져오기
 
 // ✅ 친구 요청 알림 함수 (Firestore에 friendRequests 문서가 생성될 때)
@@ -41,6 +44,61 @@ exports.sendFriendRequestNotification = functions.firestore.onDocumentCreated('f
     }
 
     return null;
+});
+
+exports.cleanupOrphanedRealtimeMeetings = onSchedule("every 10 minutes", async (event) => {
+  console.log("🧹 [cleanupOrphanedRealtimeMeetings] 호출됨");
+
+  try {
+    // 1. Firestore의 meetings ID 목록 가져오기
+    const firestoreSnapshot = await db.collection("meetings").get();
+    const firestoreMeetingIds = firestoreSnapshot.docs.map(doc => doc.id);
+    const firestoreIdSet = new Set(firestoreMeetingIds);
+    console.log(`📄 Firestore meeting 수: ${firestoreMeetingIds.length}`);
+
+    // 2. RealtimeDB의 meetings key 목록 가져오기
+    const rtdbSnapshot = await admin.database().ref("meetings").once("value");
+    const rtdbData = rtdbSnapshot.val();
+
+    if (!rtdbData) {
+      console.log("📦 RealtimeDB meetings 경로가 비어 있음");
+      return;
+    }
+
+    const rtdbMeetingIds = Object.keys(rtdbData);
+    console.log(`⚡️ RealtimeDB meeting 수: ${rtdbMeetingIds.length}`);
+
+    // 3. Firestore에는 없지만 RealtimeDB에만 있는 ID 목록 추출
+    const orphanedIds = rtdbMeetingIds.filter(id => !firestoreIdSet.has(id));
+
+    if (orphanedIds.length === 0) {
+      console.log("✅ 정리할 orphaned meeting 없음");
+      return;
+    }
+
+    // 4. 해당 orphaned ID 삭제
+    for (const id of orphanedIds) {
+      try {
+        const rootRef = admin.database().ref();
+        const meetingRef = rootRef.child(`meetings/${id}`);
+        console.log("🧪 삭제할 경로:", meetingRef.toString());
+
+        const snapshot = await meetingRef.once('value');
+        if (snapshot.exists()) {
+          await meetingRef.remove();
+          console.log(`✅ RealtimeDB에서 orphaned meeting 삭제 완료: ${id}`);
+        } else {
+          console.log(`⚠️ RealtimeDB에 존재하지 않음 (스킵): ${id}`);
+        }
+      } catch (err) {
+        console.error(`❌ 삭제 실패 (${id}):`, err);
+      }
+    }
+  } catch (err) {
+    console.error("❌ orphaned 데이터 정리 중 오류 발생:", err);
+  }
+
+  return null;
 });
 
 // ✅ 모임 초대 요청 알림 함수 (Firestore에 meetingRequests 문서가 생성될 때)
@@ -381,8 +439,32 @@ exports.deleteExpiredMeetings = onSchedule("every 1 minutes", async (event) => {
 
             // currentDate가 deleteThreshold보다 크면 삭제
             if (currentDate >= deleteThreshold) {
+                const meetingId = doc.id;
+ 
+                // Realtime Database 문서 삭제
+                try {
+                    await admin.database().ref(`meetings/${meetingId}`).remove();
+                } catch (err) {
+                    console.error(`❌ RealtimeDB 모임 삭제 실패 (${meetingId}):`, err);
+                }
+ 
+             // Firestore의 meetingRequests 컬렉션에서 관련 요청 삭제
+             try {
+                 const meetingRequestsSnapshot = await db.collection("meetingRequests")
+                     .where("meetingID", "==", meetingId)
+                     .get();
+ 
+                 for (const requestDoc of meetingRequestsSnapshot.docs) {
+                     await requestDoc.ref.delete();
+                     console.log(`🗑 Firestore meetingRequests에서 요청 ${requestDoc.id} 삭제 완료`);
+                 }
+             } catch (err) {
+                 console.error(`❌ Firestore meetingRequests 삭제 실패 (${meetingId}):`, err);
+             }
+ 
+                // Firestore 문서 삭제
                 await doc.ref.delete();
-                console.log(`🗑 모임 ${doc.id} 삭제 완료`);
+                console.log(`🗑 Firestore에서 모임 ${meetingId} 삭제 완료`);
             }
         }));
 
