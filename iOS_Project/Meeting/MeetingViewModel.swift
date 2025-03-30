@@ -424,13 +424,36 @@ class MeetingViewModel: NSObject, ObservableObject {
                     }
                 }
                 
-                // 만약 모임의 멤버가 1명이면 모임 자체를 삭제
+                // 만약 모임의 멤버가 1명이면 모임 자체를 삭제 (요청 먼저 삭제)
                 if meetingMembers.count == 1 {
-                    db.collection("meetings").document(meetingID).delete { error in
+                    // 관련된 meetingRequests 먼저 삭제
+                    db.collection("meetingRequests").whereField("meetingID", isEqualTo: meetingID).getDocuments { snapshot, error in
                         if let error = error {
-                            print("Error deleting meeting: \(error)")
-                        } else {
-                            print("Meeting deleted successfully.")
+                            print("Error fetching meetingRequests: \(error)")
+                            return
+                        }
+
+                        let batch = db.batch()
+                        snapshot?.documents.forEach { doc in
+                            batch.deleteDocument(doc.reference)
+                        }
+
+                        batch.commit { batchError in
+                            if let batchError = batchError {
+                                print("Error deleting meetingRequests: \(batchError)")
+                                return
+                            }
+
+                            print("✅ 관련된 MeetingRequests 삭제 완료")
+
+                            // meetingRequests 삭제 후 모임 삭제
+                            db.collection("meetings").document(meetingID).delete { error in
+                                if let error = error {
+                                    print("Error deleting meeting: \(error)")
+                                } else {
+                                    print("✅ Meeting deleted successfully.")
+                                }
+                            }
                         }
                     }
                     return
@@ -501,6 +524,33 @@ class MeetingViewModel: NSObject, ObservableObject {
                             )
                         } ?? []
                     }
+                }
+            }
+    }
+
+    // 외부에서 호출 가능한: 특정 모임과 관련된 meetingRequests만 삭제하는 함수
+    func deleteRequestsForMeeting(meetingID: String, completion: (() -> Void)? = nil) {
+        let db = Firestore.firestore()
+        db.collection("meetingRequests").whereField("meetingID", isEqualTo: meetingID)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("❌ MeetingRequests 조회 실패: \(error)")
+                    completion?()
+                    return
+                }
+
+                let batch = db.batch()
+                snapshot?.documents.forEach { doc in
+                    batch.deleteDocument(doc.reference)
+                }
+
+                batch.commit { batchError in
+                    if let batchError = batchError {
+                        print("❌ MeetingRequests 삭제 실패: \(batchError)")
+                    } else {
+                        print("✅ 관련된 MeetingRequests 삭제 완료")
+                    }
+                    completion?()
                 }
             }
     }
