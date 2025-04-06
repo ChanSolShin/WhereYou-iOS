@@ -22,7 +22,7 @@ struct MeetingView: View {
     @State private var showActionSheet = false
     @State private var showingEditMeetingModal = false
     @State private var showingKickOutModal = false
-    @State private var selectedMemberID: String? = nil 
+    @State private var selectedMemberID: String? = nil
     @State private var selectedButton: String? = nil
     
     var body: some View {
@@ -113,6 +113,7 @@ struct MeetingView: View {
                 }
             }
             .onAppear {
+                meetingViewModel.errorMessage = nil
                 meetingViewModel.fetchMeetingData(meetingID: meeting.id)
                 meetingViewModel.stopTrackingMember()
                 selectedMemberID = nil
