@@ -17,12 +17,13 @@ struct LoginView: View {
     var body: some View {
         NavigationView {
             VStack {
-                // 앱 이름 표시
-                Text("웨어유")
-                    .font(.largeTitle)
+                // 앱 로고 표시
+                Image("AppLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 200, height: 100)
                     .padding(.top, 60)
                     .padding(.bottom, 10)
-                    .fontWeight(.bold)
                 
                 Text("로그인")
                     .font(.title2)
