@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UIUserInterFaceStyle</key>
-	<string>Light</string>
 	<key>CFBundleIcons</key>
 	<dict>
 		<key>CFBundlePrimaryIcon</key>
@@ -48,5 +46,7 @@
 		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
+	<key>UIUserInterFaceStyle</key>
+	<string>Light</string>
 </dict>
 </plist>
