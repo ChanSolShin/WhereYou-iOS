@@ -602,9 +602,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-iOS_Project/Pods-iOS_Project-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-iOS_Project/Pods-iOS_Project-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -871,7 +875,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "/Users/sinchansol/Desktop/WhereYou-iOS/iOS_Project/Info.plist";
+				INFOPLIST_FILE = iOS_Project/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
@@ -887,7 +891,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.chansol.iOS-Project";
+				PRODUCT_BUNDLE_IDENTIFIER = wheryou.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = whereyou;
@@ -915,7 +919,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "/Users/sinchansol/Desktop/WhereYou-iOS/iOS_Project/Info.plist";
+				INFOPLIST_FILE = iOS_Project/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
@@ -931,7 +935,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.chansol.iOS-Project";
+				PRODUCT_BUNDLE_IDENTIFIER = wheryou.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = whereyou;
