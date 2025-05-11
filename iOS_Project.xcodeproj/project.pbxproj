@@ -343,6 +343,7 @@
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
 				F53F124A2D7DC0F300E434D4 /* KeyboardAvoidingModifier.swift */,
+				EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */,
 			);
 			path = iOS_Project;
 			sourceTree = "<group>";
@@ -386,7 +387,6 @@
 		EABADF222CB9223E00962A40 = {
 			isa = PBXGroup;
 			children = (
-				EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */,
 				EA86C1202CC2F15700989E43 /* iOS_Project */,
 				EA86C1372CC2F15A00989E43 /* iOS_ProjectTests */,
 				EA86C13B2CC2F15C00989E43 /* iOS_ProjectUITests */,
