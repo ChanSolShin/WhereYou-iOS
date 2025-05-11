@@ -12,6 +12,7 @@
 		EA27C0A32D8FCD2A0053F213 /* AddFriendType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA27C0A22D8FCD290053F213 /* AddFriendType.swift */; };
 		EA28F4F82CC83C64004827A3 /* MeetingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */; };
 		EA28F4FA2CC83C6D004827A3 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */; };
+		EA3C8D332DD03E9000DD899E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */; };
 		EA6EE1D92CD39060002961A9 /* AddSelectedFriend.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */; };
 		EA6EE1DB2CD39AE9002961A9 /* MeetingRequestListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1DA2CD39AE2002961A9 /* MeetingRequestListView.swift */; };
 		EA6EE1DD2CD39B07002961A9 /* MeetingRequestModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1DC2CD39B01002961A9 /* MeetingRequestModel.swift */; };
@@ -59,9 +60,6 @@
 		F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */; };
 		F50FDDBC2CD3AA12006E96B2 /* FindEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */; };
 		F50FDDBE2CD3AA2C006E96B2 /* FindEmailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */; };
-		F51148BC2D80076000137679 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F51148BB2D80076000137679 /* GoogleService-Info.plist */; };
-		F51148BD2D80076000137679 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F51148BB2D80076000137679 /* GoogleService-Info.plist */; };
-		F51148BE2D80076000137679 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F51148BB2D80076000137679 /* GoogleService-Info.plist */; };
 		F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FF62CD3CC5D00520042 /* FindPasswordModel.swift */; };
 		F52E2FF92CD3CC9000520042 /* FindPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */; };
 		F52E2FFB2CD3CEB500520042 /* FindPasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */; };
@@ -103,6 +101,7 @@
 		EA27C0A22D8FCD290053F213 /* AddFriendType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendType.swift; sourceTree = "<group>"; };
 		EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModel.swift; sourceTree = "<group>"; };
 		EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingViewModel.swift; sourceTree = "<group>"; };
+		EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSelectedFriend.swift; sourceTree = "<group>"; };
 		EA6EE1DA2CD39AE2002961A9 /* MeetingRequestListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRequestListView.swift; sourceTree = "<group>"; };
 		EA6EE1DC2CD39B01002961A9 /* MeetingRequestModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRequestModel.swift; sourceTree = "<group>"; };
@@ -152,7 +151,6 @@
 		F50FDDB92CD3A9E6006E96B2 /* FindEmailModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailModel.swift; sourceTree = "<group>"; };
 		F50FDDBB2CD3AA09006E96B2 /* FindEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailView.swift; sourceTree = "<group>"; };
 		F50FDDBD2CD3AA25006E96B2 /* FindEmailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindEmailViewModel.swift; sourceTree = "<group>"; };
-		F51148BB2D80076000137679 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F52E2FF62CD3CC5D00520042 /* FindPasswordModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordModel.swift; sourceTree = "<group>"; };
 		F52E2FF82CD3CC8700520042 /* FindPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordView.swift; sourceTree = "<group>"; };
 		F52E2FFA2CD3CEAE00520042 /* FindPasswordViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindPasswordViewModel.swift; sourceTree = "<group>"; };
@@ -345,7 +343,6 @@
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
 				F53F124A2D7DC0F300E434D4 /* KeyboardAvoidingModifier.swift */,
-				F51148BB2D80076000137679 /* GoogleService-Info.plist */,
 			);
 			path = iOS_Project;
 			sourceTree = "<group>";
@@ -389,6 +386,7 @@
 		EABADF222CB9223E00962A40 = {
 			isa = PBXGroup;
 			children = (
+				EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */,
 				EA86C1202CC2F15700989E43 /* iOS_Project */,
 				EA86C1372CC2F15A00989E43 /* iOS_ProjectTests */,
 				EA86C13B2CC2F15C00989E43 /* iOS_ProjectUITests */,
@@ -569,8 +567,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA86C1322CC2F15700989E43 /* Preview Assets.xcassets in Resources */,
+				EA3C8D332DD03E9000DD899E /* GoogleService-Info.plist in Resources */,
 				EA86C1332CC2F15700989E43 /* Assets.xcassets in Resources */,
-				F51148BD2D80076000137679 /* GoogleService-Info.plist in Resources */,
 				F5038ECE2D841D0100347F13 /* country_codes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -579,7 +577,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F51148BE2D80076000137679 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -587,7 +584,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F51148BC2D80076000137679 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -885,9 +881,11 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -934,9 +932,11 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
