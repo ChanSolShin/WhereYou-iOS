@@ -6,6 +6,7 @@ struct MeetingListView: View {
     @ObservedObject private var meetingViewModel: MeetingViewModel
     @State private var searchText = "" // 검색 텍스트
     @Binding var isTabBarHidden: Bool
+    @State private var isBirthdayMessageVisible = true
 
     init(isTabBarHidden: Binding<Bool>) {
            self._isTabBarHidden = isTabBarHidden
@@ -16,6 +17,23 @@ struct MeetingListView: View {
         NavigationStack {
             ZStack {
                 VStack {
+                    if viewModel.isTodayUserBirthday(), isBirthdayMessageVisible {
+                        if let name = viewModel.userProfile?.name {
+                            HStack {
+                                Text("\(name)님, 행복한 하루 되세요. 생일 축하합니다! 🥳")
+                                    .font(.headline)
+                                    .foregroundColor(.pink)
+                                Spacer()
+                                Button(action: {
+                                    isBirthdayMessageVisible = false
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
                     if viewModel.meetings.isEmpty {
                         VStack {
                             Spacer()

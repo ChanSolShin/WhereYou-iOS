@@ -17,6 +17,7 @@ class SignUpViewModel: ObservableObject {
     @Published var agreedToTerms: Bool = false
     @Published var realName: String = ""
     @Published var birthday: String = ""
+    @Published var birthdayDate: Date? = nil
     @Published var phoneNumber: String = ""
     @Published var verificationCode: String = ""
     @Published var signUpErrorMessage: String?
@@ -51,7 +52,6 @@ class SignUpViewModel: ObservableObject {
         let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedConfirmPassword = confirmPassword.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedRealName = realName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedBirthday = birthday.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPhoneNumber = phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
         
         return trimmedUsername.isEmpty || !isValidEmail ||
@@ -59,7 +59,6 @@ class SignUpViewModel: ObservableObject {
                trimmedConfirmPassword.isEmpty ||
                trimmedPassword != trimmedConfirmPassword ||
                trimmedRealName.isEmpty ||
-               trimmedBirthday.count != 8 ||
                trimmedPhoneNumber.count != 11
     }
     
@@ -131,14 +130,16 @@ class SignUpViewModel: ObservableObject {
     private func saveUserDataToFirestore(uid: String) {
         // 전화번호 형식 변환 후 저장
         let formattedPhone = formatPhoneNumber(phoneNumber)
-        let userData: [String: Any] = [
+        var userData: [String: Any] = [
             "email": username,
             "name": realName,
             "phoneNumber": formattedPhone,
-            "birthday": birthday,
             "loginStatus": false,                  // 로그인 여부
             "createdAt": Timestamp(date: Date())  // 회원가입 날짜
         ]
+        if !birthday.isEmpty {
+            userData["birthday"] = birthday
+        }
         
         db.collection("users").document(uid).setData(userData) { [weak self] error in
             if let error = error {
