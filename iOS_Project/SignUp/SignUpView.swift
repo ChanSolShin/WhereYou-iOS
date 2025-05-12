@@ -351,34 +351,49 @@ default:
             .background(Color.gray.opacity(0.1))
             .cornerRadius(8)
             .padding(.horizontal, 30)
+
+            Text("이름은 앱 내에서 친구에게 표시될 닉네임으로 사용됩니다.")
+                .font(.caption)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.top, 4)
         }
     }
     
     // 생년월일 입력 필드
     private var birthdayStep: some View {
         VStack {
-            Text("생년월일을 입력하세요 (8자리)")
+            Text("생년월일을 선택하세요")
                 .font(.title2)
                 .foregroundColor(.gray)
                 .padding(.bottom, 8)
-            
-            HStack {
-                Image(systemName: "calendar")
-                    .foregroundColor(.gray)
-                    .imageScale(.small)
-                TextField("생년월일(8자리)", text: $viewModel.birthday)
-                    .keyboardType(.numberPad)
-                    .onChange(of: viewModel.birthday) { newValue in
-                        if newValue.count > 8 {
-                            viewModel.birthday = String(newValue.prefix(8))
-                        }
+
+            DatePicker("생년월일", selection: Binding(
+                get: {
+                    if let date = viewModel.birthdayDate {
+                        return date
+                    } else {
+                        return Calendar.current.date(byAdding: .year, value: -20, to: Date()) ?? Date()
                     }
-                    .font(.system(size: 20))
-            }
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(8)
+                },
+                set: { newDate in
+                    viewModel.birthdayDate = newDate
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyyMMdd"
+                    viewModel.birthday = formatter.string(from: newDate)
+                }
+            ), in: ...Date(), displayedComponents: [.date])
+            .datePickerStyle(.wheel)
+            .environment(\.locale, Locale(identifier: "ko_KR"))
+            .labelsHidden()
             .padding(.horizontal, 30)
+
+            Text("생년월일은 사용자의 생일 알림 기능에만 사용됩니다. 앱 내 다른 용도로는 사용되지 않습니다.")
+                .font(.caption)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.top, 4)
+                .padding(.horizontal, 30)
         }
     }
     
@@ -467,6 +482,12 @@ default:
             .cornerRadius(8)
             .padding(.horizontal, 30)
             .disabled(!isPhoneNumberValid)
+
+            Text("전화번호는 친구를 찾고 추가하는 데 사용됩니다.")
+                .font(.caption)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.top, 4)
         }
     }
     
@@ -673,7 +694,7 @@ default:
             .cornerRadius(10)
             .padding(.horizontal, 30)
             
-            Spacer().frame(height: 20) 
+            Spacer().frame(height: 20)
             
             Toggle(isOn: $viewModel.agreedToTerms) {
                 Text("개인정보 처리방침에 동의합니다.")

@@ -13,6 +13,7 @@ import FirebaseAuth
 class MeetingListViewModel: ObservableObject {
     @Published var meetings: [MeetingListModel] = []
     @Published var pendingRequestCount: Int = 0
+    @Published var userProfile: ProfileModel? = nil
     
     private var db = Firestore.firestore()
     var meetingViewModel: MeetingViewModel // MeetingViewModel 인스턴스 추가
@@ -27,6 +28,7 @@ class MeetingListViewModel: ObservableObject {
                 .receive(on: DispatchQueue.main)
                 .assign(to: &$pendingRequestCount)
             fetchMeetings()
+            fetchCurrentUserProfile()
         }
         
     func fetchMeetings() {
@@ -76,6 +78,32 @@ class MeetingListViewModel: ObservableObject {
         let meetingModel = MeetingModel(id: meeting.id, title: meeting.title, date: meeting.date, meetingAddress: meeting.meetingAddress, meetingLocation: meeting.meetingLocation, meetingMemberIDs: meeting.meetingMemberIDs, meetingMasterID: meeting.meetingMasterID, isLocationTrackingEnabled: meeting.isLocationTrackingEnabled)
            meetingViewModel.selectMeeting(meeting: meetingModel)
        }
+    
+    func fetchCurrentUserProfile() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        db.collection("users").document(uid).getDocument { (document, error) in
+            if let document = document, document.exists {
+                let data = document.data()
+                let name = data?["name"] as? String ?? "이름 없음"
+                let email = data?["email"] as? String ?? ""
+                let phoneNumber = data?["phoneNumber"] as? String
+                let birthday = data?["birthday"] as? String
+                DispatchQueue.main.async {
+                    self.userProfile = ProfileModel(name: name, email: email, phoneNumber: phoneNumber, birthday: birthday)
+                }
+            } else {
+                print("사용자 문서 없음 또는 오류: \(error?.localizedDescription ?? "")")
+            }
+        }
+    }
+
+    func isTodayUserBirthday() -> Bool {
+        guard let birthday = userProfile?.birthday else { return false }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMdd"
+        let todayString = formatter.string(from: Date())
+        return birthday.suffix(4) == todayString
+    }
    }
     
 func createDate(year: Int, month: Int, day: Int, hour: Int, minute: Int) -> Date? {
