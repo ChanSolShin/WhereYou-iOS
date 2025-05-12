@@ -23,7 +23,6 @@ struct iOS_ProjectApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if locationCoordinator.authorizationStatus == .authorizedAlways {
                     if loginViewModel.isLoggedIn {
                         MainTabView()
                             .onAppear {
@@ -33,22 +32,13 @@ struct iOS_ProjectApp: App {
                     } else {
                         LoginView()
                     }
-                } else if locationCoordinator.authorizationStatus == .notDetermined {
-                    Text("위치 권한 요청 중...")
-                        .onAppear {
-                            // 권한 요청이 시작되었음을 나타내는 UI
-                        }
-                } else {
-                    PermissionRequiredView() // 설정으로 이동하는 화면
                 }
-            }
             .environmentObject(loginViewModel) // LoginViewModel을 전역에서 사용
             .onAppear {
                 // 위치 권한이 허용되지 않으면 경고 표시
                 if locationCoordinator.authorizationStatus != .authorizedAlways {
                     showAlert = true
                 }
-                
                 // 알림 권한 요청
                 requestNotificationPermission()
             }

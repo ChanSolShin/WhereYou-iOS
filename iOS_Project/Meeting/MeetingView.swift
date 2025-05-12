@@ -35,21 +35,40 @@ struct MeetingView: View {
                 }
                 .padding(.bottom, 10)
                 
-                MeetingMapView(
-                    selectedUserLocation: $meetingViewModel.selectedUserLocation,
-                    meeting: MeetingModel(
-                        id: meeting.id,
-                        title: meeting.title,
-                        date: meeting.date,
-                        meetingAddress: meeting.meetingAddress,
-                        meetingLocation: meeting.meetingLocation,
-                        meetingMemberIDs: meeting.meetingMemberIDs,
-                        meetingMasterID: meeting.meetingMasterID,
-                        isLocationTrackingEnabled: meeting.isLocationTrackingEnabled
-                    ),
-                    meetingViewModel: meetingViewModel
-                )
-                .frame(height: 450)
+                if meetingViewModel.locationCoordinator.authorizationStatus == .authorizedAlways {
+                    MeetingMapView(
+                        selectedUserLocation: $meetingViewModel.selectedUserLocation,
+                        meeting: MeetingModel(
+                            id: meeting.id,
+                            title: meeting.title,
+                            date: meeting.date,
+                            meetingAddress: meeting.meetingAddress,
+                            meetingLocation: meeting.meetingLocation,
+                            meetingMemberIDs: meeting.meetingMemberIDs,
+                            meetingMasterID: meeting.meetingMasterID,
+                            isLocationTrackingEnabled: meeting.isLocationTrackingEnabled
+                        ),
+                        meetingViewModel: meetingViewModel
+                    )
+                    .frame(height: 450)
+                } else {
+                    VStack(spacing: 12) {
+                        Text("위치 권한이 필요합니다")
+                            .font(.headline)
+                        Text("상대방의 위치를 보려면, 내 위치도 공유해야 합니다.")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                        Button("설정으로 이동") {
+                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(url)
+                            }
+                        }
+                        .padding()
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(10)
+                    }
+                    .frame(height: 450)
+                }
                 
                 Button(action: {
                     meetingViewModel.stopTrackingMember()
