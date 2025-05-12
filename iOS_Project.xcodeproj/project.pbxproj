@@ -337,13 +337,13 @@
 				EA86C11A2CC2F15700989E43 /* SignUp */,
 				F5D76AE42CDCAF9C00CB652B /* LocationManagers */,
 				EA86C11B2CC2F15700989E43 /* Assets.xcassets */,
-				EA86C11D2CC2F15700989E43 /* Info.plist */,
 				F5EA74C42D9047A100EAC863 /* Extension */,
 				F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */,
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
 				F53F124A2D7DC0F300E434D4 /* KeyboardAvoidingModifier.swift */,
 				EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */,
+				EA86C11D2CC2F15700989E43 /* Info.plist */,
 			);
 			path = iOS_Project;
 			sourceTree = "<group>";
@@ -863,21 +863,19 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = iOS_Project/iOS_Project.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS_Project/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = R54DJK7U34;
+				DEVELOPMENT_TEAM = R54DJK7U34;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iOS_Project/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱 사용 중 위치 정보를 사용합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도  친구와 위치공유를 위해 사용자의 위치를 자동으로 업데이트합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱 사용 중 친구와 실시간 위치를 공유할 수 있습니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -894,7 +892,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = whereyou.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = whereyou;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -926,9 +923,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iOS_Project/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱 사용 중 위치 정보를 사용합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도  친구와 위치공유를 위해 사용자의 위치를 자동으로 업데이트합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱 사용 중 친구와 실시간 위치를 공유할 수 있습니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
