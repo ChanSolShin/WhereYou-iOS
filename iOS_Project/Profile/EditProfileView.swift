@@ -55,10 +55,10 @@ struct EditProfileView: View {
                         Text("생년월일 (YYDDMM)")
                             .font(.title3)
                         TextField("생일", text: $birthday)
+                            .disabled(true)
                             .padding()
-                            .background(Color.gray.opacity(0.2))
+                            .background(Color.gray.opacity(0.08))
                             .cornerRadius(10)
-                            .keyboardType(.numberPad)
                             .focused($focusedField, equals: .birthday)
                     }
                     

@@ -26,7 +26,7 @@ class MeetingViewModel: NSObject, ObservableObject {
     private var meeting: MeetingModel? // 현재 선택된 모임
     private let realtimeDB = Database.database().reference()
     
-    private let locationCoordinator: AppLocationCoordinator // 위치 코디네이터
+    public let locationCoordinator: AppLocationCoordinator // 위치 코디네이터
     
     private var meetingListener: ListenerRegistration?
        private var memberListener: ListenerRegistration?

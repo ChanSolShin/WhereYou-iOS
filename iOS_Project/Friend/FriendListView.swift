@@ -22,6 +22,7 @@ struct FriendListView: View {
                     } else {
                         List {
                             ForEach(viewModel.friends) { friend in
+                                
                                 HStack {
                                     VStack(alignment: .leading) {
                                         Text(friend.name)
@@ -33,6 +34,7 @@ struct FriendListView: View {
                                         Text("Birthday: \(friend.birthday)")
                                             .font(.subheadline)
                                             .foregroundColor(.gray)
+                                        
                                     }
                                     Spacer()
                                 }

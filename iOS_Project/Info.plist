@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;</key>
+	<string>&lt;string&gt;앱이 백그라운드에서도 친구 위치를 자동으로 업데이트합니다.&lt;/string&gt;</string>
+	<key>&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;</key>
+	<string>&lt;string&gt;앱 사용 중 친구와 실시간 위치를 공유할 수 있습니다.&lt;/string&gt;</string>
 	<key>CFBundleIcons</key>
 	<dict>
 		<key>CFBundlePrimaryIcon</key>

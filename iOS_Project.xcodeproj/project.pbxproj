@@ -73,7 +73,6 @@
 		F5C779FA2CD9576D00E5EC08 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5C779F92CD9576700E5EC08 /* ReportView.swift */; };
 		F5C779FC2CD9578B00E5EC08 /* ReportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5C779FB2CD9578700E5EC08 /* ReportViewModel.swift */; };
 		F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */; };
-		F5D76AE82CDCB1B700CB652B /* PermissionRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */; };
 		F5E8486B2D66DBF200047AA1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
@@ -161,7 +160,6 @@
 		F5C779F92CD9576700E5EC08 /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
 		F5C779FB2CD9578700E5EC08 /* ReportViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportViewModel.swift; sourceTree = "<group>"; };
 		F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocationCoordinator.swift; sourceTree = "<group>"; };
-		F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionRequiredView.swift; sourceTree = "<group>"; };
 		F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F5E848732D66F89900047AA1 /* iOS_Project.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS_Project.entitlements; sourceTree = "<group>"; };
 		FB3FFC42D97330368AC296CF /* Pods-iOS_Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOS_Project.debug.xcconfig"; path = "Target Support Files/Pods-iOS_Project/Pods-iOS_Project.debug.xcconfig"; sourceTree = "<group>"; };
@@ -337,13 +335,13 @@
 				EA86C11A2CC2F15700989E43 /* SignUp */,
 				F5D76AE42CDCAF9C00CB652B /* LocationManagers */,
 				EA86C11B2CC2F15700989E43 /* Assets.xcassets */,
-				EA86C11D2CC2F15700989E43 /* Info.plist */,
 				F5EA74C42D9047A100EAC863 /* Extension */,
 				F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */,
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
 				F53F124A2D7DC0F300E434D4 /* KeyboardAvoidingModifier.swift */,
 				EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */,
+				EA86C11D2CC2F15700989E43 /* Info.plist */,
 			);
 			path = iOS_Project;
 			sourceTree = "<group>";
@@ -441,7 +439,6 @@
 		F5D76AE42CDCAF9C00CB652B /* LocationManagers */ = {
 			isa = PBXGroup;
 			children = (
-				F5D76AE72CDCB1B000CB652B /* PermissionRequiredView.swift */,
 				F5D76AE52CDCAFC800CB652B /* AppLocationCoordinator.swift */,
 			);
 			path = LocationManagers;
@@ -667,7 +664,6 @@
 				EA86C1292CC2F15700989E43 /* MeetingListModel.swift in Sources */,
 				EA86C12A2CC2F15700989E43 /* MeetingListView.swift in Sources */,
 				F50FDDBC2CD3AA12006E96B2 /* FindEmailView.swift in Sources */,
-				F5D76AE82CDCB1B700CB652B /* PermissionRequiredView.swift in Sources */,
 				EA86C12B2CC2F15700989E43 /* MeetingListViewModel.swift in Sources */,
 				EA86C12C2CC2F15700989E43 /* ProfileView.swift in Sources */,
 				EA86C12D2CC2F15700989E43 /* SignUpUserModel.swift in Sources */,
@@ -863,21 +859,19 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = iOS_Project/iOS_Project.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS_Project/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = R54DJK7U34;
+				DEVELOPMENT_TEAM = R54DJK7U34;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iOS_Project/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱 사용 중 위치 정보를 사용합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 친구에게 위치를 자동으로 업데이트하기 위해 사용합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱 사용 중 친구와 실시간 위치를 공유하기 위해 위치 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -894,7 +888,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = whereyou.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = whereyou;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -926,9 +919,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iOS_Project/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 항상 위치 정보를 사용합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱 사용 중 위치 정보를 사용합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 친구에게 위치를 자동으로 업데이트하기 위해 사용합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱 사용 중 친구와 실시간 위치를 공유하기 위해 위치 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
