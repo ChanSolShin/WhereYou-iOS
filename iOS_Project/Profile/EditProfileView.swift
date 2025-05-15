@@ -52,7 +52,7 @@ struct EditProfileView: View {
                             .submitLabel(.done)
                     }
                     Group {
-                        Text("생년월일 (YYDDMM)")
+                        Text("생년월일 (YYYYDDMM)")
                             .font(.title3)
                         TextField("생일", text: $birthday)
                             .disabled(true)
