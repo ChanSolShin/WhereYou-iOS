@@ -31,9 +31,6 @@ struct FriendListView: View {
                                             .font(.subheadline)
                                         Text("Phone: \(friend.phoneNumber)")
                                             .font(.subheadline)
-                                        Text("Birthday: \(friend.birthday)")
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
                                         
                                     }
                                     Spacer()
