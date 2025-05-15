@@ -76,7 +76,9 @@ class FriendListViewModel: ObservableObject {
                             phoneNumber: friendData?["phoneNumber"] as? String ?? "",
                             birthday: friendData?["birthday"] as? String ?? ""
                         )
-                        self.friends.append(friend)
+                        if !self.friends.contains(where: { $0.id == friendID }) {
+                            self.friends.append(friend)
+                        }
                     }
                     dispatchGroup.leave()
                 }

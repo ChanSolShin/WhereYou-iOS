@@ -71,6 +71,7 @@ struct SignUpView: View {
     @State private var isLoading = false
     @State private var showSafariView = false
     @State private var isButtonLocked = false
+    @State private var wantsToInputBirthday = false
     
     var body: some View {
         VStack {
@@ -264,46 +265,42 @@ struct SignUpView: View {
     }
     
     private var isNextButtonEnabled: Bool {
-switch currentStep {
-case 0:
-    // 이름 입력 단계
-    let trimmedName = viewModel.realName.trimmingCharacters(in: .whitespacesAndNewlines)
-    let koreanNameRegex = "^[가-힣]{2,10}$"
-    let englishNameRegex = "^[A-Za-z]{2,}(\\s[A-Za-z]+)*$"
-    let namePredicate = NSPredicate(format: "SELF MATCHES %@ OR SELF MATCHES %@", koreanNameRegex, englishNameRegex)
-    return namePredicate.evaluate(with: trimmedName)
-
-case 1:
-    // 생년월일 입력 단계
-    let trimmedBirthday = viewModel.birthday.trimmingCharacters(in: .whitespacesAndNewlines)
-    return !trimmedBirthday.isEmpty && trimmedBirthday.count == 8 && trimmedBirthday.allSatisfy { $0.isNumber }
-
-case 2:
-    return false  // 전화번호 입력 단계에서는 다음 버튼 비활성화
-
-case 3:
-    return viewModel.isVerificationSuccessful  // 인증 성공 시에만 다음 버튼 활성화
-
-case 4:
-    return viewModel.isValidEmail && emailChecked &&
-        !viewModel.username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-
-case 5:
-    // 비밀번호 입력 단계
-    let trimmedPassword = viewModel.password.trimmingCharacters(in: .whitespacesAndNewlines)
-    return trimmedPassword.count >= 6 &&
-           !trimmedPassword.isEmpty &&
-           !trimmedPassword.contains(" ")
-
-case 6:
-    // 비밀번호 확인 및 약관 동의 단계
-    return viewModel.passwordMatches &&
-           !viewModel.confirmPassword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-           viewModel.agreedToTerms
-
-default:
-    return false
-}
+        switch currentStep {
+        case 0:
+            // 이름 입력 단계
+            let trimmedName = viewModel.realName.trimmingCharacters(in: .whitespacesAndNewlines)
+            let koreanNameRegex = "^[가-힣]{2,10}$"
+            let englishNameRegex = "^[A-Za-z]{2,}(\\s[A-Za-z]+)*$"
+            let namePredicate = NSPredicate(format: "SELF MATCHES %@ OR SELF MATCHES %@", koreanNameRegex, englishNameRegex)
+            return namePredicate.evaluate(with: trimmedName)
+        case 1:
+            if wantsToInputBirthday {
+                let trimmedBirthday = viewModel.birthday.trimmingCharacters(in: .whitespacesAndNewlines)
+                return !trimmedBirthday.isEmpty && trimmedBirthday.count == 8 && trimmedBirthday.allSatisfy { $0.isNumber }
+            } else {
+                return true
+            }
+        case 2:
+            return false  // 전화번호 입력 단계에서는 다음 버튼 비활성화
+        case 3:
+            return viewModel.isVerificationSuccessful  // 인증 성공 시에만 다음 버튼 활성화
+        case 4:
+            return viewModel.isValidEmail && emailChecked &&
+                !viewModel.username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        case 5:
+            // 비밀번호 입력 단계
+            let trimmedPassword = viewModel.password.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmedPassword.count >= 6 &&
+                !trimmedPassword.isEmpty &&
+                !trimmedPassword.contains(" ")
+        case 6:
+            // 비밀번호 확인 및 약관 동의 단계
+            return viewModel.passwordMatches &&
+                !viewModel.confirmPassword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                viewModel.agreedToTerms
+        default:
+            return false
+        }
     }
     
     // 국가코드별 전화번호 유효성 검사
@@ -363,31 +360,35 @@ default:
     // 생년월일 입력 필드
     private var birthdayStep: some View {
         VStack {
-            Text("생년월일을 선택하세요")
-                .font(.title2)
-                .foregroundColor(.gray)
-                .padding(.bottom, 8)
-
-            DatePicker("생년월일", selection: Binding(
-                get: {
-                    if let date = viewModel.birthdayDate {
-                        return date
-                    } else {
-                        return Calendar.current.date(byAdding: .year, value: -20, to: Date()) ?? Date()
-                    }
-                },
-                set: { newDate in
-                    viewModel.birthdayDate = newDate
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "yyyyMMdd"
-                    viewModel.birthday = formatter.string(from: newDate)
-                }
-            ), in: ...Date(), displayedComponents: [.date])
-            .datePickerStyle(.wheel)
-            .environment(\.locale, Locale(identifier: "ko_KR"))
-            .labelsHidden()
+            Toggle(isOn: $wantsToInputBirthday) {
+                Text("생년월일 입력")
+                    .font(.title2)
+                    .foregroundColor(.gray)
+            }
             .padding(.horizontal, 30)
 
+            if wantsToInputBirthday {
+                DatePicker("생년월일", selection: Binding(
+                    get: {
+                        viewModel.birthdayDate ?? Calendar.current.date(byAdding: .year, value: -20, to: Date()) ?? Date()
+                    },
+                    set: { newDate in
+                        if wantsToInputBirthday {
+                            viewModel.birthdayDate = newDate
+                            let formatter = DateFormatter()
+                            formatter.dateFormat = "yyyyMMdd"
+                            viewModel.birthday = formatter.string(from: newDate)
+                        } else {
+                            viewModel.birthdayDate = nil
+                            viewModel.birthday = ""
+                        }
+                    }
+                ), in: ...Date(), displayedComponents: [.date])
+                .datePickerStyle(.wheel)
+                .environment(\.locale, Locale(identifier: "ko_KR"))
+                .labelsHidden()
+                .padding(.horizontal, 30)
+            }
             Text("생년월일은 사용자의 생일 알림 기능에만 사용됩니다. 앱 내 다른 용도로는 사용되지 않습니다.")
                 .font(.caption)
                 .foregroundColor(.gray)
