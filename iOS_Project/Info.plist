@@ -20,6 +20,10 @@
 			<false/>
 		</dict>
 	</dict>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>ko</string>
+	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
