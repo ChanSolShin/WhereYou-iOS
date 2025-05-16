@@ -178,28 +178,30 @@ class MeetingViewModel: NSObject, ObservableObject {
 
         print("Fetching location for userID \(userID) in meeting \(meetingID)")
 
-        // Firebase에서 유저의 현재 위치를 가져와 selectedUserLocation 업데이트
-        realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).observeSingleEvent(of: .value) { [weak self] snapshot in
-            if let locationData = snapshot.value as? [String: Any],
-               let latitude = locationData["latitude"] as? CLLocationDegrees,
-               let longitude = locationData["longitude"] as? CLLocationDegrees {
-                DispatchQueue.main.async {
-                    self?.selectedUserLocation = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                    print("Fetched location for user \(userID): \(latitude), \(longitude)")
-                }
-            } else {
-                print("Failed to fetch location for user \(userID). Snapshot: \(snapshot.value ?? "nil")")
-                DispatchQueue.main.async {
-                    if self?.errorMessage != "멤버의 위치 정보를 불러올 수 없습니다." {
-                        self?.errorMessage = "멤버의 위치 정보를 불러올 수 없습니다."
+        // 실시간 위치 변경 감지
+        realtimeDB.child("meetings").child(meetingID).child("locations").child(userID)
+            .observe(.value) { [weak self] snapshot in
+                if let locationData = snapshot.value as? [String: Any],
+                   let latitude = locationData["latitude"] as? CLLocationDegrees,
+                   let longitude = locationData["longitude"] as? CLLocationDegrees {
+                    DispatchQueue.main.async {
+                        self?.selectedUserLocation = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+                        print("Updated location for user \(userID): \(latitude), \(longitude)")
+                    }
+                } else {
+                    print("Failed to fetch location for user \(userID). Snapshot: \(snapshot.value ?? "nil")")
+                    DispatchQueue.main.async {
+                        if self?.errorMessage != "멤버의 위치 정보를 불러올 수 없습니다." {
+                            self?.errorMessage = "멤버의 위치 정보를 불러올 수 없습니다."
+                        }
                     }
                 }
             }
-        }
     }
     
-    // 멤버 추적 중지
     func stopTrackingMember() {
+        guard let meetingID = meeting?.id, let userID = trackedMemberID else { return }
+        realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).removeAllObservers()
         trackedMemberID = nil
         selectedUserLocation = nil
     }
