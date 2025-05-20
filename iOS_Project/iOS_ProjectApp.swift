@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Firebase
+import FirebaseAuth
 import CoreLocation
 import NMapsMap
 import UserNotifications
@@ -32,7 +33,7 @@ struct iOS_ProjectApp: App {
                     } else {
                         LoginView()
                     }
-                }
+          }
             .environmentObject(loginViewModel) // LoginViewModel을 전역에서 사용
             .onAppear {
                 // 위치 권한이 허용되지 않으면 경고 표시
@@ -41,6 +42,18 @@ struct iOS_ProjectApp: App {
                 }
                 // 알림 권한 요청
                 requestNotificationPermission()
+                // 앱이 포그라운드로 진입할 때 토큰 갱신
+                NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+                    if let user = FirebaseAuth.Auth.auth().currentUser {
+                        user.getIDTokenForcingRefresh(true) { token, error in
+                            if let error = error {
+                                print("🔥 토큰 갱신 실패: \(error.localizedDescription)")
+                            } else {
+                                print("✅ 토큰 갱신 성공")
+                            }
+                        }
+                    }
+                }
             }
             .onChange(of: locationCoordinator.authorizationStatus) { status in
                 if status == .denied || status == .restricted {
