@@ -54,7 +54,7 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
         locationManager.startUpdatingLocation()
         
         locationUpdateTimer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .background))
-        locationUpdateTimer?.schedule(deadline: .now(), repeating: 10) // 10초마다 실행
+        locationUpdateTimer?.schedule(deadline: .now(), repeating: 5) // 5초마다 실행
         locationUpdateTimer?.setEventHandler { [weak self] in
             self?.uploadLocation()
         }
