@@ -30,10 +30,14 @@ struct iOS_ProjectApp: App {
                         MainTabView()
                             .onAppear {
                                 locationCoordinator.startUpdatingLocation()
+                                checkVersion()
                                 // 로그인 후 강제 로그아웃 리스너는 LoginViewModel에서 처리됨.
                             }
                     } else {
                         LoginView()
+                            .onAppear {
+                                checkVersion()
+                            }
                     }
           }
             .environmentObject(loginViewModel) // LoginViewModel을 전역에서 사용
@@ -46,28 +50,13 @@ struct iOS_ProjectApp: App {
                 requestNotificationPermission()
                 // 앱이 포그라운드로 진입할 때 토큰 갱신
                 NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+                    checkVersion() // 앱이 포그라운드 진입 시 버전 체크
                     if let user = FirebaseAuth.Auth.auth().currentUser {
                         user.getIDTokenForcingRefresh(true) { token, error in
                             if let error = error {
                                 print("🔥 토큰 갱신 실패: \(error.localizedDescription)")
                             } else {
                                 print("✅ 토큰 갱신 성공")
-                            }
-                        }
-                    }
-                }
-                let remoteConfig = RemoteConfig.remoteConfig()
-                let settings = RemoteConfigSettings()
-                settings.minimumFetchInterval = 0
-                remoteConfig.configSettings = settings
-                remoteConfig.fetchAndActivate { status, error in
-                    let minVersion = remoteConfig["min_required_version"].stringValue ?? ""
-                    if let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-                        print("✅ minVersion: \(minVersion), currentVersion: \(currentVersion)")
-                        
-                        if isUpdateRequired(minVersion: minVersion, currentVersion: currentVersion) {
-                            DispatchQueue.main.async {
-                                showUpdateAlert = true // 현재버전, 파이어베이스에 등록된 최소버전과 비교해서 앱 업데이트 유도
                             }
                         }
                     }
@@ -128,5 +117,25 @@ struct iOS_ProjectApp: App {
             }
         }
         return false
+    }
+    
+    private func checkVersion() {
+        let remoteConfig = RemoteConfig.remoteConfig()
+        let settings = RemoteConfigSettings()
+        settings.minimumFetchInterval = 0
+        remoteConfig.configSettings = settings
+
+        remoteConfig.fetchAndActivate { status, error in
+            let minVersion = remoteConfig["min_required_version"].stringValue ?? ""
+            if let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                print("✅ minVersion: \(minVersion), currentVersion: \(currentVersion)")
+
+                if isUpdateRequired(minVersion: minVersion, currentVersion: currentVersion) {
+                    DispatchQueue.main.async {
+                        showUpdateAlert = true
+                    }
+                }
+            }
+        }
     }
 }
