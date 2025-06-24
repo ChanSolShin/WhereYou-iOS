@@ -13,6 +13,7 @@
 		EA28F4F82CC83C64004827A3 /* MeetingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */; };
 		EA28F4FA2CC83C6D004827A3 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */; };
 		EA3C8D332DD03E9000DD899E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */; };
+		EA5429E72E0B30B3002EC15E /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = EA5429E62E0B30B3002EC15E /* FirebaseRemoteConfig */; };
 		EA6EE1D92CD39060002961A9 /* AddSelectedFriend.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */; };
 		EA6EE1DB2CD39AE9002961A9 /* MeetingRequestListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1DA2CD39AE2002961A9 /* MeetingRequestListView.swift */; };
 		EA6EE1DD2CD39B07002961A9 /* MeetingRequestModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1DC2CD39B01002961A9 /* MeetingRequestModel.swift */; };
@@ -177,6 +178,7 @@
 				EAD481B02CBD7D4B0052D22B /* FirebaseAuth in Frameworks */,
 				EAD481B22CBD7D4B0052D22B /* FirebaseFirestore in Frameworks */,
 				F55D6CF72D66D9D20036E89F /* FirebaseMessaging in Frameworks */,
+				EA5429E72E0B30B3002EC15E /* FirebaseRemoteConfig in Frameworks */,
 				F54542322CE257060043B1E2 /* FirebaseDatabase in Frameworks */,
 				D3DAC0BC663E9922C2AE4C22 /* Pods_iOS_Project.framework in Frameworks */,
 			);
@@ -470,6 +472,7 @@
 				EAD481B12CBD7D4B0052D22B /* FirebaseFirestore */,
 				F54542312CE257060043B1E2 /* FirebaseDatabase */,
 				F55D6CF62D66D9D20036E89F /* FirebaseMessaging */,
+				EA5429E62E0B30B3002EC15E /* FirebaseRemoteConfig */,
 			);
 			productName = iOS_Project;
 			productReference = EABADF2B2CB9223E00962A40 /* iOS_Project.app */;
@@ -1077,6 +1080,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		EA5429E62E0B30B3002EC15E /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
 		EAD481AF2CBD7D4B0052D22B /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

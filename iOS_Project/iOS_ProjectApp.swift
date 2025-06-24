@@ -11,6 +11,7 @@ import FirebaseAuth
 import CoreLocation
 import NMapsMap
 import UserNotifications
+import FirebaseRemoteConfig
 
 @main
 struct iOS_ProjectApp: App {
@@ -20,6 +21,7 @@ struct iOS_ProjectApp: App {
     @StateObject private var loginViewModel = LoginViewModel()
     @State private var showAlert = false
     @State private var showNotificationAlert = false // 알림 권한 요청 상태
+    @State private var showUpdateAlert = false
     
     var body: some Scene {
         WindowGroup {
@@ -54,11 +56,38 @@ struct iOS_ProjectApp: App {
                         }
                     }
                 }
+                let remoteConfig = RemoteConfig.remoteConfig()
+                let settings = RemoteConfigSettings()
+                settings.minimumFetchInterval = 0
+                remoteConfig.configSettings = settings
+                remoteConfig.fetchAndActivate { status, error in
+                    let minVersion = remoteConfig["min_required_version"].stringValue ?? ""
+                    if let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                        print("✅ minVersion: \(minVersion), currentVersion: \(currentVersion)")
+                        
+                        if isUpdateRequired(minVersion: minVersion, currentVersion: currentVersion) {
+                            DispatchQueue.main.async {
+                                showUpdateAlert = true // 현재버전, 파이어베이스에 등록된 최소버전과 비교해서 앱 업데이트 유도
+                            }
+                        }
+                    }
+                }
             }
             .onChange(of: locationCoordinator.authorizationStatus) { status in
                 if status == .denied || status == .restricted {
                     showAlert = true
                 }
+            }
+            .alert(isPresented: $showUpdateAlert) {
+                Alert(
+                    title: Text("업데이트 필요"),
+                    message: Text("새로운 버전으로 업데이트가 필요합니다."),
+                    dismissButton: .default(Text("업데이트")) {
+                        if let url = URL(string: "itms-apps://itunes.apple.com/app/id6745590209") {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                )
             }
         }
     }
@@ -81,5 +110,23 @@ struct iOS_ProjectApp: App {
                 }
             }
         }
+    }
+    
+    private func isUpdateRequired(minVersion: String, currentVersion: String) -> Bool {
+        let minComponents = minVersion.split(separator: ".").compactMap { Int($0) }
+        let currentComponents = currentVersion.split(separator: ".").compactMap { Int($0) }
+        let maxCount = max(minComponents.count, currentComponents.count)
+
+        for i in 0..<maxCount {
+            let minPart = i < minComponents.count ? minComponents[i] : 0
+            let currentPart = i < currentComponents.count ? currentComponents[i] : 0
+
+            if minPart > currentPart {
+                return true
+            } else if minPart < currentPart {
+                return false
+            }
+        }
+        return false
     }
 }
