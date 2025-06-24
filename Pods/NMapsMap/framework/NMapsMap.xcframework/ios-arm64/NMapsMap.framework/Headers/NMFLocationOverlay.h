@@ -51,6 +51,13 @@ NMF_EXPORT
 @property(nonatomic) CGFloat iconHeight;
 
 /**
+ 아이콘의 투명도. `0`~`1`. `0`일 경우 완전히 투명, `1`일 경우 완전히 불투명함을 의미합니다.
+ 
+ 기본값은 `1`입니다.
+ */
+@property(nonatomic) CGFloat iconAlpha;
+
+/**
  보조 아이콘의 너비. pt 단위. `NMF_LOCATION_OVERLAY_SIZE_AUTO`일 경우 이미지의 너비를 따릅니다.
  
  기본값은 `NMF_LOCATION_OVERLAY_SIZE_AUTO`입니다.
@@ -63,6 +70,13 @@ NMF_EXPORT
  기본값은 `NMF_LOCATION_OVERLAY_SIZE_AUTO`입니다.
  */
 @property(nonatomic) CGFloat subIconHeight;
+
+/**
+ 보조 아이콘의 투명도. `0`~`1`. `0`일 경우 완전히 투명, `1`일 경우 완전히 불투명함을 의미합니다.
+ 
+ 기본값은 `1`입니다.
+ */
+@property(nonatomic) CGFloat subIconAlpha;
 
 /**
  오버레이의 좌표.
@@ -136,6 +150,7 @@ NMF_EXPORT
  @return `NMFOverlayImage` 객체.
  */
 + (NMFOverlayImage *)defaultIconImage;
+
 @end
 
 NS_ASSUME_NONNULL_END
