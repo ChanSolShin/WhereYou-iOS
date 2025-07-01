@@ -156,29 +156,6 @@ struct AddLocationView: View {
     }
 }
 
-struct SearchResult {
-    let title: String
-    let address: String
-    let coordinate: CLLocationCoordinate2D
-}
-
-struct NaverLocalSearchResponse: Decodable {
-    let items: [NaverLocalItem]?
-
-    enum CodingKeys: String, CodingKey {
-        case items
-    }
-}
-
-struct NaverLocalItem: Decodable {
-    let title: String
-    let mapx: String
-    let mapy: String
-    let address: String
-    let roadAddress: String
-}
-
-
 extension String {
     var htmlDecoded: String {
         let data = Data(utf8)

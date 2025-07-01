@@ -14,7 +14,6 @@
 		EA28F4FA2CC83C6D004827A3 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */; };
 		EA3C8D332DD03E9000DD899E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */; };
 		EA5429E72E0B30B3002EC15E /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = EA5429E62E0B30B3002EC15E /* FirebaseRemoteConfig */; };
-		EA5429F72E140CAE002EC15E /* LocationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA5429F62E140CA0002EC15E /* LocationModels.swift */; };
 		EA6EE1D92CD39060002961A9 /* AddSelectedFriend.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */; };
 		EA6EE1DB2CD39AE9002961A9 /* MeetingRequestListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1DA2CD39AE2002961A9 /* MeetingRequestListView.swift */; };
 		EA6EE1DD2CD39B07002961A9 /* MeetingRequestModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1DC2CD39B01002961A9 /* MeetingRequestModel.swift */; };
@@ -103,7 +102,6 @@
 		EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModel.swift; sourceTree = "<group>"; };
 		EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingViewModel.swift; sourceTree = "<group>"; };
 		EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		EA5429F62E140CA0002EC15E /* LocationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationModels.swift; sourceTree = "<group>"; };
 		EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSelectedFriend.swift; sourceTree = "<group>"; };
 		EA6EE1DA2CD39AE2002961A9 /* MeetingRequestListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRequestListView.swift; sourceTree = "<group>"; };
 		EA6EE1DC2CD39B01002961A9 /* MeetingRequestModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRequestModel.swift; sourceTree = "<group>"; };
@@ -235,7 +233,6 @@
 		EA86C1062CC2F15700989E43 /* AddMeeting */ = {
 			isa = PBXGroup;
 			children = (
-				EA5429F62E140CA0002EC15E /* LocationModels.swift */,
 				EA86C1472CC2F79A00989E43 /* AddLocationView.swift */,
 				EA86C1032CC2F15700989E43 /* AddMeetingModel.swift */,
 				EA86C1042CC2F15700989E43 /* AddMeetingView.swift */,
@@ -647,7 +644,6 @@
 				EA86C1212CC2F15700989E43 /* AddMeetingModel.swift in Sources */,
 				F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */,
 				F5D76AE62CDCAFD000CB652B /* AppLocationCoordinator.swift in Sources */,
-				EA5429F72E140CAE002EC15E /* LocationModels.swift in Sources */,
 				EAB9CBBC2CC84A6000BFA8DD /* MeetingMapView.swift in Sources */,
 				EA86C1222CC2F15700989E43 /* AddMeetingView.swift in Sources */,
 				EA86C1232CC2F15700989E43 /* AddMeetingViewModel.swift in Sources */,
