@@ -187,14 +187,14 @@ class AddMeetingViewModel: ObservableObject {
     }
 
     func extractRoadAddress(from fullAddress: String) -> String {
-        let units = ["층", "호", "동", "호점", "번지", "가", "지하", "상가"]
+        let units = ["층", "호", "동", "호점", "번지", "가", "지하", "상가", "점"]
         let tokens = fullAddress.components(separatedBy: " ")
 
         var result = [String]()
         for i in 0..<tokens.count {
             let token = tokens[i]
 
-            if Int(token) != nil {
+            if Int(token) != nil || token.contains("-") {
                 result.append(token)
                 if i + 1 < tokens.count {
                     let next = tokens[i + 1]
@@ -202,9 +202,11 @@ class AddMeetingViewModel: ObservableObject {
                         break
                     }
                 }
-            } else if let _ = Int(String(token.prefix { $0.isNumber })), units.contains(where: { token.contains($0) }) {
+            }
+            else if let _ = Int(String(token.prefix { $0.isNumber })), units.contains(where: { token.contains($0) }) {
                 break
-            } else {
+            }
+            else {
                 result.append(token)
             }
         }
