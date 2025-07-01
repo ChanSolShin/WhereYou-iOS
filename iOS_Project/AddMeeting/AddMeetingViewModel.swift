@@ -166,7 +166,10 @@ class AddMeetingViewModel: ObservableObject {
     }
     
     func geocode(address: String, completion: @escaping (CLLocationCoordinate2D?) -> Void) {
-        let cleanedAddress = address.components(separatedBy: "(").first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? address
+        var cleanedAddress = address.components(separatedBy: "(").first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? address
+        cleanedAddress = extractRoadAddress(from: cleanedAddress)
+        print("📍 변환용 주소: \(cleanedAddress)")
+
         let geocoder = CLGeocoder()
         geocoder.geocodeAddressString(cleanedAddress) { placemarks, error in
             if let error = error {
@@ -181,6 +184,32 @@ class AddMeetingViewModel: ObservableObject {
                 completion(nil)
             }
         }
+    }
+
+    func extractRoadAddress(from fullAddress: String) -> String {
+        let units = ["층", "호", "동", "호점", "번지", "가", "지하", "상가"]
+        let tokens = fullAddress.components(separatedBy: " ")
+
+        var result = [String]()
+        for i in 0..<tokens.count {
+            let token = tokens[i]
+
+            if Int(token) != nil {
+                result.append(token)
+                if i + 1 < tokens.count {
+                    let next = tokens[i + 1]
+                    if units.contains(where: { next.contains($0) }) {
+                        break
+                    }
+                }
+            } else if let _ = Int(String(token.prefix { $0.isNumber })), units.contains(where: { token.contains($0) }) {
+                break
+            } else {
+                result.append(token)
+            }
+        }
+
+        return result.joined(separator: " ")
     }
     
     func convertTM128ToWGS84(x: Double, y: Double) -> CLLocationCoordinate2D {
