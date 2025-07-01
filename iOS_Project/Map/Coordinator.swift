@@ -13,12 +13,14 @@ import SwiftUI
 final class Coordinator: NSObject, ObservableObject, NMFMapViewCameraDelegate, NMFMapViewTouchDelegate, NMFMapViewOptionDelegate {
     // Coordinator가 AddMeetingViewModel을 직접 받을 수 있도록 생성자를 수정
     var addMeetingViewModel: AddMeetingViewModel
+    @Binding var selectedLocation: CLLocationCoordinate2D?
     
     let view = NMFNaverMapView(frame: .zero)
     var currentMarker: NMFMarker?
     
-    init(viewModel: AddMeetingViewModel) {
+    init(viewModel: AddMeetingViewModel, selectedLocation: Binding<CLLocationCoordinate2D?>) {
         self.addMeetingViewModel = viewModel
+        self._selectedLocation = selectedLocation
         super.init()
         setupMapView()
     }
@@ -45,26 +47,33 @@ final class Coordinator: NSObject, ObservableObject, NMFMapViewCameraDelegate, N
         currentMarker?.mapView = nil
 
         // 새로운 마커 생성
-        
         let marker = NMFMarker()
         marker.position = coord
         marker.iconImage = NMF_MARKER_IMAGE_BLUE
-        marker.mapView = mapView
         marker.anchor = CGPoint(x: 0.5, y: 1.0)
         marker.width = 30
         marker.height = 50
 
-        // 현재 마커를 저장
+        // 현재 마커 저장 및 지도에 추가
         currentMarker = marker
+        marker.mapView = mapView
+
+        // 주소 초기화
+        addMeetingViewModel.meeting.meetingAddress = nil
+
+        // ViewModel에 위치 정보 즉시 반영
+        let newCoordinate = CLLocationCoordinate2D(latitude: coord.lat, longitude: coord.lng)
+        addMeetingViewModel.meeting.meetingLocation = newCoordinate
+        self.selectedLocation = newCoordinate
 
         // 주소 정보 가져오기
-        reverseGeocodeCoordinate(CLLocationCoordinate2D(latitude: coord.lat, longitude: coord.lng))
+        reverseGeocodeCoordinate(newCoordinate)
         
         
     }
 
     // MARK: - 좌표에서 주소 정보 가져오기
-    private func reverseGeocodeCoordinate(_ coordinate: CLLocationCoordinate2D) {
+    func reverseGeocodeCoordinate(_ coordinate: CLLocationCoordinate2D) {
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         let geocoder = CLGeocoder()
         
@@ -98,17 +107,46 @@ final class Coordinator: NSObject, ObservableObject, NMFMapViewCameraDelegate, N
             print("주소: \(fullAddress)")
             
             // ViewModel에 위치 정보 업데이트
-            self.addMeetingViewModel.meeting.meetingLocation = coordinate
-            self.addMeetingViewModel.meeting.meetingAddress = fullAddress // AddMeetingModel에 전체 주소 저장
-            print("Updated Meeting Address: \(String(describing: self.addMeetingViewModel.meeting.meetingAddress))")
+            DispatchQueue.main.async {
+                self.addMeetingViewModel.meeting.meetingAddress = fullAddress
+                print("Updated Meeting Address: \(String(describing: self.addMeetingViewModel.meeting.meetingAddress))")
+            }
         }
-    }    
+    }
 
     func getNaverMapView() -> NMFNaverMapView {
         return view
     }
-}
-   
+    
+    // MARK: - 마커 추가 및 카메라 이동
+    func addMarkerAndMove(to coordinate: CLLocationCoordinate2D, with title: String) {
+        DispatchQueue.main.async {
+            // 기존 마커 제거
+            self.currentMarker?.mapView = nil
+
+            // 새로운 마커 생성
+            let marker = NMFMarker()
+            marker.position = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
+            marker.iconImage = NMF_MARKER_IMAGE_BLUE
+            marker.anchor = CGPoint(x: 0.5, y: 1.0)
+            marker.width = 30
+            marker.height = 50
+
+            self.currentMarker = marker
+            marker.mapView = self.view.mapView
+
+            // 카메라 이동
+            let cameraUpdate = NMFCameraUpdate(scrollTo: marker.position)
+            cameraUpdate.animation = .easeIn
+            self.view.mapView.moveCamera(cameraUpdate)
+
+            // ViewModel 업데이트
+            self.addMeetingViewModel.meeting.meetingLocation = coordinate
+
+            // 주소 변환
+            self.reverseGeocodeCoordinate(coordinate)
+        }
+    }
     
     func checkIfLocationServiceIsEnabled() {
         DispatchQueue.global().async {
@@ -121,5 +159,4 @@ final class Coordinator: NSObject, ObservableObject, NMFMapViewCameraDelegate, N
             }
         }
     }
-    
-   
+}
