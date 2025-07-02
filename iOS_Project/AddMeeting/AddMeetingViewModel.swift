@@ -120,5 +120,104 @@ class AddMeetingViewModel: ObservableObject {
         }
     }
     
+    func fetchSearchResults(query: String, completion: @escaping ([SearchResult]) -> Void) {
+        guard !query.isEmpty,
+              let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://openapi.naver.com/v1/search/local.json?query=\(encodedQuery)&display=5&start=1&sort=random") else {
+            completion([])
+            return
+        }
+
+        guard let clientId = Bundle.main.infoDictionary?["NAVER_CLIENT_ID"] as? String,
+              let clientSecret = Bundle.main.infoDictionary?["NAVER_CLIENT_SECRET"] as? String else {
+            print("❌ 네이버 API 키가 Info.plist에서 누락되었습니다.")
+            completion([])
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue(clientId, forHTTPHeaderField: "X-Naver-Client-Id")
+        request.setValue(clientSecret, forHTTPHeaderField: "X-Naver-Client-Secret")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                do {
+                    let decoded = try JSONDecoder().decode(NaverLocalSearchResponse.self, from: data)
+                    let results = decoded.items?.map {
+                        SearchResult(
+                            title: $0.title.htmlDecoded,
+                            address: !$0.roadAddress.isEmpty ? $0.roadAddress : $0.address,
+                            coordinate: self.convertTM128ToWGS84(
+                                x: Double($0.mapx) ?? 0,
+                                y: Double($0.mapy) ?? 0
+                            )
+                        )
+                    } ?? []
+                    completion(results)
+                } catch {
+                    print("디코딩 실패: \(error)")
+                    completion([])
+                }
+            } else if let error = error {
+                print("네트워크 오류: \(error.localizedDescription)")
+                completion([])
+            }
+        }.resume()
+    }
+    
+    func geocode(address: String, completion: @escaping (CLLocationCoordinate2D?) -> Void) {
+        var cleanedAddress = address.components(separatedBy: "(").first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? address
+        cleanedAddress = extractRoadAddress(from: cleanedAddress)
+        print("📍 변환용 주소: \(cleanedAddress)")
+
+        let geocoder = CLGeocoder()
+        geocoder.geocodeAddressString(cleanedAddress) { placemarks, error in
+            if let error = error {
+                print("주소 변환 실패: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+
+            if let location = placemarks?.first?.location {
+                completion(location.coordinate)
+            } else {
+                completion(nil)
+            }
+        }
+    }
+
+    func extractRoadAddress(from fullAddress: String) -> String {
+        let units = ["층", "호", "동", "호점", "번지", "가", "지하", "상가", "점"]
+        let tokens = fullAddress.components(separatedBy: " ")
+
+        var result = [String]()
+        for i in 0..<tokens.count {
+            let token = tokens[i]
+
+            if Int(token) != nil || token.contains("-") {
+                result.append(token)
+                if i + 1 < tokens.count {
+                    let next = tokens[i + 1]
+                    if units.contains(where: { next.contains($0) }) {
+                        break
+                    }
+                }
+            }
+            else if let _ = Int(String(token.prefix { $0.isNumber })), units.contains(where: { token.contains($0) }) {
+                break
+            }
+            else {
+                result.append(token)
+            }
+        }
+
+        return result.joined(separator: " ")
+    }
+    
+    func convertTM128ToWGS84(x: Double, y: Double) -> CLLocationCoordinate2D {
+        let lon = (x - 1000000.0) / 5.0 / 3600.0 + 127.5
+        let lat = (y - 2000000.0) / 5.0 / 3600.0 + 38.0
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
     
 }

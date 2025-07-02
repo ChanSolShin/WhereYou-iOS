@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NAVER_CLIENT_SECRET</key>
+	<string>u8jU2QKWqS</string>
+	<key>NAVER_CLIENT_ID</key>
+	<string>fZX8IYa_kpXrzkGHZRQE</string>
 	<key>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;</key>
 	<string>&lt;string&gt;앱이 백그라운드에서도 친구 위치를 자동으로 업데이트합니다.&lt;/string&gt;</string>
 	<key>&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;</key>
@@ -36,8 +40,8 @@
 			</array>
 		</dict>
 	</array>
-	<key>NMFClientId</key>
-	<string>9clr0szv6s</string>
+	<key>NMFNcpKeyId</key>
+	<string>7rl0avqc0d</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -16,7 +16,6 @@
 			dependencies = (
 			);
 			name = NMapsGeometry;
-			productName = NMapsGeometry;
 		};
 		8E049F5F4E3BDC647F924FEF22D49D90 /* NMapsMap */ = {
 			isa = PBXAggregateTarget;
@@ -28,24 +27,16 @@
 				258F097AFE79EE06421A954BF7063DC2 /* PBXTargetDependency */,
 			);
 			name = NMapsMap;
-			productName = NMapsMap;
 		};
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		1F5291BB4F840D0C93DB5993D08ADE22 /* Pods-iOS_Project-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 0EC286D7F7495CBF980F982880DD0440 /* Pods-iOS_Project-dummy.m */; };
-		570E3C5675DAB19501A1DEB63BB0342D /* Pods-iOS_Project-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F5E2783FCD71D78261BAD28279D6145 /* Pods-iOS_Project-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		C8539053578768F816BE5BD11AC213D9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
+		00D7ACA6C5B0BB9A84CC26FFE2CB712D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */; };
+		3AE691B389841FA72637EBD36CB40398 /* Pods-iOS_Project-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 0EC286D7F7495CBF980F982880DD0440 /* Pods-iOS_Project-dummy.m */; };
+		7E7C393515124391B54AC9EAD141FCCE /* Pods-iOS_Project-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F5E2783FCD71D78261BAD28279D6145 /* Pods-iOS_Project-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		6B878256D41FFB43BCBEFBB46A54CCB9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 72E614C823EA09AB1AAE80D5CD8A4C58;
-			remoteInfo = NMapsGeometry;
-		};
 		7F00C360A1E47BCFA7970B4BBEC51126 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
@@ -53,12 +44,19 @@
 			remoteGlobalIDString = 72E614C823EA09AB1AAE80D5CD8A4C58;
 			remoteInfo = NMapsGeometry;
 		};
-		A9322F328FE5EA0049404289B0887B51 /* PBXContainerItemProxy */ = {
+		EB9F761A51AF0BEC94F497F01BA28C96 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 8E049F5F4E3BDC647F924FEF22D49D90;
 			remoteInfo = NMapsMap;
+		};
+		FA35CA7EFCF431799620EF7F17B2C740 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 72E614C823EA09AB1AAE80D5CD8A4C58;
+			remoteInfo = NMapsGeometry;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -69,15 +67,15 @@
 		0F5E2783FCD71D78261BAD28279D6145 /* Pods-iOS_Project-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-iOS_Project-umbrella.h"; sourceTree = "<group>"; };
 		1A326C79B1B897CBCFDC36BFF5174A43 /* NMapsGeometry.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = NMapsGeometry.debug.xcconfig; sourceTree = "<group>"; };
 		22897242753E06D71EA5DB9F87337CAE /* Pods-iOS_Project.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-iOS_Project.modulemap"; sourceTree = "<group>"; };
-		23D1EF18055C35C1FBC513F8AE9EA203 /* Pods_iOS_Project.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iOS_Project.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		485FAE6318CCD7779377C7AA4A7B3528 /* NMapsGeometry.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; name = NMapsGeometry.xcframework; path = framework/NMapsGeometry.xcframework; sourceTree = "<group>"; };
-		4F0C55D25B9900DE7936740E68EFDFCF /* NMapsMap.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; name = NMapsMap.xcframework; path = framework/NMapsMap.xcframework; sourceTree = "<group>"; };
+		23D1EF18055C35C1FBC513F8AE9EA203 /* Pods-iOS_Project */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-iOS_Project"; path = Pods_iOS_Project.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		485FAE6318CCD7779377C7AA4A7B3528 /* NMapsGeometry.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = NMapsGeometry.xcframework; path = framework/NMapsGeometry.xcframework; sourceTree = "<group>"; };
+		4F0C55D25B9900DE7936740E68EFDFCF /* NMapsMap.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = NMapsMap.xcframework; path = framework/NMapsMap.xcframework; sourceTree = "<group>"; };
 		525F44E3A914F1FED2B61F9622DED091 /* Pods-iOS_Project.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-iOS_Project.release.xcconfig"; sourceTree = "<group>"; };
 		53BB18D8DE6118DEC0AAC01027DBECA8 /* NMapsMap.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = NMapsMap.release.xcconfig; sourceTree = "<group>"; };
-		73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		7F89040B8DC7FC773592AA5FE110E9DF /* NMapsGeometry.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = NMapsGeometry.release.xcconfig; sourceTree = "<group>"; };
 		983FCEF2808419DF12F69DFEBD7685D4 /* NMapsMap-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "NMapsMap-xcframeworks.sh"; sourceTree = "<group>"; };
-		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		A6A635C0CAB290F6771D379978FE9135 /* Pods-iOS_Project-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-iOS_Project-acknowledgements.plist"; sourceTree = "<group>"; };
 		C2813E227AB1C983B8D3AA287E519AD0 /* Pods-iOS_Project-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-iOS_Project-frameworks.sh"; sourceTree = "<group>"; };
 		CA60D8FF3ED4BEA4BEB2EE1CF3C7C5C7 /* Pods-iOS_Project-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-iOS_Project-acknowledgements.markdown"; sourceTree = "<group>"; };
@@ -86,11 +84,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		DCEC1AFE7D4C8B94940B6D382E9CE57D /* Frameworks */ = {
+		51371BAD44A44DD03EF10608DE2FEF75 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C8539053578768F816BE5BD11AC213D9 /* Foundation.framework in Frameworks */,
+				00D7ACA6C5B0BB9A84CC26FFE2CB712D /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,13 +137,14 @@
 				DC955F600E602E5041F1000DC79753BB /* Frameworks */,
 				169A894F474781F666BE8D90408D3828 /* Support Files */,
 			);
+			name = NMapsGeometry;
 			path = NMapsGeometry;
 			sourceTree = "<group>";
 		};
 		33B33DD5AF31FB82EC3D66C0EB92736C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				23D1EF18055C35C1FBC513F8AE9EA203 /* Pods_iOS_Project.framework */,
+				23D1EF18055C35C1FBC513F8AE9EA203 /* Pods-iOS_Project */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -156,15 +155,8 @@
 				2ED541A35C7BD1778556550CF4846D2F /* Frameworks */,
 				A3E28C362EAC5C5A2CCC22EE5E2FDA30 /* Support Files */,
 			);
+			name = NMapsMap;
 			path = NMapsMap;
-			sourceTree = "<group>";
-		};
-		578452D2E740E91742655AC8F1636D1F /* iOS */ = {
-			isa = PBXGroup;
-			children = (
-				73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */,
-			);
-			name = iOS;
 			sourceTree = "<group>";
 		};
 		A3E28C362EAC5C5A2CCC22EE5E2FDA30 /* Support Files */ = {
@@ -209,7 +201,7 @@
 		D210D550F4EA176C3123ED886F8F87F5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				578452D2E740E91742655AC8F1636D1F /* iOS */,
+				E4801F62A6B08CD9B5410329F1A18FDE /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -222,14 +214,22 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		E4801F62A6B08CD9B5410329F1A18FDE /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		52D986435F03FBC24C35D0B93A03E1E7 /* Headers */ = {
+		E38048B4B348F2CEFC0F68F6164FED77 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				570E3C5675DAB19501A1DEB63BB0342D /* Pods-iOS_Project-umbrella.h in Headers */,
+				7E7C393515124391B54AC9EAD141FCCE /* Pods-iOS_Project-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,22 +238,22 @@
 /* Begin PBXNativeTarget section */
 		DF551C78C9E8F767BF6024F3296C5F40 /* Pods-iOS_Project */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DF041DE7148B74F4D2A9E4DC46DC8567 /* Build configuration list for PBXNativeTarget "Pods-iOS_Project" */;
+			buildConfigurationList = 7869E58B67D5339E04D4DDC0D89A1925 /* Build configuration list for PBXNativeTarget "Pods-iOS_Project" */;
 			buildPhases = (
-				52D986435F03FBC24C35D0B93A03E1E7 /* Headers */,
-				322A68CB81A42A2EBBB4531983B7E7FB /* Sources */,
-				DCEC1AFE7D4C8B94940B6D382E9CE57D /* Frameworks */,
-				C604E346AF2C51D462269885272AABC6 /* Resources */,
+				E38048B4B348F2CEFC0F68F6164FED77 /* Headers */,
+				329450E84B5CEA896441858248C4A643 /* Sources */,
+				51371BAD44A44DD03EF10608DE2FEF75 /* Frameworks */,
+				AA7195CACC0CF3997D425E0D96184445 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				116D54AB41BB302CA453FBB3FA6FB66C /* PBXTargetDependency */,
-				507FA95871FE9016ED21EE241C9E98C6 /* PBXTargetDependency */,
+				B38E91B367EDF3D53A9003D8465DBC25 /* PBXTargetDependency */,
+				0061C1ECAB4BD0F99D10CFBC63E3AD15 /* PBXTargetDependency */,
 			);
 			name = "Pods-iOS_Project";
 			productName = Pods_iOS_Project;
-			productReference = 23D1EF18055C35C1FBC513F8AE9EA203 /* Pods_iOS_Project.framework */;
+			productReference = 23D1EF18055C35C1FBC513F8AE9EA203 /* Pods-iOS_Project */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -262,11 +262,11 @@
 		BFDFE7DC352907FC980B868725387E98 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
 			};
 			buildConfigurationList = 4821239608C13582E20E6DA73FD5F1F9 /* Build configuration list for PBXProject "Pods" */;
-			compatibilityVersion = "Xcode 15.3";
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -274,6 +274,8 @@
 				en,
 			);
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
+			minimizedProjectReferenceProxies = 0;
+			preferredProjectObjectVersion = 77;
 			productRefGroup = 33B33DD5AF31FB82EC3D66C0EB92736C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -286,7 +288,7 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		C604E346AF2C51D462269885272AABC6 /* Resources */ = {
+		AA7195CACC0CF3997D425E0D96184445 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -333,22 +335,22 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		322A68CB81A42A2EBBB4531983B7E7FB /* Sources */ = {
+		329450E84B5CEA896441858248C4A643 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1F5291BB4F840D0C93DB5993D08ADE22 /* Pods-iOS_Project-dummy.m in Sources */,
+				3AE691B389841FA72637EBD36CB40398 /* Pods-iOS_Project-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		116D54AB41BB302CA453FBB3FA6FB66C /* PBXTargetDependency */ = {
+		0061C1ECAB4BD0F99D10CFBC63E3AD15 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = NMapsGeometry;
-			target = 72E614C823EA09AB1AAE80D5CD8A4C58 /* NMapsGeometry */;
-			targetProxy = 6B878256D41FFB43BCBEFBB46A54CCB9 /* PBXContainerItemProxy */;
+			name = NMapsMap;
+			target = 8E049F5F4E3BDC647F924FEF22D49D90 /* NMapsMap */;
+			targetProxy = EB9F761A51AF0BEC94F497F01BA28C96 /* PBXContainerItemProxy */;
 		};
 		258F097AFE79EE06421A954BF7063DC2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -356,22 +358,23 @@
 			target = 72E614C823EA09AB1AAE80D5CD8A4C58 /* NMapsGeometry */;
 			targetProxy = 7F00C360A1E47BCFA7970B4BBEC51126 /* PBXContainerItemProxy */;
 		};
-		507FA95871FE9016ED21EE241C9E98C6 /* PBXTargetDependency */ = {
+		B38E91B367EDF3D53A9003D8465DBC25 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = NMapsMap;
-			target = 8E049F5F4E3BDC647F924FEF22D49D90 /* NMapsMap */;
-			targetProxy = A9322F328FE5EA0049404289B0887B51 /* PBXContainerItemProxy */;
+			name = NMapsGeometry;
+			target = 72E614C823EA09AB1AAE80D5CD8A4C58 /* NMapsGeometry */;
+			targetProxy = FA35CA7EFCF431799620EF7F17B2C740 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		138EE7F5840AEF4E4028CA5FAAE9EE6E /* Release */ = {
+		054E51A885E107CDE48497C43CBA2A76 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7F89040B8DC7FC773592AA5FE110E9DF /* NMapsGeometry.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -382,7 +385,7 @@
 			};
 			name = Release;
 		};
-		308A8CE4DFB47ADCFA7C287C9EBE13B7 /* Debug */ = {
+		0E938D7B9383E969A75B103CB718880E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 01481E8EDD6EC6426E893CA9DD4DA0C7 /* Pods-iOS_Project.debug.xcconfig */;
 			buildSettings = {
@@ -396,6 +399,8 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = "Target Support Files/Pods-iOS_Project/Pods-iOS_Project-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -419,13 +424,14 @@
 			};
 			name = Debug;
 		};
-		4122D12474652D4B94029A59C0DC6010 /* Debug */ = {
+		2A5A07E7ECD8F932FC105B66E699965B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 1A326C79B1B897CBCFDC36BFF5174A43 /* NMapsGeometry.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -434,6 +440,24 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
+		};
+		5D3D4A8485CE25FA0EB43FD934BDFDE4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 53BB18D8DE6118DEC0AAC01027DBECA8 /* NMapsMap.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
 		};
 		6A5C026ED62BBFE3380CD257EEFAEB20 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -501,7 +525,7 @@
 			};
 			name = Debug;
 		};
-		E25EBB0146F6158DB8108F18856F17CF /* Release */ = {
+		835DDB0478FE305060D85DAB9A6A03A3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 525F44E3A914F1FED2B61F9622DED091 /* Pods-iOS_Project.release.xcconfig */;
 			buildSettings = {
@@ -515,6 +539,8 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = "Target Support Files/Pods-iOS_Project/Pods-iOS_Project-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -538,22 +564,6 @@
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
-		};
-		E683018BA3CA2E27A39E5DF5619B90F6 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0970046F7060534BA9B286629593DA0C /* NMapsMap.debug.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
 		};
 		E873CA97BD124B21839AF13C9BE1CD18 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -617,22 +627,22 @@
 			};
 			name = Release;
 		};
-		FE5D137BA104CCBECE001BF38C0AEB3E /* Release */ = {
+		FAB9677BCDB7996B80F291B474EB80E9 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 53BB18D8DE6118DEC0AAC01027DBECA8 /* NMapsMap.release.xcconfig */;
+			baseConfigurationReference = 0970046F7060534BA9B286629593DA0C /* NMapsMap.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
-			name = Release;
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -649,17 +659,17 @@
 		73E737D5F21341C24A13EBC70CD8D471 /* Build configuration list for PBXAggregateTarget "NMapsMap" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E683018BA3CA2E27A39E5DF5619B90F6 /* Debug */,
-				FE5D137BA104CCBECE001BF38C0AEB3E /* Release */,
+				FAB9677BCDB7996B80F291B474EB80E9 /* Debug */,
+				5D3D4A8485CE25FA0EB43FD934BDFDE4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DF041DE7148B74F4D2A9E4DC46DC8567 /* Build configuration list for PBXNativeTarget "Pods-iOS_Project" */ = {
+		7869E58B67D5339E04D4DDC0D89A1925 /* Build configuration list for PBXNativeTarget "Pods-iOS_Project" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				308A8CE4DFB47ADCFA7C287C9EBE13B7 /* Debug */,
-				E25EBB0146F6158DB8108F18856F17CF /* Release */,
+				0E938D7B9383E969A75B103CB718880E /* Debug */,
+				835DDB0478FE305060D85DAB9A6A03A3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -667,8 +677,8 @@
 		EB98AD101AB530610FAEE48FABDF7F57 /* Build configuration list for PBXAggregateTarget "NMapsGeometry" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				4122D12474652D4B94029A59C0DC6010 /* Debug */,
-				138EE7F5840AEF4E4028CA5FAAE9EE6E /* Release */,
+				2A5A07E7ECD8F932FC105B66E699965B /* Debug */,
+				054E51A885E107CDE48497C43CBA2A76 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

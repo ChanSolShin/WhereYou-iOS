@@ -6,7 +6,7 @@
 	<dict>
 		<key>Assets.car</key>
 		<data>
-		Ewacc5GQnoEzbaRx6kvkpppDhUo=
+		1Pshcu95u5Ht3tgIKadNZCFh/a0=
 		</data>
 		<key>Base.lproj/Foundation.strings</key>
 		<data>
@@ -118,7 +118,7 @@
 		</data>
 		<key>Headers/NMFAuthManager.h</key>
 		<data>
-		l5uR1eC2jzE6BFAD/3YmrhSH1bY=
+		gPmquv8PTuWKA7jmR7xyPIdA++I=
 		</data>
 		<key>Headers/NMFCameraCommon.h</key>
 		<data>
@@ -202,7 +202,7 @@
 		</data>
 		<key>Headers/NMFLocationOverlay.h</key>
 		<data>
-		94TFCkQN/uBLJTPRmVdAzYbb0EI=
+		jELrNsa08ywqPzJaV7Jw4NCR/ck=
 		</data>
 		<key>Headers/NMFMapView+IBAdditions.h</key>
 		<data>
@@ -210,7 +210,7 @@
 		</data>
 		<key>Headers/NMFMapView.h</key>
 		<data>
-		BYFWDQztBaCmt4T3nl/NlRgxIW0=
+		gHUDE7QLn4STlt+8K8QLs7MhUiI=
 		</data>
 		<key>Headers/NMFMapViewCameraDelegate.h</key>
 		<data>
@@ -220,13 +220,21 @@
 		<data>
 		uUQhHqlevszbM0L+wun97dPImog=
 		</data>
+		<key>Headers/NMFMapViewLoadDelegate.h</key>
+		<data>
+		xwwphLzaal6+/u0LATYCzQwcSIw=
+		</data>
 		<key>Headers/NMFMapViewOptionDelegate.h</key>
 		<data>
 		JZMVNfYO++SgkttWQ43lHAkLzpE=
 		</data>
+		<key>Headers/NMFMapViewRenderDelegate.h</key>
+		<data>
+		N8/oGvvZnaEfGZ2w+vpxt70f56I=
+		</data>
 		<key>Headers/NMFMapViewTouchDelegate.h</key>
 		<data>
-		WQqPdnksVe79e1jreDbg7gXRs4U=
+		fUjpl4G7IslJze9aaY6H7HDXsqc=
 		</data>
 		<key>Headers/NMFMarker.h</key>
 		<data>
@@ -282,7 +290,7 @@
 		</data>
 		<key>Headers/NMFPolygonOverlay.h</key>
 		<data>
-		8FL6W8gmnWWBQS0q1yZneygIe2U=
+		v4PY0YsFWioVKso9vuJCkojZGls=
 		</data>
 		<key>Headers/NMFPolylineOverlay.h</key>
 		<data>
@@ -318,7 +326,7 @@
 		</data>
 		<key>Headers/NMFUtils.h</key>
 		<data>
-		I/Kg9AEjCmnMFx55Qse2Br/Vqjc=
+		/MLvFwU4k//9+71mP0rrBDGdZK8=
 		</data>
 		<key>Headers/NMFZoomControlView.h</key>
 		<data>
@@ -326,7 +334,7 @@
 		</data>
 		<key>Headers/NMapsMap.h</key>
 		<data>
-		7u1e4KXBAAMKAlAassdK9v/ynzg=
+		nomhuhwbKSTD0gQSbRMP0Ig1yJY=
 		</data>
 		<key>Headers/NSBundle+NMFAdditions.h</key>
 		<data>
@@ -334,7 +342,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		MiXGbSM3RC0cweUmORdBzKh54rg=
+		XBEz812ARKPMuRUaoN84OvbumuE=
 		</data>
 		<key>LICENSE</key>
 		<data>
@@ -366,11 +374,11 @@
 		</data>
 		<key>NMFNaverMapView.nib/objects-11.0+.nib</key>
 		<data>
-		O10hqjXqbyAu3/dfEPpgkt2hVoQ=
+		nmgUUz4hbBvDgMwl/Ys7IxQOtbM=
 		</data>
 		<key>NMFNaverMapView.nib/runtime.nib</key>
 		<data>
-		ZXPaU8IdhaUI4IyR+W1RsOU1TKM=
+		3L7OMcjNZ0CtsqXNGT8x7uem5L8=
 		</data>
 		<key>NMFScaleView.nib</key>
 		<data>
@@ -390,7 +398,7 @@
 		</data>
 		<key>default.metallib</key>
 		<data>
-		4QbZcSn3VYE8WfCOVkSMi9McqnI=
+		sgnzXcEmpSpLA1/d866BusDtd60=
 		</data>
 		<key>en.lproj/Foundation.strings</key>
 		<dict>
@@ -480,11 +488,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Ewacc5GQnoEzbaRx6kvkpppDhUo=
+			1Pshcu95u5Ht3tgIKadNZCFh/a0=
 			</data>
 			<key>hash2</key>
 			<data>
-			eKD/A/at+bZY9Ql2x3Dsq/ePfzjt2vkGKobKCCplnvQ=
+			2pW4EewYwxOdtd5rImcgfF8PhE8oeOV4Tm8emZ0iMrw=
 			</data>
 		</dict>
 		<key>Base.lproj/Foundation.strings</key>
@@ -788,11 +796,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			l5uR1eC2jzE6BFAD/3YmrhSH1bY=
+			gPmquv8PTuWKA7jmR7xyPIdA++I=
 			</data>
 			<key>hash2</key>
 			<data>
-			JlZ3xeKR8iOZUl00vGrk3YWYKuXZcdFgv2YxXG7aB04=
+			cMFRzGKlscLAq4F7eTYJusCCdeao1ogpvNOCyT9C3II=
 			</data>
 		</dict>
 		<key>Headers/NMFCameraCommon.h</key>
@@ -1019,11 +1027,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			94TFCkQN/uBLJTPRmVdAzYbb0EI=
+			jELrNsa08ywqPzJaV7Jw4NCR/ck=
 			</data>
 			<key>hash2</key>
 			<data>
-			7tblZIt50lswPG/FBkKFZjZ7S4EGdeyEsWlLGR+9Ob4=
+			23HonyjG5t/WifyLWJcrWJSbpcTTyQRNk9P9V1LlBhY=
 			</data>
 		</dict>
 		<key>Headers/NMFMapView+IBAdditions.h</key>
@@ -1041,11 +1049,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			BYFWDQztBaCmt4T3nl/NlRgxIW0=
+			gHUDE7QLn4STlt+8K8QLs7MhUiI=
 			</data>
 			<key>hash2</key>
 			<data>
-			iwbOwTEEqSJK2P0fx+OkysfH9YpoFquikcWNcIXKHSE=
+			ctuI1hcmmPwip493FUaNPDqCsb5UhzFn3UVDjIGkDMA=
 			</data>
 		</dict>
 		<key>Headers/NMFMapViewCameraDelegate.h</key>
@@ -1070,6 +1078,17 @@
 			dTpTjS9d4o98kR10oGcKdd92ty99+GujOdRN/6rV8RI=
 			</data>
 		</dict>
+		<key>Headers/NMFMapViewLoadDelegate.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			xwwphLzaal6+/u0LATYCzQwcSIw=
+			</data>
+			<key>hash2</key>
+			<data>
+			xtI5ZrUoZ8mM1ay4eFPjXRVSlVtcydIMHVgClifj7nI=
+			</data>
+		</dict>
 		<key>Headers/NMFMapViewOptionDelegate.h</key>
 		<dict>
 			<key>hash</key>
@@ -1081,15 +1100,26 @@
 			QA6GGPnRxA3rY0wAMP7YN+oxmtPKZwjaJLwX5YO/FdY=
 			</data>
 		</dict>
+		<key>Headers/NMFMapViewRenderDelegate.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			N8/oGvvZnaEfGZ2w+vpxt70f56I=
+			</data>
+			<key>hash2</key>
+			<data>
+			R8XFFumdSkXUEmDVAyk2z8NLOM+UJIa56aRJGp+f1fc=
+			</data>
+		</dict>
 		<key>Headers/NMFMapViewTouchDelegate.h</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			WQqPdnksVe79e1jreDbg7gXRs4U=
+			fUjpl4G7IslJze9aaY6H7HDXsqc=
 			</data>
 			<key>hash2</key>
 			<data>
-			MElHVPERfFGdHqMZ3Mxs/1gsO1ulHAi0etOcyMpsrlw=
+			xzWkLmeURR4hloNRFHSRS+hOEWvRSqrITyBlfgnVCws=
 			</data>
 		</dict>
 		<key>Headers/NMFMarker.h</key>
@@ -1239,11 +1269,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			8FL6W8gmnWWBQS0q1yZneygIe2U=
+			v4PY0YsFWioVKso9vuJCkojZGls=
 			</data>
 			<key>hash2</key>
 			<data>
-			gwmlUsmrpU0l9I84gZjJRulqBBaEeMKkPAXRg4rPxN0=
+			isJJRWdj1yrj9DnEAlBdnh41CQBw+1uTnMM7F2vwxRo=
 			</data>
 		</dict>
 		<key>Headers/NMFPolylineOverlay.h</key>
@@ -1338,11 +1368,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			I/Kg9AEjCmnMFx55Qse2Br/Vqjc=
+			/MLvFwU4k//9+71mP0rrBDGdZK8=
 			</data>
 			<key>hash2</key>
 			<data>
-			gsnlbKnuxlK4805Bcg3mTb8nvQTaCVdJfSXHKV9E30k=
+			Yl4ciInHoCej92Qjd5ISaa/pVnspDl/0r6Zi2OAynl4=
 			</data>
 		</dict>
 		<key>Headers/NMFZoomControlView.h</key>
@@ -1360,11 +1390,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			7u1e4KXBAAMKAlAassdK9v/ynzg=
+			nomhuhwbKSTD0gQSbRMP0Ig1yJY=
 			</data>
 			<key>hash2</key>
 			<data>
-			wsTFQZc63GI+eTZcI6TE1DHkgz/rk8jlvDRur5dF6bQ=
+			yuQidhclMb1DY4uOdxCM8YTgDpoeqor1UCux5CT84TU=
 			</data>
 		</dict>
 		<key>Headers/NSBundle+NMFAdditions.h</key>
@@ -1459,22 +1489,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			O10hqjXqbyAu3/dfEPpgkt2hVoQ=
+			nmgUUz4hbBvDgMwl/Ys7IxQOtbM=
 			</data>
 			<key>hash2</key>
 			<data>
-			pUZ7sBWlk4Ps7FLz8wygRyWJDsrOQwrph1ULI09XBMM=
+			XqffQJBPfbjecl4whyVnmr+g/IAGzTNiAXSwKeOVnCg=
 			</data>
 		</dict>
 		<key>NMFNaverMapView.nib/runtime.nib</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			ZXPaU8IdhaUI4IyR+W1RsOU1TKM=
+			3L7OMcjNZ0CtsqXNGT8x7uem5L8=
 			</data>
 			<key>hash2</key>
 			<data>
-			sDzE2YSlnn5zGS+rD0aWLK3ceVWtCifjNCobhqQtCKM=
+			QSd4rpliF/zGsOrwxNiD96o3y7G+4Z2INrRpIJQed8E=
 			</data>
 		</dict>
 		<key>NMFScaleView.nib</key>
@@ -1525,11 +1555,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			4QbZcSn3VYE8WfCOVkSMi9McqnI=
+			sgnzXcEmpSpLA1/d866BusDtd60=
 			</data>
 			<key>hash2</key>
 			<data>
-			csy+ffnfMUh+4B3mgmon2HRJ9rHSngVm/564BQnxqgA=
+			R0ysujjC5fOlFDYLKjC9aP+d/YggF/VnRLDBs7FqojY=
 			</data>
 		</dict>
 		<key>en.lproj/Foundation.strings</key>
