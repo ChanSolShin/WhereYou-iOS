@@ -1,0 +1,21 @@
+#!/bin/sh
+
+echo "🔧 post-clone: Installing CocoaPods dependencies..."
+
+# rbenv 초기화 (필요한 경우)
+if which rbenv > /dev/null; then
+  export PATH="$HOME/.rbenv/bin:$PATH"
+  eval "$(rbenv init -)"
+fi
+
+# CocoaPods 설치 (없을 경우 대비)
+if ! command -v pod &> /dev/null
+then
+    echo "❌ CocoaPods not found. Installing..."
+    sudo gem install cocoapods
+fi
+
+# pod install 실행
+pod install
+
+echo "✅ pod install completed"
