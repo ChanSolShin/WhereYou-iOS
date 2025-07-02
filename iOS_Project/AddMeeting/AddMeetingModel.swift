@@ -8,7 +8,6 @@
 import Foundation
 import CoreLocation
 import SwiftUI
-import NMapsMap
 
 struct AddMeetingModel {
     var meetingName: String = " "
