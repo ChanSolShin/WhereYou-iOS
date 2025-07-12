@@ -9,7 +9,6 @@ import SwiftUI
 import Firebase
 import FirebaseAuth
 import CoreLocation
-import NMapsMap
 import UserNotifications
 import FirebaseRemoteConfig
 

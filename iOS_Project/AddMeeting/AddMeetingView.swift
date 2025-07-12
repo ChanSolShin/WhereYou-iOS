@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreLocation
-import NMapsMap
 import Foundation
 
 struct AddMeetingView: View {

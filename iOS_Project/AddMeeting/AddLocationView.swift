@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import NMapsMap
 import CoreLocation
 
 struct AddLocationView: View {
