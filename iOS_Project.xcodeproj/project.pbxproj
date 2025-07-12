@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -170,10 +170,6 @@
 		F5EA74C42D9047A100EAC863 /* Extension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -548,7 +544,6 @@
 				};
 			};
 			buildConfigurationList = EABADF262CB9223E00962A40 /* Build configuration list for PBXProject "iOS_Project" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -560,6 +555,7 @@
 			packageReferences = (
 				EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
+			preferredProjectObjectVersion = 77;
 			productRefGroup = EABADF2C2CB9223E00962A40 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
