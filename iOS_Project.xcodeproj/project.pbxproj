@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D3DAC0BC663E9922C2AE4C22 /* Pods_iOS_Project.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B866D8C9DA73463FAADA7A1A /* Pods_iOS_Project.framework */; };
+		EA216DB12E22BDD600E9A6BA /* Pods_iOS_Project.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B866D8C9DA73463FAADA7A1A /* Pods_iOS_Project.framework */; };
 		EA27C0A12D8FCB3A0053F213 /* AddFriendNumberModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA27C0A02D8FCB2D0053F213 /* AddFriendNumberModal.swift */; };
 		EA27C0A32D8FCD2A0053F213 /* AddFriendType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA27C0A22D8FCD290053F213 /* AddFriendType.swift */; };
 		EA28F4F82CC83C64004827A3 /* MeetingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */; };
@@ -169,8 +169,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F5EA74C42D9047A100EAC863 /* Extension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = Extension;
 			sourceTree = "<group>";
 		};
@@ -183,10 +181,10 @@
 			files = (
 				EAD481B02CBD7D4B0052D22B /* FirebaseAuth in Frameworks */,
 				EAD481B22CBD7D4B0052D22B /* FirebaseFirestore in Frameworks */,
+				EA216DB12E22BDD600E9A6BA /* Pods_iOS_Project.framework in Frameworks */,
 				F55D6CF72D66D9D20036E89F /* FirebaseMessaging in Frameworks */,
 				EA5429E72E0B30B3002EC15E /* FirebaseRemoteConfig in Frameworks */,
 				F54542322CE257060043B1E2 /* FirebaseDatabase in Frameworks */,
-				D3DAC0BC663E9922C2AE4C22 /* Pods_iOS_Project.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -604,9 +602,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-iOS_Project/Pods-iOS_Project-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-iOS_Project/Pods-iOS_Project-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
