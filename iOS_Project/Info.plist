@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>NAVER_CLIENT_SECRET</key>
-	<string>u8jU2QKWqS</string>
+	<string>mSYlOQuAbZ6V37IbMQw3m3bI9MaDpsQRlFQwMZrS</string>
 	<key>NAVER_CLIENT_ID</key>
-	<string>fZX8IYa_kpXrzkGHZRQE</string>
+	<string>7rl0avqc0d</string>
 	<key>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;</key>
 	<string>&lt;string&gt;앱이 백그라운드에서도 친구 위치를 자동으로 업데이트합니다.&lt;/string&gt;</string>
 	<key>&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;</key>
