@@ -1,15 +1,17 @@
 #!/bin/sh
 
-echo "🔧 ci_post_clone: Installing CocoaPods dependencies..."
+echo "🔧 [Xcode Cloud] Starting ci_post_clone script..."
 
-brew install cocoapods || echo "✅ CocoaPods already installed"
+# 1. Homebrew 업데이트 및 CocoaPods 설치 (이미 설치돼 있으면 무시됨)
+echo "📦 Installing CocoaPods..."
+brew install cocoapods
 
-cd "$CI_WORKSPACE" || exit 1
+# 2. 최신 xcodeproj 설치 (objectVersion 70 대응)
+echo "📦 Installing xcodeproj 1.28.0..."
+sudo gem install xcodeproj -v 1.28.0
 
-if [ -f "Podfile" ]; then
-  pod install
-  echo "✅ pod install completed"
-else
-  echo "❌ Podfile not found in $CI_WORKSPACE"
-  exit 1
-fi
+# 3. pod install 실행
+echo "🚀 Running pod install..."
+pod install
+
+echo "✅ [Xcode Cloud] ci_post_clone completed!"

@@ -1,5 +1,4 @@
 import SwiftUI
-import NMapsMap
 
 struct MeetingListView: View {
     @StateObject private var viewModel = MeetingListViewModel()

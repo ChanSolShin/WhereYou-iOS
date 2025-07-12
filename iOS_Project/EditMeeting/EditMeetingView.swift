@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreLocation
-import NMapsMap
 
 struct EditMeetingView: View {
     @StateObject private var viewModel = EditMeetingViewModel()
