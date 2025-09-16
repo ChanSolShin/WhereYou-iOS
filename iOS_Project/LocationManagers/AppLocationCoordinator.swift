@@ -28,6 +28,16 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
         super.init()
         locationManager.delegate = self
         checkAuthorizationStatus()
+        
+        // Foreground 진입 시 만료 모임 재검증
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(appWillEnterForeground),
+                                               name: UIApplication.willEnterForegroundNotification,
+                                               object: nil)
+    }
+    
+    @objc private func appWillEnterForeground() {
+        sweepActiveMeetings()
     }
     
     func checkAuthorizationStatus() {
@@ -67,22 +77,46 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
         locationUpdateTimer = nil
     }
     
+    // 조회 가능 시간 유효성 검사
+    private func isMeetingActive(_ meeting: MeetingModel, at date: Date = Date()) -> Bool {
+        let start = Calendar.current.date(byAdding: .hour, value: -3, to: meeting.date) ?? meeting.date
+        let end   = Calendar.current.date(byAdding: .hour, value:  1, to: meeting.date) ?? meeting.date
+        return date >= start && date <= end
+    }
+    
+    // 현재 시간 기준으로 활성 모임만 남기고, 없으면 업로드 중단
+    private func sweepActiveMeetings(now: Date = Date()) {
+        guard !activeMeetings.isEmpty else { return }
+        let beforeCount = activeMeetings.count
+        activeMeetings.removeAll { !isMeetingActive($0, at: now) }
+        let afterCount = activeMeetings.count
+        if beforeCount != afterCount {
+            print("[Location] 만료된 모임 정리: before=\(beforeCount) → after=\(afterCount)")
+        }
+        if activeMeetings.isEmpty {
+            print("[Location] 활성 모임 없음 → 위치 업데이트 중단")
+            stopUpdatingLocation()
+        }
+    }
+    
     private func uploadLocation() {
+        // 업로드 직전에 한 번 더 유효성 스윕
+        sweepActiveMeetings()
+        
+        guard !activeMeetings.isEmpty else {
+            return
+        }
         guard let currentLocation = currentLocation else {
             print("위치를 가져올 수 없습니다.")
             return
         }
         
-        guard !activeMeetings.isEmpty else {
-            return
-        }
-        
         let latitude = currentLocation.latitude
         let longitude = currentLocation.longitude
-        print("현재 위치 업로드: (\(latitude), \(longitude))")
         
         // 활성화된 모든 모임에 대해 위치 업로드
-        for meeting in activeMeetings {
+        for meeting in activeMeetings where isMeetingActive(meeting) {
+            print("현재 위치 업로드[\(meeting.id)]: (\(latitude), \(longitude))")
             realtimeDB.child("meetings").child(meeting.id).child("locations").child(getCurrentUserID()).setValue([
                 "latitude": latitude,
                 "longitude": longitude,
@@ -133,7 +167,7 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
             }
             
             guard let document = document, document.exists,
-                  let firestoreMembers = document.data()?["meetingMembers"] as? [String] else {
+                  let firestoreMembers = document.data()? ["meetingMembers"] as? [String] else {
                 print("모임 문서가 존재하지 않거나 멤버 정보가 없음")
                 return
             }
@@ -146,19 +180,18 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
             // 리스너를 통해 모임 삭제 감지
             db.collection("meetings").document(meeting.id).addSnapshotListener { [weak self] documentSnapshot, error in
                 guard let self = self else { return }
-                
                 if let error = error {
                     print("Firestore 모임 삭제 감지 리스너 에러: \(error)")
                     return
                 }
-                
-                if documentSnapshot == nil || !documentSnapshot!.exists {
+                guard let snap = documentSnapshot else { return }
+                if !snap.exists {
                     self.activeMeetings.removeAll { $0.id == meeting.id }
                     print("모임이 Firestore에서 삭제됨. \(meeting.id)")
-                    
-                    if self.activeMeetings.isEmpty {
-                        self.stopUpdatingLocation()
-                    }
+                    if self.activeMeetings.isEmpty { self.stopUpdatingLocation() }
+                } else {
+                    // meetingDate 변경 등 서버 상태가 바뀌었을 수 있으므로 재검증
+                    self.sweepActiveMeetings()
                 }
             }
             
@@ -191,11 +224,8 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
                 DispatchQueue.main.asyncAfter(deadline: .now() + endDelay) {
                     self.activeMeetings.removeAll { $0.id == meeting.id }
                     print("업로드 비활성화된 모임 제거: \(meeting.id)")
-                    
                     // 더 이상 활성화된 모임이 없으면 위치 업데이트 중지
-                    if self.activeMeetings.isEmpty {
-                        self.stopUpdatingLocation()
-                    }
+                    if self.activeMeetings.isEmpty { self.stopUpdatingLocation() }
                 }
             }
         }
@@ -222,6 +252,5 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let latestLocation = locations.last else { return }
         currentLocation = latestLocation.coordinate
-        
     }
 }
