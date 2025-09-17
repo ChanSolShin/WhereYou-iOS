@@ -51,7 +51,9 @@ class MeetingViewModel: NSObject, ObservableObject {
     // 모임 선택 및 초기화
     func selectMeeting(meeting: MeetingModel) {
         self.meeting = meeting
-        self.trackedMemberID = nil
+        DispatchQueue.main.async {
+            self.trackedMemberID = nil
+        }
         
         for memberID in meeting.meetingMemberIDs {
             fetchUserName(byID: memberID) { [weak self] name in
@@ -164,7 +166,9 @@ class MeetingViewModel: NSObject, ObservableObject {
 
             // 새로운 멤버 추적 시작
             print("Started tracking user \(userID)")
-            self.trackedMemberID = userID
+            DispatchQueue.main.async {
+                self.trackedMemberID = userID
+            }
             self.fetchMemberLocation(userID: userID)
         }
     }
@@ -202,8 +206,10 @@ class MeetingViewModel: NSObject, ObservableObject {
     func stopTrackingMember() {
         guard let meetingID = meeting?.id, let userID = trackedMemberID else { return }
         realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).removeAllObservers()
-        trackedMemberID = nil
-        selectedUserLocation = nil
+        DispatchQueue.main.async {
+            self.trackedMemberID = nil
+            self.selectedUserLocation = nil
+        }
     }
     
     private func fetchUserName(byID userID: String, completion: @escaping (String) -> Void) {
@@ -239,22 +245,23 @@ class MeetingViewModel: NSObject, ObservableObject {
            db.collection("meetings").document(meetingID)
                .addSnapshotListener { [weak self] document, error in
                    if let error = error {
-                       self?.errorMessage = "데이터 로딩 중 오류 발생: \(error.localizedDescription)"
+                       DispatchQueue.main.async {
+                           self?.errorMessage = "데이터 로딩 중 오류 발생: \(error.localizedDescription)"
+                       }
                        return
                    }
-                   
                    guard let document = document, document.exists else {
                        return
                    }
-                   
-                   // Firestore에서 날짜를 받아와 업데이트
-                   if let date = document.data()?["meetingDate"] as? Timestamp {
-                       self?.meetingDate = date.dateValue()
-                   }
-                   
-                   // 모임 멤버 이름 업데이트
-                   if let memberNames = document.data()?["meetingMemberNames"] as? [String: String] {
-                       self?.meetingMemberNames = memberNames
+                   DispatchQueue.main.async {
+                       // Firestore에서 날짜를 받아와 업데이트
+                       if let date = document.data()? ["meetingDate"] as? Timestamp {
+                           self?.meetingDate = date.dateValue()
+                       }
+                       // 모임 멤버 이름 업데이트
+                       if let memberNames = document.data()? ["meetingMemberNames"] as? [String: String] {
+                           self?.meetingMemberNames = memberNames
+                       }
                    }
                }
        }
@@ -386,8 +393,10 @@ class MeetingViewModel: NSObject, ObservableObject {
                 print("Error deleting meeting request: \(error)")
             } else {
                 print("Successfully deleted meeting request with ID: \(requestID)")
-                if let index = self.pendingMeetingRequests.firstIndex(where: { $0.id == requestID }) {
-                    self.pendingMeetingRequests.remove(at: index)
+                DispatchQueue.main.async {
+                    if let index = self.pendingMeetingRequests.firstIndex(where: { $0.id == requestID }) {
+                        self.pendingMeetingRequests.remove(at: index)
+                    }
                 }
             }
         }
