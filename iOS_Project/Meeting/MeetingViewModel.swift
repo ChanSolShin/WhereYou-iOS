@@ -29,9 +29,10 @@ class MeetingViewModel: NSObject, ObservableObject {
     public let locationCoordinator: AppLocationCoordinator // 위치 코디네이터
     
     private var meetingListener: ListenerRegistration?
-       private var memberListener: ListenerRegistration?
-    
+    private var memberListener: ListenerRegistration?
+
     private var db = Firestore.firestore()
+    private var currentMemberIDs: [String] = []
     
     init(locationCoordinator: AppLocationCoordinator = AppLocationCoordinator.shared) {
         self.locationCoordinator = locationCoordinator
@@ -84,23 +85,23 @@ class MeetingViewModel: NSObject, ObservableObject {
        }
     
     private func listenToMemberNameChanges(memberIDs: [String]) {
-           memberListener?.remove()
-           
-           let db = Firestore.firestore()
-           memberListener = db.collection("users").whereField(FieldPath.documentID(), in: memberIDs)
-               .addSnapshotListener { [weak self] (querySnapshot, error) in
-                   guard let self = self else { return }
-                   guard let documents = querySnapshot?.documents else { return }
-                   
-                   DispatchQueue.main.async {
-                       for document in documents {
-                           if let name = document.data()["name"] as? String {
-                               self.meetingMemberNames[document.documentID] = name
-                           }
-                       }
-                   }
-               }
-       }
+        memberListener?.remove()
+        let ids = memberIDs
+        guard !ids.isEmpty else { return }
+        let db = Firestore.firestore()
+        memberListener = db.collection("users").whereField(FieldPath.documentID(), in: ids)
+            .addSnapshotListener { [weak self] (querySnapshot, error) in
+                guard let self = self else { return }
+                guard let documents = querySnapshot?.documents else { return }
+                DispatchQueue.main.async {
+                    for document in documents {
+                        if let name = document.data()["name"] as? String {
+                            self.meetingMemberNames[document.documentID] = name
+                        }
+                    }
+                }
+            }
+    }
 
     
     
@@ -242,29 +243,41 @@ class MeetingViewModel: NSObject, ObservableObject {
     }
     
     func fetchMeetingData(meetingID: String) {
-           db.collection("meetings").document(meetingID)
-               .addSnapshotListener { [weak self] document, error in
-                   if let error = error {
-                       DispatchQueue.main.async {
-                           self?.errorMessage = "데이터 로딩 중 오류 발생: \(error.localizedDescription)"
-                       }
-                       return
-                   }
-                   guard let document = document, document.exists else {
-                       return
-                   }
-                   DispatchQueue.main.async {
-                       // Firestore에서 날짜를 받아와 업데이트
-                       if let date = document.data()? ["meetingDate"] as? Timestamp {
-                           self?.meetingDate = date.dateValue()
-                       }
-                       // 모임 멤버 이름 업데이트
-                       if let memberNames = document.data()? ["meetingMemberNames"] as? [String: String] {
-                           self?.meetingMemberNames = memberNames
-                       }
-                   }
-               }
-       }
+        db.collection("meetings").document(meetingID)
+            .addSnapshotListener { [weak self] document, error in
+                if let error = error {
+                    DispatchQueue.main.async {
+                        self?.errorMessage = "데이터 로딩 중 오류 발생: \(error.localizedDescription)"
+                    }
+                    return
+                }
+                guard let document = document, document.exists else {
+                    return
+                }
+                // 1) 날짜/이름 맵 UI 업데이트
+                DispatchQueue.main.async {
+                    if let date = document.data()? ["meetingDate"] as? Timestamp {
+                        self?.meetingDate = date.dateValue()
+                    }
+                    if let memberNames = document.data()? ["meetingMemberNames"] as? [String: String] {
+                        self?.meetingMemberNames = memberNames
+                    }
+                }
+                // 2) 멤버 목록이 바뀌면, 이름 리스너를 새 멤버 배열로 재구독
+                if let memberIDs = document.data()? ["meetingMembers"] as? [String] {
+                    if memberIDs != self?.currentMemberIDs {
+                        self?.currentMemberIDs = memberIDs
+                        // 이름 플레이스홀더(선택): 아직 로드 안 된 멤버는 '불러오는 중...' 표시 유지
+                        DispatchQueue.main.async {
+                            for id in memberIDs where self?.meetingMemberNames[id] == nil {
+                                self?.meetingMemberNames[id] = "불러오는 중..."
+                            }
+                        }
+                        self?.listenToMemberNameChanges(memberIDs: memberIDs)
+                    }
+                }
+            }
+    }
     
     // 친구들에게 모임 초대 요청 보내기
     func sendMeetingRequest(toUserIDs: [String], meetingName: String, fromUserID: String, fromUserName: String) {
