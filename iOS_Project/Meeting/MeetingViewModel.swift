@@ -22,6 +22,7 @@ class MeetingViewModel: NSObject, ObservableObject {
     @Published var selectedUserLocation: CLLocationCoordinate2D? // 유저 위치 표시
     @Published var trackedMemberID: String? // 현재 추적 중인 멤버 ID
     @Published var meetingDate: Date?
+    @Published var isKicked: Bool = false
     
     private var meeting: MeetingModel? // 현재 선택된 모임
     private let realtimeDB = Database.database().reference()
@@ -265,6 +266,13 @@ class MeetingViewModel: NSObject, ObservableObject {
                 }
                 // 2) 멤버 목록이 바뀌면, 이름 리스너를 새 멤버 배열로 재구독
                 if let memberIDs = document.data()? ["meetingMembers"] as? [String] {
+                    // 멤버 강퇴 감지
+                    if let uid = Auth.auth().currentUser?.uid, !memberIDs.contains(uid) {
+                        DispatchQueue.main.async {
+                            self?.isKicked = true
+                        }
+                        return
+                    }
                     if memberIDs != self?.currentMemberIDs {
                         self?.currentMemberIDs = memberIDs
                         // 이름 플레이스홀더(선택): 아직 로드 안 된 멤버는 '불러오는 중...' 표시 유지
