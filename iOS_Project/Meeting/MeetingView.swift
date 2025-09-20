@@ -180,6 +180,13 @@ struct MeetingView: View {
                     showAlert = true
                 }
             }
+            .onReceive(meetingViewModel.$isKicked) { kicked in
+                if kicked {
+                    alertMessage = "모임에서 제외되었습니다."
+                    showAlert = true
+                    dismiss()
+                }
+            }
             .actionSheet(isPresented: $showActionSheet) {
                 var buttons: [ActionSheet.Button] = [
                     .destructive(Text("나가기")) {
