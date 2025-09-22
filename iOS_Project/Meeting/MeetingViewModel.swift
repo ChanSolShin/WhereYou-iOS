@@ -281,6 +281,11 @@ class MeetingViewModel: NSObject, ObservableObject {
                     if let memberNames = document.data()? ["meetingMemberNames"] as? [String: String] {
                         self?.meetingMemberNames = memberNames
                     }
+                    if let master = document.data()? ["meetingMaster"] as? String {
+                        self?.meetingMasterID = master
+                    } else if let master = document.data()? ["meetingMasterID"] as? String {
+                        self?.meetingMasterID = master
+                    }
                 }
                 // 2) 멤버 목록이 바뀌면, 이름 리스너를 새 멤버 배열로 재구독
                 if let memberIDs = document.data()? ["meetingMembers"] as? [String] {

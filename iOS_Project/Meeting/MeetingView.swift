@@ -95,7 +95,7 @@ struct MeetingView: View {
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 16) {
-                        ForEach(meeting.meetingMemberIDs, id: \.self) { memberID in
+                        ForEach(sortedMemberIDs(), id: \.self) { memberID in
                             Button(action: {
                                 if meetingViewModel.trackedMemberID == memberID {
                                     meetingViewModel.stopTrackingMember()
@@ -117,7 +117,7 @@ struct MeetingView: View {
                                                 .stroke(selectedMemberID == memberID ? Color.yellow : Color.clear, lineWidth: 4)
                                         )
                                     
-                                    if memberID == meeting.meetingMasterID {
+                                    if memberID == (meetingViewModel.meetingMasterID ?? meeting.meetingMasterID) {
                                         Image(systemName: "crown.fill")
                                             .foregroundColor(.yellow)
                                             .offset(x: 0, y: -40)
@@ -264,5 +264,23 @@ struct MeetingView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy년 MM월 dd일 HH:mm"
         return "모임시간: \(formatter.string(from: date))"
+    }
+
+    private func sortedMemberIDs() -> [String] {
+        let leaderID = meetingViewModel.meetingMasterID ?? meeting.meetingMasterID
+        let ids = meeting.meetingMemberIDs
+        // 멤버 버튼 순서: 모임장이 항상 첫 번째
+        let others = ids.filter { $0 != leaderID }
+        let sortedOthers = others.sorted { (a, b) -> Bool in
+            let nameA = meetingViewModel.meetingMemberNames[a] ?? ""
+            let nameB = meetingViewModel.meetingMemberNames[b] ?? ""
+            if nameA.isEmpty || nameB.isEmpty { return a < b }
+            return nameA.localizedCaseInsensitiveCompare(nameB) == .orderedAscending
+        }
+        if ids.contains(leaderID) {
+            return [leaderID] + sortedOthers
+        } else {
+            return sortedOthers
+        }
     }
 }
