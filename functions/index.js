@@ -510,3 +510,45 @@ exports.deleteUnlinkedTempAccounts = onSchedule("every 5 minutes", async (event)
 
     return null;
 });
+
+// ✅ 멤버가 강퇴되면 RTDB 좌표 삭제
+exports.removeKickedMemberLocation = functions.firestore.onDocumentUpdated(
+  { document: 'meetings/{meetingId}' },
+  async (event) => {
+    const meetingId = event.params.meetingId;
+
+    const beforeData = event.data.before.data() || {};
+    const afterData  = event.data.after.data()  || {};
+
+    const beforeMembers = beforeData.meetingMembers || [];
+    const afterMembers  = afterData.meetingMembers  || [];
+
+    // Firestore 배열에서 제거된 멤버 계산
+    const removedMembers = beforeMembers.filter((m) => !afterMembers.includes(m));
+
+    if (removedMembers.length === 0) {
+      console.log(`제거된 멤버 없음: meetingId=${meetingId}`);
+      return null;
+    }
+
+    console.log(`RTDB 좌표 정리 시작: meetingId=${meetingId}, removedMembers=${removedMembers.join(', ')}`);
+
+    // 각 제거된 멤버의 RTDB 좌표 삭제
+    for (const uid of removedMembers) {
+      try {
+        const ref = admin.database().ref(`meetings/${meetingId}/locations/${uid}`);
+        const snap = await ref.get();
+        if (snap.exists()) {
+          await ref.remove();
+          console.log(`✅ RTDB 좌표 삭제 완료: meetingId=${meetingId}, uid=${uid}`);
+        } else {
+          console.log(`ℹ️ RTDB 좌표 없음(스킵): meetingId=${meetingId}, uid=${uid}`);
+        }
+      } catch (err) {
+        console.error(`❌ RTDB 좌표 삭제 실패: meetingId=${meetingId}, uid=${uid}`, err);
+      }
+    }
+
+    return null;
+  }
+);

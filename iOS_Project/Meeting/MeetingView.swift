@@ -8,6 +8,7 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
+import Combine
 
 struct MeetingView: View {
     @Environment(\.dismiss) var dismiss
@@ -23,6 +24,8 @@ struct MeetingView: View {
     @State private var showingKickOutModal = false
     @State private var selectedMemberID: String? = nil
     @State private var selectedButton: String? = nil
+    // 강퇴 알림 1회성 표시 플래그
+    @State private var showKickedAlert: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -90,43 +93,41 @@ struct MeetingView: View {
                         )
                 }
 
-                
-                
                 ScrollView(.horizontal, showsIndicators: false) {
-                                  LazyHStack(spacing: 16) {
-                                      ForEach(meeting.meetingMemberIDs, id: \.self) { memberID in
-                                          Button(action: {
-                                              if meetingViewModel.trackedMemberID == memberID {
-                                                  meetingViewModel.stopTrackingMember()
-                                                  selectedMemberID = nil
-                                              } else {
-                                                  meetingViewModel.moveToUserLocation(userID: memberID)
-                                                  selectedMemberID = memberID
-                                              }
-                                              selectedButton = memberID // 멤버 버튼 선택 상태로 설정
-                                          }) {
-                                              ZStack {
-                                                  Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
-                                                      .padding()
-                                                      .background(Color.blue)
-                                                      .foregroundColor(.white)
-                                                      .cornerRadius(10)
-                                                      .overlay(
-                                                          RoundedRectangle(cornerRadius: 10)
-                                                              .stroke(selectedMemberID == memberID ? Color.yellow : Color.clear, lineWidth: 4) // 노란색 테두리
-                                                      )
-                                                  
-                                                  if memberID == meeting.meetingMasterID {
-                                                      Image(systemName: "crown.fill")
-                                                          .foregroundColor(.yellow)
-                                                          .offset(x: 0, y: -40)
-                                                  }
-                                              }
-                                          }
-                                          .padding(.vertical, 2)
-                                      }
-                                  }
-                                  .padding(.horizontal)
+                    LazyHStack(spacing: 16) {
+                        ForEach(sortedMemberIDs(), id: \.self) { memberID in
+                            Button(action: {
+                                if meetingViewModel.trackedMemberID == memberID {
+                                    meetingViewModel.stopTrackingMember()
+                                    selectedMemberID = nil
+                                } else {
+                                    meetingViewModel.moveToUserLocation(userID: memberID)
+                                    selectedMemberID = memberID
+                                }
+                                selectedButton = memberID // 멤버 버튼 선택 상태로 설정
+                            }) {
+                                ZStack {
+                                    Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
+                                        .padding()
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(selectedMemberID == memberID ? Color.yellow : Color.clear, lineWidth: 4)
+                                        )
+                                    
+                                    if memberID == (meetingViewModel.meetingMasterID ?? meeting.meetingMasterID) {
+                                        Image(systemName: "crown.fill")
+                                            .foregroundColor(.yellow)
+                                            .offset(x: 0, y: -40)
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
+                    .padding(.horizontal)
                     .padding(.horizontal)
                 }
             }
@@ -139,6 +140,7 @@ struct MeetingView: View {
             }
             .onDisappear {
                 meetingViewModel.stopTrackingMember()
+                meetingViewModel.stopMeetingListeners()
             }
             .navigationTitle(meeting.title)
             .navigationBarTitleDisplayMode(.inline)
@@ -178,6 +180,16 @@ struct MeetingView: View {
                 if let message = message {
                     alertMessage = message
                     showAlert = true
+                }
+            }
+            // 1회성 알림 표시
+            .onReceive(meetingViewModel.$isKicked) { kicked in
+                if kicked { showKickedAlert = true }
+            }
+            .alert("모임에서 제외되었습니다.", isPresented: $showKickedAlert) {
+                Button("확인") {
+                    meetingViewModel.consumeKickedEvent() // 이벤트 소비(1회성)
+                    dismiss()
                 }
             }
             .actionSheet(isPresented: $showActionSheet) {
@@ -252,5 +264,23 @@ struct MeetingView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy년 MM월 dd일 HH:mm"
         return "모임시간: \(formatter.string(from: date))"
+    }
+
+    private func sortedMemberIDs() -> [String] {
+        let leaderID = meetingViewModel.meetingMasterID ?? meeting.meetingMasterID
+        let ids = meeting.meetingMemberIDs
+        // 멤버 버튼 순서: 모임장이 항상 첫 번째
+        let others = ids.filter { $0 != leaderID }
+        let sortedOthers = others.sorted { (a, b) -> Bool in
+            let nameA = meetingViewModel.meetingMemberNames[a] ?? ""
+            let nameB = meetingViewModel.meetingMemberNames[b] ?? ""
+            if nameA.isEmpty || nameB.isEmpty { return a < b }
+            return nameA.localizedCaseInsensitiveCompare(nameB) == .orderedAscending
+        }
+        if ids.contains(leaderID) {
+            return [leaderID] + sortedOthers
+        } else {
+            return sortedOthers
+        }
     }
 }
