@@ -183,6 +183,11 @@
 			path = Extension;
 			sourceTree = "<group>";
 		};
+		F5FD2F992E95453700238639 /* Deep-Link */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Deep-Link";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -334,8 +339,9 @@
 				EA86C1162CC2F15700989E43 /* Profile */,
 				EA86C11A2CC2F15700989E43 /* SignUp */,
 				F5D76AE42CDCAF9C00CB652B /* LocationManagers */,
-				EA86C11B2CC2F15700989E43 /* Assets.xcassets */,
+				F5FD2F992E95453700238639 /* Deep-Link */,
 				F5EA74C42D9047A100EAC863 /* Extension */,
+				EA86C11B2CC2F15700989E43 /* Assets.xcassets */,
 				F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */,
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
@@ -469,6 +475,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				F5EA74C42D9047A100EAC863 /* Extension */,
+				F5FD2F992E95453700238639 /* Deep-Link */,
 			);
 			name = iOS_Project;
 			packageProductDependencies = (
@@ -849,10 +856,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = whereyou.app;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.chansol.iOS-Project";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = whereyou2;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = whereyou;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -871,7 +878,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = iOS_Project/iOS_Project.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"iOS_Project/Preview Content\"";
@@ -899,7 +906,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = whereyou.app;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.chansol.iOS-Project";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = whereyou;
@@ -919,7 +926,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = L93NL52T89;
+				DEVELOPMENT_TEAM = 52AU86437A;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
@@ -938,7 +945,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = L93NL52T89;
+				DEVELOPMENT_TEAM = 52AU86437A;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
