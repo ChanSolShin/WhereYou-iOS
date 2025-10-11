@@ -8,8 +8,8 @@
 import Foundation
 import CoreLocation
 
-struct MeetingListModel: Identifiable {
-    var id: String 
+struct MeetingListModel: Identifiable, Hashable {
+    var id: String
     var title: String
     var date: Date
     var meetingAddress: String
@@ -18,7 +18,16 @@ struct MeetingListModel: Identifiable {
     var meetingMasterID: String
     var isLocationTrackingEnabled: Bool
 
-    init(id: String, title: String, date: Date, meetingAddress: String, meetingLocation: CLLocationCoordinate2D, meetingMemberIDs: [String], meetingMasterID: String, isLocationTrackingEnabled: Bool) {
+    init(
+        id: String,
+        title: String,
+        date: Date,
+        meetingAddress: String,
+        meetingLocation: CLLocationCoordinate2D,
+        meetingMemberIDs: [String],
+        meetingMasterID: String,
+        isLocationTrackingEnabled: Bool
+    ) {
         self.id = id
         self.title = title
         self.date = date
@@ -28,4 +37,7 @@ struct MeetingListModel: Identifiable {
         self.meetingMasterID = meetingMasterID
         self.isLocationTrackingEnabled = isLocationTrackingEnabled
     }
+
+    static func == (lhs: MeetingListModel, rhs: MeetingListModel) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }

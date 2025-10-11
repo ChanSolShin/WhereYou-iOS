@@ -1,4 +1,6 @@
 import SwiftUI
+import FirebaseFirestore
+import CoreLocation
 
 struct MeetingListView: View {
     @StateObject private var viewModel = MeetingListViewModel()
@@ -7,13 +9,26 @@ struct MeetingListView: View {
     @Binding var isTabBarHidden: Bool
     @State private var isBirthdayMessageVisible = true
 
+    @EnvironmentObject var router: AppRouter
+    @State private var openMeetingRequests = false
+    @State private var path = NavigationPath()
+
     init(isTabBarHidden: Binding<Bool>) {
-           self._isTabBarHidden = isTabBarHidden
-           self._meetingViewModel = ObservedObject(wrappedValue: MeetingViewModel())
-       }
-    
+        self._isTabBarHidden = isTabBarHidden
+        self._meetingViewModel = ObservedObject(wrappedValue: MeetingViewModel())
+    }
+
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
+            // Hidden link for meeting requests (deep link)
+            NavigationLink(
+                destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
+                    .onAppear { isTabBarHidden = true }
+                    .onDisappear { isTabBarHidden = false },
+                isActive: $openMeetingRequests
+            ) { EmptyView() }
+            .hidden()
+
             ZStack {
                 VStack {
                     if viewModel.isTodayUserBirthday(), isBirthdayMessageVisible {
@@ -23,9 +38,7 @@ struct MeetingListView: View {
                                     .font(.headline)
                                     .foregroundColor(.pink)
                                 Spacer()
-                                Button(action: {
-                                    isBirthdayMessageVisible = false
-                                }) {
+                                Button(action: { isBirthdayMessageVisible = false }) {
                                     Image(systemName: "xmark.circle.fill")
                                         .foregroundColor(.gray)
                                 }
@@ -33,6 +46,7 @@ struct MeetingListView: View {
                             .padding(.horizontal)
                         }
                     }
+
                     if viewModel.meetings.isEmpty {
                         VStack {
                             Spacer()
@@ -51,7 +65,11 @@ struct MeetingListView: View {
                                 ForEach(viewModel.meetings.filter { meeting in
                                     searchText.isEmpty || meeting.title.localizedCaseInsensitiveContains(searchText)
                                 }) { meeting in
-                                    NavigationLink(destination: MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
+                                    NavigationLink(
+                                        destination: MeetingView(
+                                            meeting: meeting,
+                                            meetingViewModel: viewModel.meetingViewModel
+                                        )
                                         .onAppear { isTabBarHidden = true }
                                         .onDisappear { isTabBarHidden = false }
                                     ) {
@@ -95,16 +113,18 @@ struct MeetingListView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
             .overlay(
-                NavigationLink(destination: AddMeetingView(viewModel: AddMeetingViewModel())
-                    .onAppear { isTabBarHidden = true }
-                    .onDisappear { isTabBarHidden = false }) {
-                        Image(systemName: "plus")
-                            .font(.largeTitle)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .clipShape(Circle())
-                            .shadow(radius: 5)
+                NavigationLink(
+                    destination: AddMeetingView(viewModel: AddMeetingViewModel())
+                        .onAppear { isTabBarHidden = true }
+                        .onDisappear { isTabBarHidden = false }
+                ) {
+                    Image(systemName: "plus")
+                        .font(.largeTitle)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .clipShape(Circle())
+                        .shadow(radius: 5)
                 }
                 .padding(.trailing, 20)
                 .padding(.bottom, 40),
@@ -114,9 +134,11 @@ struct MeetingListView: View {
             .searchable(text: $searchText, prompt: "검색어를 입력하세요")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
-                        .onAppear { isTabBarHidden = true }
-                        .onDisappear { isTabBarHidden = false }) {
+                    NavigationLink(
+                        destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
+                            .onAppear { isTabBarHidden = true }
+                            .onDisappear { isTabBarHidden = false }
+                    ) {
                         HStack {
                             Image(systemName: "bell")
                             if viewModel.pendingRequestCount > 0 {
@@ -136,13 +158,86 @@ struct MeetingListView: View {
                 viewModel.meetingViewModel.fetchPendingMeetingRequests()
             }
         }
+        // iOS 16 호환: typed destination
+        .navigationDestination(for: MeetingListModel.self) { meeting in
+            MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
+                .onAppear { isTabBarHidden = true }
+                .onDisappear { isTabBarHidden = false }
+        }
+        .onReceive(router.$pendingRoute) { dest in
+            guard let dest = dest else { return }
+            switch dest {
+            case .meetingRequests:
+                openMeetingRequests = true
+                router.consume(.meetingRequests)
+
+            case .meeting(let id):
+                if let found = viewModel.meetings.first(where: { $0.id == id }) {
+                    path.append(found)
+                    router.consume(.meeting(id: id))
+                } else {
+                    fetchMeeting(by: id) { model in
+                        if let model = model { path.append(model) }
+                        router.consume(.meeting(id: id))
+                    }
+                }
+
+            default:
+                break
+            }
+        }
     }
-    
+
     // DateFormatter 정의
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .short
         return formatter
+    }
+
+    // MARK: - Deep Link Helpers
+    private func fetchMeeting(by id: String, completion: @escaping (MeetingListModel?) -> Void) {
+        let db = Firestore.firestore()
+        db.collection("meetings").document(id).getDocument { snap, error in
+            guard error == nil, let doc = snap, doc.exists, let data = doc.data() else {
+                completion(nil)
+                return
+            }
+            guard
+                let title = data["meetingName"] as? String,
+                let ts = data["meetingDate"] as? Timestamp,
+                let address = data["meetingAddress"] as? String,
+                let gp = data["meetingLocation"] as? GeoPoint,
+                let members = data["meetingMembers"] as? [String],
+                let master = data["meetingMaster"] as? String,
+                let tracking = data["isLocationTrackingEnabled"] as? Bool
+            else {
+                completion(nil)
+                return
+            }
+            let model = MeetingListModel(
+                id: doc.documentID,
+                title: title,
+                date: ts.dateValue(),
+                meetingAddress: address,
+                meetingLocation: CLLocationCoordinate2D(latitude: gp.latitude, longitude: gp.longitude),
+                meetingMemberIDs: members,
+                meetingMasterID: master,
+                isLocationTrackingEnabled: tracking
+            )
+            completion(model)
+        }
+    }
+
+    /// External entry for programmatic navigation if needed
+    func navigateToMeeting(meetingId: String) {
+        if let found = viewModel.meetings.first(where: { $0.id == meetingId }) {
+            path.append(found)
+        } else {
+            fetchMeeting(by: meetingId) { model in
+                if let model = model { path.append(model) }
+            }
+        }
     }
 }
