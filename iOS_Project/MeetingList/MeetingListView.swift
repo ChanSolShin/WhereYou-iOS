@@ -11,7 +11,6 @@ struct MeetingListView: View {
 
     @EnvironmentObject var router: AppRouter
     @State private var openMeetingRequests = false
-    @State private var isShowingMeetingRequests = false
     @State private var path = NavigationPath()
 
     init(isTabBarHidden: Binding<Bool>) {
@@ -24,14 +23,8 @@ struct MeetingListView: View {
             // Hidden link for meeting requests (deep link)
             NavigationLink(
                 destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
-                    .onAppear {
-                        isTabBarHidden = true
-                        isShowingMeetingRequests = true
-                    }
-                    .onDisappear {
-                        isTabBarHidden = false
-                        isShowingMeetingRequests = false
-                    },
+                    .onAppear { isTabBarHidden = true }
+                    .onDisappear { isTabBarHidden = false },
                 isActive: $openMeetingRequests
             ) { EmptyView() }
             .hidden()
@@ -143,14 +136,8 @@ struct MeetingListView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(
                         destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
-                            .onAppear {
-                                isTabBarHidden = true
-                                isShowingMeetingRequests = true
-                            }
-                            .onDisappear {
-                                isTabBarHidden = false
-                                isShowingMeetingRequests = false
-                            }
+                            .onAppear { isTabBarHidden = true }
+                            .onDisappear { isTabBarHidden = false }
                     ) {
                         HStack {
                             Image(systemName: "bell")
@@ -166,45 +153,33 @@ struct MeetingListView: View {
                     }
                 }
             }
-            .navigationDestination(for: String.self) { id in
-                if let meeting = viewModel.meetings.first(where: { $0.id == id }) {
-                    MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
-                        .onAppear { isTabBarHidden = true }
-                        .onDisappear { isTabBarHidden = false }
-                } else {
-                    ProgressView("모임 정보를 불러오는 중...")
-                        .onAppear {
-                            fetchMeeting(by: id) { model in
-                                if let model = model {
-                                    viewModel.meetings.append(model)
-                                    path.append(model.id)
-                                }
-                            }
-                        }
-                }
-            }
             .onAppear {
                 // 대기 중인 요청을 실시간으로 받아오도록 설정
                 viewModel.meetingViewModel.fetchPendingMeetingRequests()
             }
         }
+        // iOS 16 호환: typed destination
+        .navigationDestination(for: MeetingListModel.self) { meeting in
+            MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
+                .onAppear { isTabBarHidden = true }
+                .onDisappear { isTabBarHidden = false }
+        }
         .onReceive(router.$pendingRoute) { dest in
             guard let dest = dest else { return }
             switch dest {
             case .meetingRequests:
-                // 이미 MeetingRequestListView가 보이는 경우, 추가 네비게이션을 하지 않음
-                if !isShowingMeetingRequests && !openMeetingRequests {
-                    openMeetingRequests = true
-                }
-                // 상태 초기화를 위해 consume은 항상 수행
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                    router.consume(.meetingRequests)
-                }
+                openMeetingRequests = true
+                router.consume(.meetingRequests)
 
-            case .meeting:
-                // MeetingView 딥링크 보류: 네비게이션 수행 없이 consume만 처리
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                    router.consume(dest)
+            case .meeting(let id):
+                if let found = viewModel.meetings.first(where: { $0.id == id }) {
+                    path.append(found)
+                    router.consume(.meeting(id: id))
+                } else {
+                    fetchMeeting(by: id) { model in
+                        if let model = model { path.append(model) }
+                        router.consume(.meeting(id: id))
+                    }
                 }
 
             default:
@@ -258,10 +233,10 @@ struct MeetingListView: View {
     /// External entry for programmatic navigation if needed
     func navigateToMeeting(meetingId: String) {
         if let found = viewModel.meetings.first(where: { $0.id == meetingId }) {
-            path.append(found.id)
+            path.append(found)
         } else {
             fetchMeeting(by: meetingId) { model in
-                if let model = model { path.append(model.id) }
+                if let model = model { path.append(model) }
             }
         }
     }
