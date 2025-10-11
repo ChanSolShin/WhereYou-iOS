@@ -1,22 +1,26 @@
 import SwiftUI
 import Foundation
 
-enum FriendRoute: Hashable {
-    case friendRequests
-}
-
 struct FriendListView: View {
-    @StateObject var viewModel = FriendListViewModel()
+    @ObservedObject var viewModel = FriendListViewModel()
     @State private var showAddFriendModal = false
     @Binding var isTabBarHidden: Bool
     @State private var addFriendType: AddFriendType?
     @State private var showAddFriendActionSheet = false
     @EnvironmentObject var router: AppRouter
-    @State private var path = NavigationPath()
-    @State private var isShowingFriendRequests = false
+    @State private var openFriendRequests = false
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationView {
+            // Hidden deep-link to FriendRequestListView
+            NavigationLink(
+                destination: FriendRequestListView(viewModel: viewModel)
+                    .onAppear { isTabBarHidden = true }
+                    .onDisappear { isTabBarHidden = false },
+                isActive: $openFriendRequests
+            ) { EmptyView() }
+            .hidden()
+
             ZStack {
                 Color.white.ignoresSafeArea()
                 VStack {
@@ -58,28 +62,23 @@ struct FriendListView: View {
             .background(Color.white.edgesIgnoringSafeArea(.all))
             .navigationTitle("친구")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        path.append(FriendRoute.friendRequests)
-                        isTabBarHidden = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "bell")
-                            if viewModel.pendingRequests.count > 0 {
-                                Text("\(viewModel.pendingRequests.count)")
-                                    .font(.caption)
-                                    .foregroundColor(.white)
-                                    .padding(3)
-                                    .background(Color.red)
-                                    .clipShape(Circle())
-                            }
+                NavigationLink(destination: FriendRequestListView(viewModel: viewModel)
+                    .onAppear { isTabBarHidden = true }
+                    .onDisappear { isTabBarHidden = false }) {
+                    HStack {
+                        Image(systemName: "bell")
+                        if viewModel.pendingRequests.count > 0 {
+                            Text("\(viewModel.pendingRequests.count)")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                                .padding(3)
+                                .background(Color.red)
+                                .clipShape(Circle())
                         }
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showAddFriendActionSheet = true }) {
-                        Image(systemName: "plus")
-                    }
+                Button(action: { showAddFriendActionSheet = true }) {
+                    Image(systemName: "plus")
                 }
             }
             .confirmationDialog("친구 추가", isPresented: $showAddFriendActionSheet, titleVisibility: .visible) {
@@ -98,33 +97,19 @@ struct FriendListView: View {
             .alert(isPresented: $viewModel.showAlert) {
                 Alert(title: Text("알림"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("확인")))
             }
-            .navigationDestination(for: FriendRoute.self) { route in
-                switch route {
-                case .friendRequests:
-                    FriendRequestListView(viewModel: viewModel)
-                        .onAppear {
-                            isTabBarHidden = true
-                            isShowingFriendRequests = true
-                        }
-                        .onDisappear {
-                            isTabBarHidden = false
-                            isShowingFriendRequests = false
-                        }
-                }
-            }
             .onReceive(router.$pendingRoute) { dest in
                 guard let dest = dest else { return }
                 switch dest {
                 case .friendRequests:
-                    if !isShowingFriendRequests {
-                        path.append(FriendRoute.friendRequests)
-                    }
+                    openFriendRequests = true
                     router.consume(.friendRequests)
-                    isTabBarHidden = true
                 default:
                     break
                 }
             }
+        }
+        .onAppear {
+            viewModel.observePendingRequests() // 친구 요청 목록 업데이트
         }
     }
 
