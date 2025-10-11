@@ -15,6 +15,7 @@ import UserNotifications
 class AppDelegate: NSObject, UIApplicationDelegate {
     
     let gcmMessageIDKey = "gcm.message_id"
+
     
     // 앱이 실행될 때 호출되는 함수
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
@@ -28,6 +29,13 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // 메시징 델리게이트 설정
         Messaging.messaging().delegate = self
         
+        // 앱이 푸시 알림을 통해 런치된 경우 딥링크 처리
+        if let remote = launchOptions?[.remoteNotification] as? [AnyHashable: Any],
+           let dest = NotificationPayloadParser.parseDestination(from: remote) {
+            Task { @MainActor in
+                AppRouter.shared.handle(dest)
+            }
+        }
         return true
     }
     
@@ -108,6 +116,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         }
         
         print("User Info: \(userInfo)")
+        
+        if let dest = NotificationPayloadParser.parseDestination(from: userInfo) {
+            Task { @MainActor in
+                AppRouter.shared.handle(dest)
+            }
+        }
         
         completionHandler()
     }
