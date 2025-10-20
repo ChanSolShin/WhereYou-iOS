@@ -116,19 +116,22 @@ struct MeetingView: View {
                                             RoundedRectangle(cornerRadius: 10)
                                                 .stroke(selectedMemberID == memberID ? Color.yellow : Color.clear, lineWidth: 4)
                                         )
-                                    
+
                                     if memberID == (meetingViewModel.meetingMasterID ?? meeting.meetingMasterID) {
                                         Image(systemName: "crown.fill")
                                             .foregroundColor(.yellow)
                                             .offset(x: 0, y: -40)
+                                            .zIndex(1)
                                     }
                                 }
+                                .padding(.top, 2)
                             }
                             .padding(.vertical, 2)
                         }
                     }
                     .padding(.horizontal)
                     .padding(.horizontal)
+                    .padding(.top, 35)
                 }
             }
             .onAppear {
@@ -284,3 +287,4 @@ struct MeetingView: View {
         }
     }
 }
+
