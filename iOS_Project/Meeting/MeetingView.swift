@@ -140,10 +140,14 @@ struct MeetingView: View {
                 meetingViewModel.stopTrackingMember()
                 selectedMemberID = nil
                 selectedButton = nil
+                meetingViewModel.consumeKickedEvent()   // 이전 화면에서 남아있을 수 있는 isKicked 상태 초기화
+                showKickedAlert = false                 // 로컬 1회성 알림 플래그 초기화
             }
             .onDisappear {
                 meetingViewModel.stopTrackingMember()
                 meetingViewModel.stopMeetingListeners()
+                meetingViewModel.consumeKickedEvent()   // 이 화면을 떠날 때 전역 isKicked 상태 정리
+                showKickedAlert = false
             }
             .navigationTitle(meeting.title)
             .navigationBarTitleDisplayMode(.inline)
@@ -185,13 +189,16 @@ struct MeetingView: View {
                     showAlert = true
                 }
             }
-            // 1회성 알림 표시
+         // 1회성 알림 표시 (이전 화면에서 남은 true를 방지)
             .onReceive(meetingViewModel.$isKicked) { kicked in
-                if kicked { showKickedAlert = true }
+                if kicked && !showKickedAlert {
+                    showKickedAlert = true
+                }
             }
             .alert("모임에서 제외되었습니다.", isPresented: $showKickedAlert) {
                 Button("확인") {
                     meetingViewModel.consumeKickedEvent() // 이벤트 소비(1회성)
+                    showKickedAlert = false               // 로컬 플래그 리셋
                     dismiss()
                 }
             }

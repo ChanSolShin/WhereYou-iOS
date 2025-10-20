@@ -26,6 +26,7 @@ class MeetingViewModel: NSObject, ObservableObject {
     @Published var kickedMeetingID: String?            // 이번에 강퇴 이벤트가 발생한 모임 ID
     private var handledKickedIDs = Set<String>()       // 이미 알림 처리한 모임 ID들
     private var observingMeetingID: String?            // 현재 관찰 중인 모임 ID
+    private var selfLeavingIDs = Set<String>()          // 사용자가 스스로 나가기를 선택한 모임 ID 집합 (강퇴와 구분)
     
     private var meeting: MeetingModel? // 현재 선택된 모임
     private let realtimeDB = Database.database().reference()
@@ -290,6 +291,17 @@ class MeetingViewModel: NSObject, ObservableObject {
                 // 2) 멤버 목록이 바뀌면, 이름 리스너를 새 멤버 배열로 재구독
                 if let memberIDs = document.data()? ["meetingMembers"] as? [String] {
                     if let uid = Auth.auth().currentUser?.uid, !memberIDs.contains(uid) {
+                        // 내가 직접 나가기를 선택한 경우라면 강퇴로 처리하지 않고 깔끔히 정리
+                        if let strongSelf = self, strongSelf.selfLeavingIDs.contains(meetingID) {
+                            strongSelf.selfLeavingIDs.remove(meetingID)
+                            // 강퇴 알림 플래그가 남지 않도록 리셋하고 리스너만 정리
+                            DispatchQueue.main.async {
+                                strongSelf.isKicked = false
+                                strongSelf.kickedMeetingID = nil
+                            }
+                            strongSelf.stopMeetingListeners()
+                            return
+                        }
                         // 현재 관찰 중인 모임에 대해서만, 그리고 1회성으로만 이벤트 발생
                         self?.handleKicked(meetingID: meetingID)
                         return
@@ -447,9 +459,11 @@ class MeetingViewModel: NSObject, ObservableObject {
     // 모임 나가기 기능
     func leaveMeeting(meetingID: String) {
         guard let currentUserID = Auth.auth().currentUser?.uid else { return }
-        
+        // 강퇴 오인 방지: 내가 스스로 나가기를 선택했음을 표시
+        selfLeavingIDs.insert(meetingID)
+
         let db = Firestore.firestore()
-        
+
         db.collection("meetings").document(meetingID).getDocument { [weak self] document, error in
             if let error = error {
                 print("Error fetching meeting: \(error)")
@@ -615,6 +629,11 @@ extension MeetingViewModel {
 
     // 강퇴 이벤트 처리 (같은 모임에 대해서는 1회만 알림)
     fileprivate func handleKicked(meetingID: String) {
+        // 만약 바로 직전에 내가 스스로 나가기를 선택한 모임이라면 강퇴 이벤트로 처리하지 않음
+        if selfLeavingIDs.contains(meetingID) {
+            selfLeavingIDs.remove(meetingID)
+            return
+        }
         // 강퇴 이벤트 발생 시 추가 신호 차단(중복 방지)
         meetingListener?.remove()
         memberListener?.remove()
