@@ -153,33 +153,42 @@ struct MeetingListView: View {
                     }
                 }
             }
+            .navigationDestination(for: String.self) { id in
+                if let meeting = viewModel.meetings.first(where: { $0.id == id }) {
+                    MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
+                        .onAppear { isTabBarHidden = true }
+                        .onDisappear { isTabBarHidden = false }
+                } else {
+                    ProgressView("모임 정보를 불러오는 중...")
+                        .onAppear {
+                            fetchMeeting(by: id) { model in
+                                if let model = model {
+                                    viewModel.meetings.append(model)
+                                    path.append(model.id)
+                                }
+                            }
+                        }
+                }
+            }
             .onAppear {
                 // 대기 중인 요청을 실시간으로 받아오도록 설정
                 viewModel.meetingViewModel.fetchPendingMeetingRequests()
             }
-        }
-        // iOS 16 호환: typed destination
-        .navigationDestination(for: MeetingListModel.self) { meeting in
-            MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
-                .onAppear { isTabBarHidden = true }
-                .onDisappear { isTabBarHidden = false }
         }
         .onReceive(router.$pendingRoute) { dest in
             guard let dest = dest else { return }
             switch dest {
             case .meetingRequests:
                 openMeetingRequests = true
-                router.consume(.meetingRequests)
+                // 네비게이션 푸시가 완료된 후 상태 초기화를 위해 지연
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    router.consume(.meetingRequests)
+                }
 
-            case .meeting(let id):
-                if let found = viewModel.meetings.first(where: { $0.id == id }) {
-                    path.append(found)
-                    router.consume(.meeting(id: id))
-                } else {
-                    fetchMeeting(by: id) { model in
-                        if let model = model { path.append(model) }
-                        router.consume(.meeting(id: id))
-                    }
+            case .meeting:
+                // MeetingView 딥링크 보류: 네비게이션 수행 없이 consume만 처리
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    router.consume(dest)
                 }
 
             default:
@@ -233,10 +242,10 @@ struct MeetingListView: View {
     /// External entry for programmatic navigation if needed
     func navigateToMeeting(meetingId: String) {
         if let found = viewModel.meetings.first(where: { $0.id == meetingId }) {
-            path.append(found)
+            path.append(found.id)
         } else {
             fetchMeeting(by: meetingId) { model in
-                if let model = model { path.append(model) }
+                if let model = model { path.append(model.id) }
             }
         }
     }
