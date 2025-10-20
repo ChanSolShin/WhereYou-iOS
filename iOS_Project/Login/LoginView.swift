@@ -82,23 +82,18 @@ struct LoginView: View {
                 .padding(.horizontal, 10)
                 .padding(.bottom, 15)
                 
-                // 로그인 및 회원가입 버튼
-                NavigationLink(destination: MainTabView(), isActive: $viewModel.isLoggedIn) {
-                    Button(action: {
-                        viewModel.login()
-                    }) {
-                        Text("이메일로 로그인") // 버튼에 표시할 텍스트
-                            .frame(width: 350, height: 50)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .fontWeight(.bold)
-                            .cornerRadius(40)
-                    }
-                    .contentShape(Rectangle())
+                // 로그인 버튼 (중복 전환 방지를 위해 NavigationLink 제거)
+                Button(action: {
+                    viewModel.login()
+                }) {
+                    Text("이메일로 로그인")
+                        .frame(width: 350, height: 50)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .fontWeight(.bold)
+                        .cornerRadius(40)
                 }
-                .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
-                    MainTabView() // 로그인 성공 시 MainTabView로 전환
-                }
+                .contentShape(Rectangle())
                 .padding(.bottom, 20)
                 
                 HStack {
@@ -124,6 +119,9 @@ struct LoginView: View {
             .onAppear {
                 let loggedInStatus = UserDefaults.standard.bool(forKey: "isLoggedIn")
                 print(loggedInStatus)
+            }
+            .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
+                MainTabView()
             }
             .alert(isPresented: Binding<Bool>(
                 get: {
