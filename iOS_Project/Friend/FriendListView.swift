@@ -13,6 +13,7 @@ struct FriendListView: View {
     @State private var showAddFriendActionSheet = false
     @EnvironmentObject var router: AppRouter
     @State private var path = NavigationPath()
+    @State private var isShowingFriendRequests = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -101,14 +102,23 @@ struct FriendListView: View {
                 switch route {
                 case .friendRequests:
                     FriendRequestListView(viewModel: viewModel)
-                        .onDisappear { isTabBarHidden = false }
+                        .onAppear {
+                            isTabBarHidden = true
+                            isShowingFriendRequests = true
+                        }
+                        .onDisappear {
+                            isTabBarHidden = false
+                            isShowingFriendRequests = false
+                        }
                 }
             }
             .onReceive(router.$pendingRoute) { dest in
                 guard let dest = dest else { return }
                 switch dest {
                 case .friendRequests:
-                    path.append(FriendRoute.friendRequests)
+                    if !isShowingFriendRequests {
+                        path.append(FriendRoute.friendRequests)
+                    }
                     router.consume(.friendRequests)
                     isTabBarHidden = true
                 default:
