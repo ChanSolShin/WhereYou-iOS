@@ -6,7 +6,7 @@ enum FriendRoute: Hashable {
 }
 
 struct FriendListView: View {
-    @ObservedObject var viewModel = FriendListViewModel()
+    @StateObject var viewModel = FriendListViewModel()
     @State private var showAddFriendModal = false
     @Binding var isTabBarHidden: Bool
     @State private var addFriendType: AddFriendType?
@@ -125,9 +125,6 @@ struct FriendListView: View {
                     break
                 }
             }
-        }
-        .onAppear {
-            viewModel.observePendingRequests() // 친구 요청 목록 업데이트
         }
     }
 
