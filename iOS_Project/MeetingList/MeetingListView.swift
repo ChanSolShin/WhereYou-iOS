@@ -11,6 +11,7 @@ struct MeetingListView: View {
 
     @EnvironmentObject var router: AppRouter
     @State private var openMeetingRequests = false
+    @State private var isShowingMeetingRequests = false
     @State private var path = NavigationPath()
 
     init(isTabBarHidden: Binding<Bool>) {
@@ -23,8 +24,14 @@ struct MeetingListView: View {
             // Hidden link for meeting requests (deep link)
             NavigationLink(
                 destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
-                    .onAppear { isTabBarHidden = true }
-                    .onDisappear { isTabBarHidden = false },
+                    .onAppear {
+                        isTabBarHidden = true
+                        isShowingMeetingRequests = true
+                    }
+                    .onDisappear {
+                        isTabBarHidden = false
+                        isShowingMeetingRequests = false
+                    },
                 isActive: $openMeetingRequests
             ) { EmptyView() }
             .hidden()
@@ -136,8 +143,14 @@ struct MeetingListView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(
                         destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
-                            .onAppear { isTabBarHidden = true }
-                            .onDisappear { isTabBarHidden = false }
+                            .onAppear {
+                                isTabBarHidden = true
+                                isShowingMeetingRequests = true
+                            }
+                            .onDisappear {
+                                isTabBarHidden = false
+                                isShowingMeetingRequests = false
+                            }
                     ) {
                         HStack {
                             Image(systemName: "bell")
@@ -179,8 +192,11 @@ struct MeetingListView: View {
             guard let dest = dest else { return }
             switch dest {
             case .meetingRequests:
-                openMeetingRequests = true
-                // 네비게이션 푸시가 완료된 후 상태 초기화를 위해 지연
+                // 이미 MeetingRequestListView가 보이는 경우, 추가 네비게이션을 하지 않음
+                if !isShowingMeetingRequests && !openMeetingRequests {
+                    openMeetingRequests = true
+                }
+                // 상태 초기화를 위해 consume은 항상 수행
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                     router.consume(.meetingRequests)
                 }
