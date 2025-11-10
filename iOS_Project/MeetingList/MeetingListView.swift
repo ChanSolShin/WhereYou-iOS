@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MeetingListView: View {
     @StateObject private var viewModel = MeetingListViewModel()
+    @StateObject private var addMeetingViewModel = AddMeetingViewModel()
     @ObservedObject private var meetingViewModel: MeetingViewModel
     @Binding var isTabBarHidden: Bool
 
@@ -113,9 +114,12 @@ struct MeetingListView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
             .overlay(
                 NavigationLink(
-                    destination: AddMeetingView(viewModel: AddMeetingViewModel())
+                    destination: AddMeetingView(viewModel: addMeetingViewModel)
                         .onAppear { isTabBarHidden = true }
-                        .onDisappear { isTabBarHidden = false }
+                        .onDisappear {
+                            isTabBarHidden = false
+                            addMeetingViewModel.meeting = AddMeetingModel()
+                        }
                 ) {
                     Image(systemName: "plus")
                         .font(.largeTitle)
