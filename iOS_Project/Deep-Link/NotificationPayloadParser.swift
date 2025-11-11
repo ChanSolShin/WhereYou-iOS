@@ -20,7 +20,12 @@ struct NotificationPayloadParser {
         case "meetingRequests":
             return .meetingRequests
         case "meetingView":
-            // TODO: MeetingView 딥링크
+            if let id = (userInfo["meetingId"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines), !id.isEmpty {
+                return .meeting(id: id)
+            }
+            if let id = (userInfo["meetingID"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines), !id.isEmpty {
+                return .meeting(id: id)
+            }
             return nil
         default:
             return nil
