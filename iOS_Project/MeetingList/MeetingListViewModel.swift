@@ -16,6 +16,7 @@ class MeetingListViewModel: ObservableObject {
     @Published var userProfile: ProfileModel? = nil
     @Published var searchText: String = ""
     @Published var isBirthdayBannerVisible: Bool = true
+    @Published var meetingToOpenID: String? = nil
     
     private var db = Firestore.firestore()
     var meetingViewModel: MeetingViewModel // MeetingViewModel 인스턴스 추가
@@ -125,6 +126,25 @@ class MeetingListViewModel: ObservableObject {
         formatter.dateFormat = "MMdd"
         let todayString = formatter.string(from: Date())
         return birthday.suffix(4) == todayString
+    }
+
+    // MeetingView 딥링크
+    func openMeeting(id: String) {
+        // 로컬에 이미 있으면 즉시 네비게이션 이벤트 방출
+        if meetings.first(where: { $0.id == id }) != nil {
+            DispatchQueue.main.async { [weak self] in
+                self?.meetingToOpenID = id
+            }
+            return
+        }
+        // 없으면 Firestore에서 가져온 뒤 추가하고 이벤트 방출
+        fetchMeeting(by: id) { [weak self] model in
+            guard let self = self, let model = model else { return }
+            DispatchQueue.main.async {
+                self.appendMeeting(model)
+                self.meetingToOpenID = model.id
+            }
+        }
     }
 
     func appendMeeting(_ meeting: MeetingListModel) {
