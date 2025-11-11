@@ -190,24 +190,28 @@ struct MeetingListView: View {
             guard let dest = dest else { return }
             switch dest {
             case .meetingRequests:
-                // 이미 MeetingRequestListView가 보이는 경우, 추가 네비게이션을 하지 않음
                 if !isShowingMeetingRequests && !openMeetingRequests {
                     openMeetingRequests = true
                 }
                 // 상태 초기화를 위해 consume은 항상 수행
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                DispatchQueue.main.async {
                     router.consume(.meetingRequests)
                 }
-
-            case .meeting:
-                // MeetingView 딥링크 보류: 네비게이션 수행 없이 consume만 처리
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            case .meeting(let id):
+                // ViewModel에 의도 전달 → 데이터 준비 → View에서 push
+                viewModel.openMeeting(id: id)
+                DispatchQueue.main.async {
                     router.consume(dest)
                 }
-
             default:
                 break
             }
+        }
+        .onReceive(viewModel.$meetingToOpenID.compactMap { $0 }) { id in
+            // 데이터 준비가 끝났으므로 실제 네비게이션 수행
+            path.append(id)
+            // 1회성 이벤트 소모
+            viewModel.meetingToOpenID = nil
         }
     }
 
