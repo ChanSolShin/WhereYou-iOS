@@ -120,9 +120,10 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         if let dest = NotificationPayloadParser.parseDestination(from: userInfo) {
             Task { @MainActor in
                 AppRouter.shared.handle(dest)
+                completionHandler()
             }
+        } else {
+            completionHandler()
         }
-        
-        completionHandler()
     }
 }
