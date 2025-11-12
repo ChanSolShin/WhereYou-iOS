@@ -18,11 +18,19 @@ final class AppRouter: ObservableObject {
     // 탭 루트가 소비할 1회성 딥링크 이벤트
     @Published var pendingRoute: DeepLinkDestination?
 
+    // 교차 탭 딥링크 시, 떠나는 탭이 루트로 복귀하도록 지시하는 1회성 이벤트
+    @Published var popToRootTab: AppTabIndex?
+
     private init() {}
 
     // 알림/딥링크가 들어왔을 때 호출
     func handle(_ dest: DeepLinkDestination) {
-        selectedTabIndex = tabIndex(for: dest)
+        let current = AppTabIndex(rawValue: selectedTabIndex) ?? .meeting
+        let targetIndex = tabIndex(for: dest)
+        if current.rawValue != targetIndex {
+            popToRootTab = current
+        }
+        selectedTabIndex = targetIndex
         pendingRoute = dest
     }
 
@@ -30,6 +38,13 @@ final class AppRouter: ObservableObject {
     func consume(_ dest: DeepLinkDestination) {
         if pendingRoute == dest {
             pendingRoute = nil
+        }
+    }
+
+    // popToRootTab 1회성 소비
+    func consumePop(for tab: AppTabIndex) {
+        if popToRootTab == tab {
+            popToRootTab = nil
         }
     }
 

@@ -103,11 +103,15 @@ struct FriendListView: View {
                 case .friendRequests:
                     FriendRequestListView(viewModel: viewModel)
                         .onAppear {
-                            isTabBarHidden = true
+                            if router.selectedTabIndex == AppTabIndex.friend.rawValue {
+                                isTabBarHidden = true
+                            }
                             isShowingFriendRequests = true
                         }
                         .onDisappear {
-                            isTabBarHidden = false
+                            if router.selectedTabIndex == AppTabIndex.friend.rawValue {
+                                isTabBarHidden = false
+                            }
                             isShowingFriendRequests = false
                         }
                 }
@@ -120,9 +124,18 @@ struct FriendListView: View {
                         path.append(FriendRoute.friendRequests)
                     }
                     router.consume(.friendRequests)
-                    isTabBarHidden = true
+                case .meetingRequests, .meeting(_):
+                    // 크로스 탭 딥링크 대응
+                    path = NavigationPath()
                 default:
                     break
+                }
+            }
+            .onReceive(router.$popToRootTab) { tab in
+                guard let tab = tab else { return }
+                if tab == .friend {
+                    path = NavigationPath()
+                    router.consumePop(for: .friend)
                 }
             }
         }
