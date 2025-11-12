@@ -22,11 +22,15 @@ struct MeetingListView: View {
             NavigationLink(
                 destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
                     .onAppear {
-                        isTabBarHidden = true
+                        if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
+                            isTabBarHidden = true
+                        }
                         isShowingMeetingRequests = true
                     }
                     .onDisappear {
-                        isTabBarHidden = false
+                        if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
+                            isTabBarHidden = false
+                        }
                         isShowingMeetingRequests = false
                     },
                 isActive: $openMeetingRequests
@@ -65,14 +69,7 @@ struct MeetingListView: View {
                         ScrollView {
                             VStack(spacing: 10) {
                                 ForEach(viewModel.filteredMeetings) { meeting in
-                                    NavigationLink(
-                                        destination: MeetingView(
-                                            meeting: meeting,
-                                            meetingViewModel: viewModel.meetingViewModel
-                                        )
-                                        .onAppear { isTabBarHidden = true }
-                                        .onDisappear { isTabBarHidden = false }
-                                    ) {
+                                    NavigationLink(value: meeting.id) {
                                         HStack {
                                             Text(meeting.title)
                                                 .font(.headline)
@@ -137,17 +134,9 @@ struct MeetingListView: View {
             .searchable(text: $viewModel.searchText, prompt: "검색어를 입력하세요")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(
-                        destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
-                            .onAppear {
-                                isTabBarHidden = true
-                                isShowingMeetingRequests = true
-                            }
-                            .onDisappear {
-                                isTabBarHidden = false
-                                isShowingMeetingRequests = false
-                            }
-                    ) {
+                    Button {
+                        openMeetingRequests = true
+                    } label: {
                         HStack {
                             Image(systemName: "bell")
                             if viewModel.pendingRequestCount > 0 {
@@ -165,8 +154,16 @@ struct MeetingListView: View {
             .navigationDestination(for: String.self) { id in
                 if let meeting = viewModel.meetings.first(where: { $0.id == id }) {
                     MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
-                        .onAppear { isTabBarHidden = true }
-                        .onDisappear { isTabBarHidden = false }
+                        .onAppear {
+                            if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
+                                isTabBarHidden = true
+                            }
+                        }
+                        .onDisappear {
+                            if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
+                                isTabBarHidden = false
+                            }
+                        }
                 } else {
                     ProgressView("모임 정보를 불러오는 중...")
                         .onAppear {
@@ -189,6 +186,10 @@ struct MeetingListView: View {
         .onReceive(router.$pendingRoute) { dest in
             guard let dest = dest else { return }
             switch dest {
+            case .friendRequests:
+                // 크로스 탭 딥링크 대응
+                path = NavigationPath()
+                openMeetingRequests = false
             case .meetingRequests:
                 if !isShowingMeetingRequests && !openMeetingRequests {
                     openMeetingRequests = true
@@ -205,6 +206,14 @@ struct MeetingListView: View {
                 }
             default:
                 break
+            }
+        }
+        .onReceive(router.$popToRootTab) { tab in
+            guard let tab = tab else { return }
+            if tab == .meeting {
+                path = NavigationPath()
+                openMeetingRequests = false
+                router.consumePop(for: .meeting)
             }
         }
         .onReceive(viewModel.$meetingToOpenID.compactMap { $0 }) { id in
