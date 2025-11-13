@@ -100,7 +100,7 @@ struct ProfileView: View {
                         Text("버전 정보")
                             .font(.body)
                         Spacer()
-                        Text("1.1.0v")
+                        Text("1.2.0v")
                             .foregroundColor(.gray)
                     }
                     .padding(.vertical, 8)

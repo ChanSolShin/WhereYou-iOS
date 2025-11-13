@@ -15,6 +15,7 @@ import FirebaseRemoteConfig
 @main
 struct iOS_ProjectApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var router = AppRouter.shared
     
     @ObservedObject private var locationCoordinator = AppLocationCoordinator.shared
     @StateObject private var loginViewModel = LoginViewModel()
@@ -40,6 +41,8 @@ struct iOS_ProjectApp: App {
                     }
           }
             .environmentObject(loginViewModel) // LoginViewModel을 전역에서 사용
+            .environmentObject(AppRouter.shared) 
+            .environmentObject(router)
             .onAppear {
                 // 위치 권한이 허용되지 않으면 경고 표시
                 if locationCoordinator.authorizationStatus != .authorizedAlways {

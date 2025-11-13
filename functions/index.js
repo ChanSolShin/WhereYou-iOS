@@ -30,11 +30,14 @@ exports.sendFriendRequestNotification = functions.firestore.onDocumentCreated('f
         if (!fcmToken) return console.log('FCM 토큰이 없음');
 
         const message = {
-            notification: {
-                title: '웨어유',
-                body: `${fromUserName}님이 친구 요청을 보냈습니다!`,
-            },
-            token: fcmToken,
+          notification: {
+            title: '웨어유',
+            body: `${fromUserName}님이 친구 요청을 보냈습니다!`,
+          },
+          data: {
+            route: "friendRequests"
+          },
+          token: fcmToken,
         };
 
         await messaging.send(message);  // admin.messaging()으로 수정
@@ -121,11 +124,14 @@ exports.sendMeetingInviteNotification = functions.firestore.onDocumentCreated('m
         if (!fcmToken) return console.log('FCM 토큰이 없음');
 
         const message = {
-            notification: {
-                title: '웨어유',
-                body: `${fromUserName}님이 '${meetingName}' 모임에 초대했습니다!`,
-            },
-            token: fcmToken,
+          notification: {
+            title: '웨어유',
+            body: `${fromUserName}님이 '${meetingName}' 모임에 초대했습니다!`,
+          },
+          data: {
+            route: "meetingRequests"
+          },
+          token: fcmToken,
         };
 
         await messaging.send(message);  // admin.messaging()으로 수정
@@ -214,10 +220,14 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
 
                     // 각 멤버에게 FCM 메시지 전송
                     const message = {
-                        notification: {
-                            title: "웨어유",
-                            body: `지금부터 ${meetingName} 멤버의 위치 조회가 가능합니다!`,
-                        },
+                      notification: {
+                        title: "웨어유",
+                        body: `지금부터 ${meetingName} 멤버의 위치 조회가 가능합니다!`,
+                      },
+                      data: {
+                        route: "meetingView",
+                        meetingId: doc.id
+                      },
                     };
 
                     try {
@@ -313,11 +323,15 @@ exports.notifyMemberAdded = functions.firestore.onDocumentUpdated(
 
                 for (const token of tokenChunk) {
                     const message = {
-                        token: token,
-                        notification: {
-                            title: '웨어유',
-                            body: `${newMemberNames.join(', ')}님이 ${meetingName} 모임에 참여하였습니다!`,
-                        },
+                      token: token,
+                      notification: {
+                        title: '웨어유',
+                        body: `${newMemberNames.join(', ')}님이 ${meetingName} 모임에 참여하였습니다!`,
+                      },
+                      data: {
+                        route: "meetingView",
+                        meetingId: event.params.meetingId
+                      }
                     };
 
                     // ✅ `send` 사용 (단건 메시지 전송)
@@ -391,10 +405,14 @@ exports.notifyMeetingUpdated = functions.firestore.onDocumentUpdated(
 
         // 🔹 FCM 메시지 생성
         const message = {
-            notification: {
-                title: '웨어유',
-                body: `${meetingName} 모임의 정보가 수정되었습니다!`,
-            },
+          notification: {
+            title: '웨어유',
+            body: `${meetingName} 모임의 정보가 수정되었습니다!`,
+          },
+          data: {
+            route: "meetingView",
+            meetingId: event.params.meetingId
+          },
         };
 
         try {
