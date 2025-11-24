@@ -10,6 +10,7 @@ struct MeetingListView: View {
     @State private var openMeetingRequests = false
     @State private var isShowingMeetingRequests = false
     @State private var path = NavigationPath()
+    @State private var lastOpenedMeetingID: String?
 
     init(isTabBarHidden: Binding<Bool>) {
         self._isTabBarHidden = isTabBarHidden
@@ -189,6 +190,7 @@ struct MeetingListView: View {
             case .friendRequests:
                 // 크로스 탭 딥링크 대응
                 path = NavigationPath()
+                lastOpenedMeetingID = nil
                 openMeetingRequests = false
             case .meetingRequests:
                 if !isShowingMeetingRequests && !openMeetingRequests {
@@ -212,14 +214,19 @@ struct MeetingListView: View {
             guard let tab = tab else { return }
             if tab == .meeting {
                 path = NavigationPath()
+                lastOpenedMeetingID = nil
                 openMeetingRequests = false
                 router.consumePop(for: .meeting)
             }
         }
         .onReceive(viewModel.$meetingToOpenID.compactMap { $0 }) { id in
-            // 데이터 준비가 끝났으므로 실제 네비게이션 수행
+            // 딥링크 중복 push 방지
+            if lastOpenedMeetingID == id {
+                viewModel.meetingToOpenID = nil
+                return
+            }
             path.append(id)
-            // 1회성 이벤트 소모
+            lastOpenedMeetingID = id
             viewModel.meetingToOpenID = nil
         }
     }
@@ -228,12 +235,14 @@ struct MeetingListView: View {
     func navigateToMeeting(meetingId: String) {
         if let found = viewModel.meetings.first(where: { $0.id == meetingId }) {
             path.append(found.id)
+            lastOpenedMeetingID = found.id
         } else {
             viewModel.fetchMeeting(by: meetingId) { model in
                 if let model = model {
                     DispatchQueue.main.async {
                         viewModel.appendMeeting(model)
                         path.append(model.id)
+                        lastOpenedMeetingID = model.id
                     }
                 }
             }
