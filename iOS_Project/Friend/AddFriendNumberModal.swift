@@ -3,9 +3,7 @@ import SwiftUI
 struct AddFriendNumberModal: View {
     @ObservedObject var viewModel: FriendListViewModel
     @Binding var isPresented: Bool
-    @State private var phoneNumber: String = ""
     @State private var countryCodes: [CountryCode] = []
-    @State private var selectedCountry: CountryCode? = nil
 
     var body: some View {
         GeometryReader { geometry in
@@ -16,13 +14,13 @@ struct AddFriendNumberModal: View {
                     Menu {
                         ForEach(countryCodes, id: \.id) { code in
                             Button(action: {
-                                selectedCountry = code
+                                viewModel.selectedCountry = code
                             }) {
                                 Text("\(code.emoji) \(code.country) (\(code.code))")
                             }
                         }
                     } label: {
-                        if let selected = selectedCountry {
+                        if let selected = viewModel.selectedCountry {
                             Text("\(selected.emoji) \(selected.country) (\(selected.code))")
                                 .font(.system(size: 14))
                         } else {
@@ -32,14 +30,14 @@ struct AddFriendNumberModal: View {
                     }
                     .frame(width: 130)
 
-                    TextField("전화번호", text: $phoneNumber)
+                    TextField("전화번호", text: $viewModel.friendPhoneNumberInput)
                         .keyboardType(.numberPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
 
                 Button(action: {
-                    guard let selected = selectedCountry else { return }
-                    var cleanPhone = phoneNumber.replacingOccurrences(of: "-", with: "").replacingOccurrences(of: " ", with: "")
+                    guard let selected = viewModel.selectedCountry else { return }
+                    var cleanPhone = viewModel.friendPhoneNumberInput.replacingOccurrences(of: "-", with: "").replacingOccurrences(of: " ", with: "")
                     if cleanPhone.hasPrefix("0") {
                         cleanPhone.removeFirst()
                     }
@@ -50,11 +48,11 @@ struct AddFriendNumberModal: View {
                     Text("친구 요청 보내기")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background((phoneNumber.isEmpty || selectedCountry == nil) ? Color.gray : Color.blue)
+                        .background((viewModel.friendPhoneNumberInput.isEmpty || viewModel.selectedCountry == nil) ? Color.gray : Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
-                .disabled(phoneNumber.isEmpty || selectedCountry == nil)
+                .disabled(viewModel.friendPhoneNumberInput.isEmpty || viewModel.selectedCountry == nil)
                 .padding(.horizontal)
             }
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
