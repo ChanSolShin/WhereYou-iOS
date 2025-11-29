@@ -11,6 +11,8 @@ struct MeetingListView: View {
     @State private var isShowingMeetingRequests = false
     @State private var path = NavigationPath()
     @State private var lastOpenedMeetingID: String?
+    @State private var hideForMeetingRequests = false
+    @State private var hideForMeetingDetail = false
 
     init(isTabBarHidden: Binding<Bool>) {
         self._isTabBarHidden = isTabBarHidden
@@ -23,15 +25,13 @@ struct MeetingListView: View {
             NavigationLink(
                 destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
                     .onAppear {
-                        if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
-                            isTabBarHidden = true
-                        }
+                        hideForMeetingRequests = true
+                        updateTabBarVisibility()
                         isShowingMeetingRequests = true
                     }
                     .onDisappear {
-                        if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
-                            isTabBarHidden = false
-                        }
+                        hideForMeetingRequests = false
+                        updateTabBarVisibility()
                         isShowingMeetingRequests = false
                     },
                 isActive: $openMeetingRequests
@@ -156,14 +156,12 @@ struct MeetingListView: View {
                 if let meeting = viewModel.meetings.first(where: { $0.id == id }) {
                     MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
                         .onAppear {
-                            if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
-                                isTabBarHidden = true
-                            }
+                            hideForMeetingDetail = true
+                            updateTabBarVisibility()
                         }
                         .onDisappear {
-                            if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
-                                isTabBarHidden = false
-                            }
+                            hideForMeetingDetail = false
+                            updateTabBarVisibility()
                         }
                 } else {
                     ProgressView("모임 정보를 불러오는 중...")
@@ -192,15 +190,39 @@ struct MeetingListView: View {
                 path = NavigationPath()
                 lastOpenedMeetingID = nil
                 openMeetingRequests = false
+                hideForMeetingRequests = false
+                hideForMeetingDetail = false
+                updateTabBarVisibility()
             case .meetingRequests:
-                if !isShowingMeetingRequests && !openMeetingRequests {
-                    openMeetingRequests = true
+                if isShowingMeetingRequests {
+                    DispatchQueue.main.async {
+                        router.consume(.meetingRequests)
+                    }
+                    return
                 }
-                // 상태 초기화를 위해 consume은 항상 수행
+                hideForMeetingRequests = true
+                updateTabBarVisibility()
+                if !path.isEmpty {
+                    path = NavigationPath()
+                    lastOpenedMeetingID = nil
+                }
+                if openMeetingRequests {
+                    openMeetingRequests = false
+                }
                 DispatchQueue.main.async {
+                    openMeetingRequests = true
                     router.consume(.meetingRequests)
                 }
             case .meeting(let id):
+                hideForMeetingDetail = true
+                updateTabBarVisibility()
+                if openMeetingRequests {
+                    openMeetingRequests = false
+                }
+                if !path.isEmpty {
+                    path = NavigationPath()
+                }
+                lastOpenedMeetingID = nil
                 // ViewModel에 의도 전달 → 데이터 준비 → View에서 push
                 viewModel.openMeeting(id: id)
                 DispatchQueue.main.async {
@@ -216,6 +238,9 @@ struct MeetingListView: View {
                 path = NavigationPath()
                 lastOpenedMeetingID = nil
                 openMeetingRequests = false
+                hideForMeetingRequests = false
+                hideForMeetingDetail = false
+                updateTabBarVisibility()
                 router.consumePop(for: .meeting)
             }
         }
@@ -225,6 +250,8 @@ struct MeetingListView: View {
                 viewModel.meetingToOpenID = nil
                 return
             }
+            hideForMeetingDetail = true
+            updateTabBarVisibility()
             path.append(id)
             lastOpenedMeetingID = id
             viewModel.meetingToOpenID = nil
@@ -246,6 +273,12 @@ struct MeetingListView: View {
                     }
                 }
             }
+        }
+    }
+
+    private func updateTabBarVisibility() {
+        if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
+            isTabBarHidden = hideForMeetingRequests || hideForMeetingDetail
         }
     }
 }
