@@ -10,6 +10,9 @@ struct MeetingListView: View {
     @State private var openMeetingRequests = false
     @State private var isShowingMeetingRequests = false
     @State private var path = NavigationPath()
+    @State private var lastOpenedMeetingID: String?
+    @State private var hideForMeetingRequests = false
+    @State private var hideForMeetingDetail = false
 
     init(isTabBarHidden: Binding<Bool>) {
         self._isTabBarHidden = isTabBarHidden
@@ -22,15 +25,13 @@ struct MeetingListView: View {
             NavigationLink(
                 destination: MeetingRequestListView(viewModel: viewModel.meetingViewModel)
                     .onAppear {
-                        if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
-                            isTabBarHidden = true
-                        }
+                        hideForMeetingRequests = true
+                        updateTabBarVisibility()
                         isShowingMeetingRequests = true
                     }
                     .onDisappear {
-                        if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
-                            isTabBarHidden = false
-                        }
+                        hideForMeetingRequests = false
+                        updateTabBarVisibility()
                         isShowingMeetingRequests = false
                     },
                 isActive: $openMeetingRequests
@@ -155,14 +156,12 @@ struct MeetingListView: View {
                 if let meeting = viewModel.meetings.first(where: { $0.id == id }) {
                     MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
                         .onAppear {
-                            if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
-                                isTabBarHidden = true
-                            }
+                            hideForMeetingDetail = true
+                            updateTabBarVisibility()
                         }
                         .onDisappear {
-                            if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
-                                isTabBarHidden = false
-                            }
+                            hideForMeetingDetail = false
+                            updateTabBarVisibility()
                         }
                 } else {
                     ProgressView("모임 정보를 불러오는 중...")
@@ -189,16 +188,41 @@ struct MeetingListView: View {
             case .friendRequests:
                 // 크로스 탭 딥링크 대응
                 path = NavigationPath()
+                lastOpenedMeetingID = nil
                 openMeetingRequests = false
+                hideForMeetingRequests = false
+                hideForMeetingDetail = false
+                updateTabBarVisibility()
             case .meetingRequests:
-                if !isShowingMeetingRequests && !openMeetingRequests {
-                    openMeetingRequests = true
+                if isShowingMeetingRequests {
+                    DispatchQueue.main.async {
+                        router.consume(.meetingRequests)
+                    }
+                    return
                 }
-                // 상태 초기화를 위해 consume은 항상 수행
+                hideForMeetingRequests = true
+                updateTabBarVisibility()
+                if !path.isEmpty {
+                    path = NavigationPath()
+                    lastOpenedMeetingID = nil
+                }
+                if openMeetingRequests {
+                    openMeetingRequests = false
+                }
                 DispatchQueue.main.async {
+                    openMeetingRequests = true
                     router.consume(.meetingRequests)
                 }
             case .meeting(let id):
+                hideForMeetingDetail = true
+                updateTabBarVisibility()
+                if openMeetingRequests {
+                    openMeetingRequests = false
+                }
+                if !path.isEmpty {
+                    path = NavigationPath()
+                }
+                lastOpenedMeetingID = nil
                 // ViewModel에 의도 전달 → 데이터 준비 → View에서 push
                 viewModel.openMeeting(id: id)
                 DispatchQueue.main.async {
@@ -212,14 +236,24 @@ struct MeetingListView: View {
             guard let tab = tab else { return }
             if tab == .meeting {
                 path = NavigationPath()
+                lastOpenedMeetingID = nil
                 openMeetingRequests = false
+                hideForMeetingRequests = false
+                hideForMeetingDetail = false
+                updateTabBarVisibility()
                 router.consumePop(for: .meeting)
             }
         }
         .onReceive(viewModel.$meetingToOpenID.compactMap { $0 }) { id in
-            // 데이터 준비가 끝났으므로 실제 네비게이션 수행
+            // 딥링크 중복 push 방지
+            if lastOpenedMeetingID == id {
+                viewModel.meetingToOpenID = nil
+                return
+            }
+            hideForMeetingDetail = true
+            updateTabBarVisibility()
             path.append(id)
-            // 1회성 이벤트 소모
+            lastOpenedMeetingID = id
             viewModel.meetingToOpenID = nil
         }
     }
@@ -228,15 +262,23 @@ struct MeetingListView: View {
     func navigateToMeeting(meetingId: String) {
         if let found = viewModel.meetings.first(where: { $0.id == meetingId }) {
             path.append(found.id)
+            lastOpenedMeetingID = found.id
         } else {
             viewModel.fetchMeeting(by: meetingId) { model in
                 if let model = model {
                     DispatchQueue.main.async {
                         viewModel.appendMeeting(model)
                         path.append(model.id)
+                        lastOpenedMeetingID = model.id
                     }
                 }
             }
+        }
+    }
+
+    private func updateTabBarVisibility() {
+        if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
+            isTabBarHidden = hideForMeetingRequests || hideForMeetingDetail
         }
     }
 }
