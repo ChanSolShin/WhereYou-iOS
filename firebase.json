@@ -1,0 +1,12 @@
+{
+  "emulators": {
+    "functions": {
+      "enabled": true,
+      "port": 5001
+    }
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs18"
+  }
+}

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;</key>
+	<string>&lt;string&gt;앱이 백그라운드에서도 친구 위치를 자동으로 업데이트합니다.&lt;/string&gt;</string>
+	<key>&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;</key>
+	<string>&lt;string&gt;앱 사용 중 친구와 실시간 위치를 공유할 수 있습니다.&lt;/string&gt;</string>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconFiles</key>
+			<array>
+				<string></string>
+			</array>
+			<key>CFBundleIconName</key>
+			<string>AppIcon</string>
+			<key>UIPrerenderedIcon</key>
+			<false/>
+		</dict>
+	</dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.112211747880-irtvmrde4qjmp7jh36qlvtuml7oomijs</string>
+				<string>app-1-112211747880-ios-ef2a2772eca1c62491011d</string>
+			</array>
+		</dict>
+	</array>
+	<key>NMFClientId</key>
+	<string>9clr0szv6s</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<key>UIUserInterFaceStyle</key>
+	<string>Light</string>
+</dict>
+</plist>
