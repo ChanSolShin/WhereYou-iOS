@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreLocation
-import NMapsMap
 import Foundation
 
 struct AddMeetingView: View {
@@ -99,9 +98,12 @@ struct AddMeetingView: View {
                         .cornerRadius(30)
                         .frame(width: 150, height: 50)
                 }
+                Text("모임은 \(viewModel.meeting.meetingDate.addingTimeInterval(7200), formatter: dateFormatter) 에 삭제됩니다")
+                    .font(.footnote)
+                    .foregroundColor(.red)
                 .disabled(viewModel.successAddMeeting)
                 .padding(.horizontal, 20)
-                .padding(.top, 100)
+                .padding(.top, 10)
             }
             .padding(.vertical, 20)
             .sheet(isPresented: $showDatePicker) {

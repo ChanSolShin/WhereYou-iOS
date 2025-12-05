@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreLocation
-import NMapsMap
 
 struct EditMeetingView: View {
     @StateObject private var viewModel = EditMeetingViewModel()
@@ -86,10 +85,14 @@ struct EditMeetingView: View {
                         .cornerRadius(30)
                         .frame(width: 150, height: 50)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 100)
+                Text("모임은 \(viewModel.meetingDate.addingTimeInterval(7200), formatter: dateFormatter)에 삭제됩니다")
+                    .font(.footnote)
+                    .foregroundColor(.red)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
             }
             .padding(.vertical, 20)
+            .padding(.bottom, 100)
             .sheet(isPresented: $showLocationModal) {
                 EditLocationView(viewModel: viewModel)
             }

@@ -9,8 +9,8 @@ import SwiftUI
 import Firebase
 import FirebaseAuth
 import CoreLocation
-import NMapsMap
 import UserNotifications
+import FirebaseRemoteConfig
 
 @main
 struct iOS_ProjectApp: App {
@@ -20,6 +20,7 @@ struct iOS_ProjectApp: App {
     @StateObject private var loginViewModel = LoginViewModel()
     @State private var showAlert = false
     @State private var showNotificationAlert = false // 알림 권한 요청 상태
+    @State private var showUpdateAlert = false
     
     var body: some Scene {
         WindowGroup {
@@ -28,10 +29,14 @@ struct iOS_ProjectApp: App {
                         MainTabView()
                             .onAppear {
                                 locationCoordinator.startUpdatingLocation()
+                                checkVersion()
                                 // 로그인 후 강제 로그아웃 리스너는 LoginViewModel에서 처리됨.
                             }
                     } else {
                         LoginView()
+                            .onAppear {
+                                checkVersion()
+                            }
                     }
           }
             .environmentObject(loginViewModel) // LoginViewModel을 전역에서 사용
@@ -44,6 +49,7 @@ struct iOS_ProjectApp: App {
                 requestNotificationPermission()
                 // 앱이 포그라운드로 진입할 때 토큰 갱신
                 NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+                    checkVersion() // 앱이 포그라운드 진입 시 버전 체크
                     if let user = FirebaseAuth.Auth.auth().currentUser {
                         user.getIDTokenForcingRefresh(true) { token, error in
                             if let error = error {
@@ -59,6 +65,17 @@ struct iOS_ProjectApp: App {
                 if status == .denied || status == .restricted {
                     showAlert = true
                 }
+            }
+            .alert(isPresented: $showUpdateAlert) {
+                Alert(
+                    title: Text("업데이트 필요"),
+                    message: Text("새로운 버전으로 업데이트가 필요합니다."),
+                    dismissButton: .default(Text("업데이트")) {
+                        if let url = URL(string: "itms-apps://itunes.apple.com/app/id6745590209") {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                )
             }
         }
     }
@@ -78,6 +95,44 @@ struct iOS_ProjectApp: App {
                 print("알림 권한이 거부되었습니다.")
                 DispatchQueue.main.async {
                     self.showNotificationAlert = true
+                }
+            }
+        }
+    }
+    
+    private func isUpdateRequired(minVersion: String, currentVersion: String) -> Bool {
+        let minComponents = minVersion.split(separator: ".").compactMap { Int($0) }
+        let currentComponents = currentVersion.split(separator: ".").compactMap { Int($0) }
+        let maxCount = max(minComponents.count, currentComponents.count)
+
+        for i in 0..<maxCount {
+            let minPart = i < minComponents.count ? minComponents[i] : 0
+            let currentPart = i < currentComponents.count ? currentComponents[i] : 0
+
+            if minPart > currentPart {
+                return true
+            } else if minPart < currentPart {
+                return false
+            }
+        }
+        return false
+    }
+    
+    private func checkVersion() {
+        let remoteConfig = RemoteConfig.remoteConfig()
+        let settings = RemoteConfigSettings()
+        settings.minimumFetchInterval = 0
+        remoteConfig.configSettings = settings
+
+        remoteConfig.fetchAndActivate { status, error in
+            let minVersion = remoteConfig["min_required_version"].stringValue ?? ""
+            if let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                print("✅ minVersion: \(minVersion), currentVersion: \(currentVersion)")
+
+                if isUpdateRequired(minVersion: minVersion, currentVersion: currentVersion) {
+                    DispatchQueue.main.async {
+                        showUpdateAlert = true
+                    }
                 }
             }
         }

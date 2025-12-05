@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import NMapsMap
 import FirebaseAuth
 import FirebaseFirestore
 

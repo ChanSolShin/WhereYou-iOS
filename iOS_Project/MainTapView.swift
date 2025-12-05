@@ -8,7 +8,6 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
-import NMapsMap
 
 struct MainTabView: View {
     @State private var isTabBarHidden = false
