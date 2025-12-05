@@ -30,11 +30,14 @@ exports.sendFriendRequestNotification = functions.firestore.onDocumentCreated('f
         if (!fcmToken) return console.log('FCM 토큰이 없음');
 
         const message = {
-            notification: {
-                title: '웨어유',
-                body: `${fromUserName}님이 친구 요청을 보냈습니다!`,
-            },
-            token: fcmToken,
+          notification: {
+            title: '웨어유',
+            body: `${fromUserName}님이 친구 요청을 보냈습니다!`,
+          },
+          data: {
+            route: "friendRequests"
+          },
+          token: fcmToken,
         };
 
         await messaging.send(message);  // admin.messaging()으로 수정
@@ -121,11 +124,14 @@ exports.sendMeetingInviteNotification = functions.firestore.onDocumentCreated('m
         if (!fcmToken) return console.log('FCM 토큰이 없음');
 
         const message = {
-            notification: {
-                title: '웨어유',
-                body: `${fromUserName}님이 '${meetingName}' 모임에 초대했습니다!`,
-            },
-            token: fcmToken,
+          notification: {
+            title: '웨어유',
+            body: `${fromUserName}님이 '${meetingName}' 모임에 초대했습니다!`,
+          },
+          data: {
+            route: "meetingRequests"
+          },
+          token: fcmToken,
         };
 
         await messaging.send(message);  // admin.messaging()으로 수정
@@ -214,10 +220,14 @@ exports.updateLocationTrackingStatus = onSchedule('every 1 minutes', async (even
 
                     // 각 멤버에게 FCM 메시지 전송
                     const message = {
-                        notification: {
-                            title: "웨어유",
-                            body: `지금부터 ${meetingName} 멤버의 위치 조회가 가능합니다!`,
-                        },
+                      notification: {
+                        title: "웨어유",
+                        body: `지금부터 ${meetingName} 멤버의 위치 조회가 가능합니다!`,
+                      },
+                      data: {
+                        route: "meetingView",
+                        meetingId: doc.id
+                      },
                     };
 
                     try {
@@ -313,11 +323,15 @@ exports.notifyMemberAdded = functions.firestore.onDocumentUpdated(
 
                 for (const token of tokenChunk) {
                     const message = {
-                        token: token,
-                        notification: {
-                            title: '웨어유',
-                            body: `${newMemberNames.join(', ')}님이 ${meetingName} 모임에 참여하였습니다!`,
-                        },
+                      token: token,
+                      notification: {
+                        title: '웨어유',
+                        body: `${newMemberNames.join(', ')}님이 ${meetingName} 모임에 참여하였습니다!`,
+                      },
+                      data: {
+                        route: "meetingView",
+                        meetingId: event.params.meetingId
+                      }
                     };
 
                     // ✅ `send` 사용 (단건 메시지 전송)
@@ -391,10 +405,14 @@ exports.notifyMeetingUpdated = functions.firestore.onDocumentUpdated(
 
         // 🔹 FCM 메시지 생성
         const message = {
-            notification: {
-                title: '웨어유',
-                body: `${meetingName} 모임의 정보가 수정되었습니다!`,
-            },
+          notification: {
+            title: '웨어유',
+            body: `${meetingName} 모임의 정보가 수정되었습니다!`,
+          },
+          data: {
+            route: "meetingView",
+            meetingId: event.params.meetingId
+          },
         };
 
         try {
@@ -510,3 +528,45 @@ exports.deleteUnlinkedTempAccounts = onSchedule("every 5 minutes", async (event)
 
     return null;
 });
+
+// ✅ 멤버가 강퇴되면 RTDB 좌표 삭제
+exports.removeKickedMemberLocation = functions.firestore.onDocumentUpdated(
+  { document: 'meetings/{meetingId}' },
+  async (event) => {
+    const meetingId = event.params.meetingId;
+
+    const beforeData = event.data.before.data() || {};
+    const afterData  = event.data.after.data()  || {};
+
+    const beforeMembers = beforeData.meetingMembers || [];
+    const afterMembers  = afterData.meetingMembers  || [];
+
+    // Firestore 배열에서 제거된 멤버 계산
+    const removedMembers = beforeMembers.filter((m) => !afterMembers.includes(m));
+
+    if (removedMembers.length === 0) {
+      console.log(`제거된 멤버 없음: meetingId=${meetingId}`);
+      return null;
+    }
+
+    console.log(`RTDB 좌표 정리 시작: meetingId=${meetingId}, removedMembers=${removedMembers.join(', ')}`);
+
+    // 각 제거된 멤버의 RTDB 좌표 삭제
+    for (const uid of removedMembers) {
+      try {
+        const ref = admin.database().ref(`meetings/${meetingId}/locations/${uid}`);
+        const snap = await ref.get();
+        if (snap.exists()) {
+          await ref.remove();
+          console.log(`✅ RTDB 좌표 삭제 완료: meetingId=${meetingId}, uid=${uid}`);
+        } else {
+          console.log(`ℹ️ RTDB 좌표 없음(스킵): meetingId=${meetingId}, uid=${uid}`);
+        }
+      } catch (err) {
+        console.error(`❌ RTDB 좌표 삭제 실패: meetingId=${meetingId}, uid=${uid}`, err);
+      }
+    }
+
+    return null;
+  }
+);

@@ -10,6 +10,9 @@ import Combine
 class FriendListViewModel: ObservableObject {
     @Published var friends: [FriendModel] = []
     @Published var pendingRequests: [FriendRequestModel] = []
+    @Published var friendEmailInput: String = ""
+    @Published var friendPhoneNumberInput: String = ""
+    @Published var selectedCountry: CountryCode?
     
     @Published var alertMessage: String = ""
     @Published var showAlert: Bool = false
@@ -32,6 +35,15 @@ class FriendListViewModel: ObservableObject {
         fetchCurrentUserName()
         observeFriends()
         observePendingRequests()
+    }
+
+    func resetFriendEmailInput() {
+        friendEmailInput = ""
+    }
+
+    func resetFriendPhoneInput() {
+        friendPhoneNumberInput = ""
+        selectedCountry = nil
     }
     
     private func fetchCurrentUserName() {
@@ -182,6 +194,7 @@ class FriendListViewModel: ObservableObject {
                                     DispatchQueue.main.async {
                                         self.alertMessage = "친구 요청을 보냈습니다!"
                                         self.showAlert = true
+                                        self.resetFriendEmailInput()
                                     }
                                 }
                             }
@@ -253,6 +266,7 @@ class FriendListViewModel: ObservableObject {
                                     DispatchQueue.main.async {
                                         self.alertMessage = "친구 요청을 보냈습니다!"
                                         self.showAlert = true
+                                        self.resetFriendPhoneInput()
                                     }
                                 }
                             }

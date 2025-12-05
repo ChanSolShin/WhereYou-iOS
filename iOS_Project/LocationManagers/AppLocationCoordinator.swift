@@ -15,6 +15,8 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // 활성화된 모임 정보
     @Published var activeMeetings: [MeetingModel] = []
+    // 멤버십이 유효한 모임만 업로드 허용 (강퇴 즉시 차단을 위한 가드)
+    private var memberAllowedMeetingIDs = Set<String>()
     
     //lazy var: Firebase가 설정된 후에 데이터베이스를 참조하도록 설정
     private lazy var realtimeDB: DatabaseReference = {
@@ -28,6 +30,16 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
         super.init()
         locationManager.delegate = self
         checkAuthorizationStatus()
+        
+        // Foreground 진입 시 만료 모임 재검증
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(appWillEnterForeground),
+                                               name: UIApplication.willEnterForegroundNotification,
+                                               object: nil)
+    }
+    
+    @objc private func appWillEnterForeground() {
+        sweepActiveMeetings()
     }
     
     func checkAuthorizationStatus() {
@@ -56,7 +68,9 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
         locationUpdateTimer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .background))
         locationUpdateTimer?.schedule(deadline: .now(), repeating: 5) // 5초마다 실행
         locationUpdateTimer?.setEventHandler { [weak self] in
-            self?.uploadLocation()
+            DispatchQueue.main.async {
+                self?.uploadLocation()
+            }
         }
         locationUpdateTimer?.resume() // 타이머 실행
     }
@@ -67,22 +81,46 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
         locationUpdateTimer = nil
     }
     
+    // 조회 가능 시간 유효성 검사
+    private func isMeetingActive(_ meeting: MeetingModel, at date: Date = Date()) -> Bool {
+        let start = Calendar.current.date(byAdding: .hour, value: -3, to: meeting.date) ?? meeting.date
+        let end   = Calendar.current.date(byAdding: .hour, value:  1, to: meeting.date) ?? meeting.date
+        return date >= start && date <= end
+    }
+    
+    // 현재 시간 기준으로 활성 모임만 남기고, 없으면 업로드 중단
+    private func sweepActiveMeetings(now: Date = Date()) {
+        guard !activeMeetings.isEmpty else { return }
+        DispatchQueue.main.async {
+            let beforeCount = self.activeMeetings.count
+            self.activeMeetings.removeAll { !self.isMeetingActive($0, at: now) }
+            let afterCount = self.activeMeetings.count
+            if beforeCount != afterCount {
+                print("[Location] 만료된 모임 정리: before=\(beforeCount) → after=\(afterCount)")
+            }
+            if self.activeMeetings.isEmpty {
+                print("[Location] 활성 모임 없음 → 위치 업데이트 중단")
+                self.stopUpdatingLocation()
+            }
+        }
+    }
+    
     private func uploadLocation() {
+        // 업로드 직전에 한 번 더 유효성 스윕
+        sweepActiveMeetings()
+        
+        guard !activeMeetings.isEmpty else { return }
         guard let currentLocation = currentLocation else {
             print("위치를 가져올 수 없습니다.")
             return
         }
         
-        guard !activeMeetings.isEmpty else {
-            return
-        }
-        
         let latitude = currentLocation.latitude
         let longitude = currentLocation.longitude
-        print("현재 위치 업로드: (\(latitude), \(longitude))")
         
-        // 활성화된 모든 모임에 대해 위치 업로드
-        for meeting in activeMeetings {
+        // 멤버십이 유효(memberAllowedMeetingIDs)에 포함된 모임에만 업로드
+        for meeting in activeMeetings where isMeetingActive(meeting) && memberAllowedMeetingIDs.contains(meeting.id) {
+            print("현재 위치 업로드[\(meeting.id)]: (\(latitude), \(longitude))")
             realtimeDB.child("meetings").child(meeting.id).child("locations").child(getCurrentUserID()).setValue([
                 "latitude": latitude,
                 "longitude": longitude,
@@ -143,22 +181,43 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
                 return
             }
             
-            // 리스너를 통해 모임 삭제 감지
+            // 허용 리스트 보강(초기 진입 시)
+            self.memberAllowedMeetingIDs.insert(meeting.id)
+            
+            // 리스너를 통해 모임 삭제/멤버십 변경 감지
             db.collection("meetings").document(meeting.id).addSnapshotListener { [weak self] documentSnapshot, error in
                 guard let self = self else { return }
-                
                 if let error = error {
-                    print("Firestore 모임 삭제 감지 리스너 에러: \(error)")
+                    print("Firestore 모임 변경 리스너 에러: \(error)")
                     return
                 }
+                guard let snap = documentSnapshot else { return }
                 
-                if documentSnapshot == nil || !documentSnapshot!.exists {
-                    self.activeMeetings.removeAll { $0.id == meeting.id }
-                    print("모임이 Firestore에서 삭제됨. \(meeting.id)")
-                    
-                    if self.activeMeetings.isEmpty {
-                        self.stopUpdatingLocation()
+                if !snap.exists {
+                    DispatchQueue.main.async {
+                        self.memberAllowedMeetingIDs.remove(meeting.id)
+                        self.activeMeetings.removeAll { $0.id == meeting.id }
+                        print("모임이 Firestore에서 삭제됨. \(meeting.id)")
+                        if self.activeMeetings.isEmpty { self.stopUpdatingLocation() }
                     }
+                } else {
+                    // 강퇴/멤버 제거 즉시 감지 -> 업로드 중단
+                    if let data = snap.data(), let members = data["meetingMembers"] as? [String] {
+                        if !members.contains(currentUID) {
+                            DispatchQueue.main.async {
+                                self.memberAllowedMeetingIDs.remove(meeting.id)
+                                self.activeMeetings.removeAll { $0.id == meeting.id }
+                                print("현재 사용자가 모임에서 제거됨 → 업로드 중단: \(meeting.id)")
+                                if self.activeMeetings.isEmpty { self.stopUpdatingLocation() }
+                            }
+                            return
+                        } else {
+                            // 레이스 대비 보강
+                            self.memberAllowedMeetingIDs.insert(meeting.id)
+                        }
+                    }
+                    // meetingDate 변경 등 서버 상태 변동 재검증
+                    self.sweepActiveMeetings()
                 }
             }
             
@@ -168,19 +227,27 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
             let currentTime = Date()
             
             if currentTime >= startUploadDate && currentTime <= endUploadDate {
-                self.activeMeetings.append(meeting)
-                print("업로드 활성화된 모임 추가: \(meeting.id)")
-                if self.authorizationStatus == .authorizedAlways {
-                    self.startUpdatingLocation()
+                DispatchQueue.main.async {
+                    self.activeMeetings.append(meeting)
+                    // 즉시 시작 시 허용 리스트도 보강
+                    self.memberAllowedMeetingIDs.insert(meeting.id)
+                    print("업로드 활성화된 모임 추가: \(meeting.id)")
+                    if self.authorizationStatus == .authorizedAlways {
+                        self.startUpdatingLocation()
+                    }
                 }
             } else if currentTime < startUploadDate {
                 // 업로드 시작 시점에 타이머 설정
                 let delay = startUploadDate.timeIntervalSince(currentTime)
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                    self.activeMeetings.append(meeting)
-                    print("타이머 후 업로드 활성화된 모임 추가: \(meeting.id)")
-                    if self.authorizationStatus == .authorizedAlways {
-                        self.startUpdatingLocation()
+                    DispatchQueue.main.async {
+                        self.activeMeetings.append(meeting)
+                        // 지연 시작 시 허용 리스트 보강
+                        self.memberAllowedMeetingIDs.insert(meeting.id)
+                        print("타이머 후 업로드 활성화된 모임 추가: \(meeting.id)")
+                        if self.authorizationStatus == .authorizedAlways {
+                            self.startUpdatingLocation()
+                        }
                     }
                 }
             }
@@ -189,12 +256,12 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
             let endDelay = endUploadDate.timeIntervalSince(currentTime)
             if endDelay > 0 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + endDelay) {
-                    self.activeMeetings.removeAll { $0.id == meeting.id }
-                    print("업로드 비활성화된 모임 제거: \(meeting.id)")
-                    
-                    // 더 이상 활성화된 모임이 없으면 위치 업데이트 중지
-                    if self.activeMeetings.isEmpty {
-                        self.stopUpdatingLocation()
+                    DispatchQueue.main.async {
+                        // 종료 시 허용 리스트/대상 정리
+                        self.memberAllowedMeetingIDs.remove(meeting.id)
+                        self.activeMeetings.removeAll { $0.id == meeting.id }
+                        print("업로드 비활성화된 모임 제거: \(meeting.id)")
+                        if self.activeMeetings.isEmpty { self.stopUpdatingLocation() }
                     }
                 }
             }
@@ -221,7 +288,8 @@ class AppLocationCoordinator: NSObject, ObservableObject, CLLocationManagerDeleg
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let latestLocation = locations.last else { return }
-        currentLocation = latestLocation.coordinate
-        
+        DispatchQueue.main.async {
+            self.currentLocation = latestLocation.coordinate
+        }
     }
 }

@@ -22,6 +22,11 @@ class MeetingViewModel: NSObject, ObservableObject {
     @Published var selectedUserLocation: CLLocationCoordinate2D? // 유저 위치 표시
     @Published var trackedMemberID: String? // 현재 추적 중인 멤버 ID
     @Published var meetingDate: Date?
+    @Published var isKicked: Bool = false
+    @Published var kickedMeetingID: String?            // 이번에 강퇴 이벤트가 발생한 모임 ID
+    private var handledKickedIDs = Set<String>()       // 이미 알림 처리한 모임 ID들
+    private var observingMeetingID: String?            // 현재 관찰 중인 모임 ID
+    private var selfLeavingIDs = Set<String>()          // 사용자가 스스로 나가기를 선택한 모임 ID 집합 (강퇴와 구분)
     
     private var meeting: MeetingModel? // 현재 선택된 모임
     private let realtimeDB = Database.database().reference()
@@ -29,9 +34,10 @@ class MeetingViewModel: NSObject, ObservableObject {
     public let locationCoordinator: AppLocationCoordinator // 위치 코디네이터
     
     private var meetingListener: ListenerRegistration?
-       private var memberListener: ListenerRegistration?
-    
+    private var memberListener: ListenerRegistration?
+
     private var db = Firestore.firestore()
+    private var currentMemberIDs: [String] = []
     
     init(locationCoordinator: AppLocationCoordinator = AppLocationCoordinator.shared) {
         self.locationCoordinator = locationCoordinator
@@ -51,7 +57,16 @@ class MeetingViewModel: NSObject, ObservableObject {
     // 모임 선택 및 초기화
     func selectMeeting(meeting: MeetingModel) {
         self.meeting = meeting
-        self.trackedMemberID = nil
+        self.observingMeetingID = meeting.id
+        // 재초대 방지: 이전에 처리한 강퇴 이벤트 기록 제거
+        self.handledKickedIDs.remove(meeting.id)
+        DispatchQueue.main.async { [weak self] in
+            self?.isKicked = false
+            self?.kickedMeetingID = nil
+        }
+        DispatchQueue.main.async {
+            self.trackedMemberID = nil
+        }
         
         for memberID in meeting.meetingMemberIDs {
             fetchUserName(byID: memberID) { [weak self] name in
@@ -66,42 +81,39 @@ class MeetingViewModel: NSObject, ObservableObject {
     }
     
     private func listenToMeetingChanges(meetingID: String) {
-           meetingListener?.remove()
-           
-           let db = Firestore.firestore()
-           meetingListener = db.collection("meetings").document(meetingID).addSnapshotListener { [weak self] (document, error) in
-               guard let self = self else { return }
-               if let document = document, document.exists {
-                   if let timestamp = document.data()?["meetingDate"] as? Timestamp {
-                       DispatchQueue.main.async {
-                           self.meetingDate = timestamp.dateValue()
-                       }
-                   }
-               }
-           }
-       }
+        meetingListener?.remove()
+        let db = Firestore.firestore()
+        meetingListener = db.collection("meetings").document(meetingID).addSnapshotListener { [weak self] (document, error) in
+            guard let self = self else { return }
+            if let document = document, document.exists {
+                if let timestamp = document.data()?["meetingDate"] as? Timestamp {
+                    DispatchQueue.main.async {
+                        self.meetingDate = timestamp.dateValue()
+                    }
+                }
+            }
+        }
+    }
     
     private func listenToMemberNameChanges(memberIDs: [String]) {
-           memberListener?.remove()
-           
-           let db = Firestore.firestore()
-           memberListener = db.collection("users").whereField(FieldPath.documentID(), in: memberIDs)
-               .addSnapshotListener { [weak self] (querySnapshot, error) in
-                   guard let self = self else { return }
-                   guard let documents = querySnapshot?.documents else { return }
-                   
-                   DispatchQueue.main.async {
-                       for document in documents {
-                           if let name = document.data()["name"] as? String {
-                               self.meetingMemberNames[document.documentID] = name
-                           }
-                       }
-                   }
-               }
-       }
+        memberListener?.remove()
+        let ids = memberIDs
+        guard !ids.isEmpty else { return }
+        let db = Firestore.firestore()
+        memberListener = db.collection("users").whereField(FieldPath.documentID(), in: ids)
+            .addSnapshotListener { [weak self] (querySnapshot, error) in
+                guard let self = self else { return }
+                guard let documents = querySnapshot?.documents else { return }
+                DispatchQueue.main.async {
+                    for document in documents {
+                        if let name = document.data()["name"] as? String {
+                            self.meetingMemberNames[document.documentID] = name
+                        }
+                    }
+                }
+            }
+    }
 
-    
-    
     // 특정 유저 위치 가져오기 및 추적 시작
     func moveToUserLocation(userID: String) {
         guard let meetingID = meeting?.id else { return }
@@ -164,7 +176,9 @@ class MeetingViewModel: NSObject, ObservableObject {
 
             // 새로운 멤버 추적 시작
             print("Started tracking user \(userID)")
-            self.trackedMemberID = userID
+            DispatchQueue.main.async {
+                self.trackedMemberID = userID
+            }
             self.fetchMemberLocation(userID: userID)
         }
     }
@@ -189,7 +203,8 @@ class MeetingViewModel: NSObject, ObservableObject {
                         print("Updated location for user \(userID): \(latitude), \(longitude)")
                     }
                 } else {
-                    print("Failed to fetch location for user \(userID). Snapshot: \(snapshot.value ?? "nil")")
+                    let snapDesc = snapshot.value ?? "nil"
+                    print("Failed to fetch location for user \(userID). Snapshot: \(snapDesc)")
                     DispatchQueue.main.async {
                         if self?.errorMessage != "멤버의 위치 정보를 불러올 수 없습니다." {
                             self?.errorMessage = "멤버의 위치 정보를 불러올 수 없습니다."
@@ -202,8 +217,10 @@ class MeetingViewModel: NSObject, ObservableObject {
     func stopTrackingMember() {
         guard let meetingID = meeting?.id, let userID = trackedMemberID else { return }
         realtimeDB.child("meetings").child(meetingID).child("locations").child(userID).removeAllObservers()
-        trackedMemberID = nil
-        selectedUserLocation = nil
+        DispatchQueue.main.async {
+            self.trackedMemberID = nil
+            self.selectedUserLocation = nil
+        }
     }
     
     private func fetchUserName(byID userID: String, completion: @escaping (String) -> Void) {
@@ -224,7 +241,7 @@ class MeetingViewModel: NSObject, ObservableObject {
     private func fetchMeetingDocumentID(for meetingName: String, completion: @escaping (String?) -> Void) {
         db.collection("meetings").whereField("meetingName", isEqualTo: meetingName).getDocuments { (snapshot, error) in
             if let error = error {
-            print("Error fetching meeting document ID: \(error)")
+                print("Error fetching meeting document ID: \(error)")
                 completion(nil)
             } else if let document = snapshot?.documents.first {
                 // 첫 번째 문서의 ID 반환
@@ -236,28 +253,72 @@ class MeetingViewModel: NSObject, ObservableObject {
     }
     
     func fetchMeetingData(meetingID: String) {
-           db.collection("meetings").document(meetingID)
-               .addSnapshotListener { [weak self] document, error in
-                   if let error = error {
-                       self?.errorMessage = "데이터 로딩 중 오류 발생: \(error.localizedDescription)"
-                       return
-                   }
-                   
-                   guard let document = document, document.exists else {
-                       return
-                   }
-                   
-                   // Firestore에서 날짜를 받아와 업데이트
-                   if let date = document.data()?["meetingDate"] as? Timestamp {
-                       self?.meetingDate = date.dateValue()
-                   }
-                   
-                   // 모임 멤버 이름 업데이트
-                   if let memberNames = document.data()?["meetingMemberNames"] as? [String: String] {
-                       self?.meetingMemberNames = memberNames
-                   }
-               }
-       }
+        // 이전 리스너 제거 후 새 리스너 등록
+        meetingListener?.remove()
+        meetingListener = db.collection("meetings").document(meetingID)
+            .addSnapshotListener { [weak self] document, error in
+                // 관찰 모임이 바뀌면 강퇴 플래그 리셋 및 관찰 ID 갱신
+                if self?.observingMeetingID != meetingID {
+                    self?.observingMeetingID = meetingID
+                    DispatchQueue.main.async { [weak self] in
+                        self?.isKicked = false
+                        self?.kickedMeetingID = nil
+                    }
+                }
+                if let error = error {
+                    DispatchQueue.main.async {
+                        self?.errorMessage = "데이터 로딩 중 오류 발생: \(error.localizedDescription)"
+                    }
+                    return
+                }
+                guard let document = document, document.exists else {
+                    return
+                }
+                // 1) 날짜/이름 맵 UI 업데이트
+                DispatchQueue.main.async {
+                    if let date = document.data()? ["meetingDate"] as? Timestamp {
+                        self?.meetingDate = date.dateValue()
+                    }
+                    if let memberNames = document.data()? ["meetingMemberNames"] as? [String: String] {
+                        self?.meetingMemberNames = memberNames
+                    }
+                    if let master = document.data()? ["meetingMaster"] as? String {
+                        self?.meetingMasterID = master
+                    } else if let master = document.data()? ["meetingMasterID"] as? String {
+                        self?.meetingMasterID = master
+                    }
+                }
+                // 2) 멤버 목록이 바뀌면, 이름 리스너를 새 멤버 배열로 재구독
+                if let memberIDs = document.data()? ["meetingMembers"] as? [String] {
+                    if let uid = Auth.auth().currentUser?.uid, !memberIDs.contains(uid) {
+                        // 내가 직접 나가기를 선택한 경우라면 강퇴로 처리하지 않고 깔끔히 정리
+                        if let strongSelf = self, strongSelf.selfLeavingIDs.contains(meetingID) {
+                            strongSelf.selfLeavingIDs.remove(meetingID)
+                            // 강퇴 알림 플래그가 남지 않도록 리셋하고 리스너만 정리
+                            DispatchQueue.main.async {
+                                strongSelf.isKicked = false
+                                strongSelf.kickedMeetingID = nil
+                            }
+                            strongSelf.stopMeetingListeners()
+                            return
+                        }
+                        // 현재 관찰 중인 모임에 대해서만, 그리고 1회성으로만 이벤트 발생
+                        self?.handleKicked(meetingID: meetingID)
+                        return
+                    }
+                    // 멤버 배열 변경 시 이름 리스너 재구독 로직 유지
+                    if memberIDs != self?.currentMemberIDs {
+                        self?.currentMemberIDs = memberIDs
+                        DispatchQueue.main.async {
+                            for id in memberIDs where self?.meetingMemberNames[id] == nil {
+                                self?.meetingMemberNames[id] = "불러오는 중..."
+                            }
+                        }
+                        self?.listenToMemberNameChanges(memberIDs: memberIDs)
+                    }
+                }
+            }
+    }
     
     // 친구들에게 모임 초대 요청 보내기
     func sendMeetingRequest(toUserIDs: [String], meetingName: String, fromUserID: String, fromUserName: String) {
@@ -386,8 +447,10 @@ class MeetingViewModel: NSObject, ObservableObject {
                 print("Error deleting meeting request: \(error)")
             } else {
                 print("Successfully deleted meeting request with ID: \(requestID)")
-                if let index = self.pendingMeetingRequests.firstIndex(where: { $0.id == requestID }) {
-                    self.pendingMeetingRequests.remove(at: index)
+                DispatchQueue.main.async {
+                    if let index = self.pendingMeetingRequests.firstIndex(where: { $0.id == requestID }) {
+                        self.pendingMeetingRequests.remove(at: index)
+                    }
                 }
             }
         }
@@ -396,9 +459,11 @@ class MeetingViewModel: NSObject, ObservableObject {
     // 모임 나가기 기능
     func leaveMeeting(meetingID: String) {
         guard let currentUserID = Auth.auth().currentUser?.uid else { return }
-        
+        // 강퇴 오인 방지: 내가 스스로 나가기를 선택했음을 표시
+        selfLeavingIDs.insert(meetingID)
+
         let db = Firestore.firestore()
-        
+
         db.collection("meetings").document(meetingID).getDocument { [weak self] document, error in
             if let error = error {
                 print("Error fetching meeting: \(error)")
@@ -469,21 +534,16 @@ class MeetingViewModel: NSObject, ObservableObject {
     
     // 랜덤한 다른 멤버를 선택하는 함수
     func getRandomOtherMember(currentUserID: String, members: [String]) -> String? {
-        // 현재 사용자가 모임 멤버 목록에 포함되어 있을 경우, 이를 제외한 나머지 멤버들 중에서 랜덤 선택
         let otherMembers = members.filter { $0 != currentUserID }
-        
-        // 만약 다른 멤버가 있다면, 랜덤으로 선택
         if let randomMember = otherMembers.randomElement() {
             return randomMember
         }
-        
         return nil
     }
     
     // meetingMembers에서 사용자 ID 삭제
     private func removeUserFromMeeting(meetingID: String, userID: String) {
         let db = Firestore.firestore()
-        
         db.collection("meetings").document(meetingID).updateData([
             "meetingMembers": FieldValue.arrayRemove([userID])
         ]) { error in
@@ -522,7 +582,7 @@ class MeetingViewModel: NSObject, ObservableObject {
                                 toUserID: data["toUserID"] as? String ?? "",
                                 meetingName: data["meetingName"] as? String ?? "",
                                 status: data["status"] as? String ?? "",
-                                meetingID: data["meetingID"] as? String ?? ""  // meetingID 추가
+                                meetingID: data["meetingID"] as? String ?? "" // meetingID 추가
                             )
                         } ?? []
                     }
@@ -556,8 +616,42 @@ class MeetingViewModel: NSObject, ObservableObject {
                 }
             }
     }
+
+    // 뷰에서 리스너 정리할 때 호출
+    func stopMeetingListeners() {
+        meetingListener?.remove()
+        memberListener?.remove()
+    }
 }
 
 extension MeetingViewModel {
     // 위치 매니저 델리게이트 메소드 제거
+
+    // 강퇴 이벤트 처리 (같은 모임에 대해서는 1회만 알림)
+    fileprivate func handleKicked(meetingID: String) {
+        // 만약 바로 직전에 내가 스스로 나가기를 선택한 모임이라면 강퇴 이벤트로 처리하지 않음
+        if selfLeavingIDs.contains(meetingID) {
+            selfLeavingIDs.remove(meetingID)
+            return
+        }
+        // 강퇴 이벤트 발생 시 추가 신호 차단(중복 방지)
+        meetingListener?.remove()
+        memberListener?.remove()
+        guard observingMeetingID == nil || observingMeetingID == meetingID else { return }
+        // 같은 모임에 대한 중복 알림 방지
+        guard !handledKickedIDs.contains(meetingID) else { return }
+        handledKickedIDs.insert(meetingID)
+        DispatchQueue.main.async { [weak self] in
+            self?.kickedMeetingID = meetingID
+            self?.isKicked = true
+        }
+    }
+
+    // 뷰에서 알림을 한 번 띄운 뒤 이벤트를 소비(리셋)할 때 호출
+    func consumeKickedEvent() {
+        DispatchQueue.main.async { [weak self] in
+            self?.isKicked = false
+            self?.kickedMeetingID = nil
+        }
+    }
 }
