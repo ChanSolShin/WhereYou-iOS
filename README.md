@@ -1,5 +1,4 @@
 <img width="256" height="256" alt="image" src="https://github.com/user-attachments/assets/d37cd4cd-b155-4ea0-9160-f355005e0556" />
-<img width="1638" height="800" alt="image" src="https://github.com/user-attachments/assets/a6f50237-eacc-4531-b922-9f76d18c8714" />
 
 
 # WhereYou(웨어유)
@@ -83,6 +82,7 @@
 - 1.2.0 - 알림을 누르면 해당 알림 View로 이동하는 기능 추가 (2025.12.11)
 
 ---
+<img width="1638" height="800" alt="image" src="https://github.com/user-attachments/assets/a6f50237-eacc-4531-b922-9f76d18c8714" />
 
 <img width="250" height="2688" alt="image" src="https://github.com/user-attachments/assets/6c5815bc-b807-417f-ae13-cefaf482a9a5" />
 <img width="250" height="2688" alt="image" src="https://github.com/user-attachments/assets/f3812791-6def-4157-a104-b7516efdbd0f" />
