@@ -56,7 +56,7 @@
 - **Framework:** SwiftUI
 - **Architecture:** MVVM
 - **Backend:** Firebase (Firestore, Authentication, Functions, RealtimeDB)
-- **MAP**: ****NAVER Maps API
+- **MAP**: ** NAVER Maps API
 - **Asynchronous:** GCD, Swift async/await
 - **Version Control:** Git & GitHub
 - **Collaboration**: Notion
