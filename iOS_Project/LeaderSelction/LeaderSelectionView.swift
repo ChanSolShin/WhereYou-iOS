@@ -65,7 +65,9 @@ struct LeaderSelectionView: View {
                             selectedLeader = member
                         }
                     }
+                    .listRowBackground(GlassPanel(radius: 8))
                 }
+                .scrollContentBackground(.hidden)
             }
             
             Spacer()
@@ -84,6 +86,7 @@ struct LeaderSelectionView: View {
             .disabled(selectedLeader == nil)
         }
         .padding()
+        .background(GlassBackdrop())
         .onAppear {
             // 모임의 멤버를 불러오기
             viewModel.fetchMeetingMembers(meetingID: meetingID)

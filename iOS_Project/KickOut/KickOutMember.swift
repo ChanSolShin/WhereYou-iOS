@@ -44,7 +44,9 @@ struct KickOutMember: View {
                             selectedMember = member
                         }
                     }
+                    .listRowBackground(GlassPanel(radius: 8))
                 }
+                .scrollContentBackground(.hidden)
             }
             
             Spacer()
@@ -73,6 +75,7 @@ struct KickOutMember: View {
             .disabled(selectedMember == nil) // 선택된 멤버가 없으면 버튼 비활성화
         }
         .padding()
+        .background(GlassBackdrop())
         .onAppear {
             viewModel.fetchMeetingMembers(meetingID: meetingID)
         }

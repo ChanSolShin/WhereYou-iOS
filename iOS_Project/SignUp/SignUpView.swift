@@ -143,6 +143,7 @@ struct SignUpView: View {
             .padding(.bottom, 40)
         }
         .padding()
+        .background(GlassBackdrop())
         .navigationTitle("회원가입")
         // 기존 회원가입 성공 alert를 ActiveAlert로 통합
         .alert(item: $activeAlert) { alert in
@@ -345,7 +346,7 @@ struct SignUpView: View {
                     .font(.system(size: 20))
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .glassSurface(radius: 10)
             .cornerRadius(8)
             .padding(.horizontal, 30)
 
@@ -463,7 +464,7 @@ struct SignUpView: View {
                     .font(.system(size: 20))
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .glassSurface(radius: 10)
             .cornerRadius(8)
             .padding(.horizontal, 30)
             
@@ -504,7 +505,7 @@ struct SignUpView: View {
                     TextField("인증번호 입력", text: $viewModel.verificationCode)
                         .keyboardType(.numberPad)
                         .padding()
-                        .background(Color.gray.opacity(0.1))
+                        .glassSurface(radius: 10)
                         .cornerRadius(8)
                     // 타이머 표시
                     Text("\(String(format: "%02d:%02d", viewModel.timerValue/60, viewModel.timerValue % 60))")
@@ -571,7 +572,7 @@ struct SignUpView: View {
                     }
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .glassSurface(radius: 10)
             .cornerRadius(10)
             .padding(.horizontal, 30)
             
@@ -640,7 +641,7 @@ struct SignUpView: View {
                 }
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .glassSurface(radius: 10)
             .cornerRadius(8)
             .padding(.horizontal, 30)
             .onChange(of: viewModel.password) { newValue in
@@ -691,7 +692,7 @@ struct SignUpView: View {
                 }
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .glassSurface(radius: 10)
             .cornerRadius(10)
             .padding(.horizontal, 30)
             

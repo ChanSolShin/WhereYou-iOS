@@ -10,89 +10,99 @@ import CoreLocation
 
 struct AddLocationView: View {
     @ObservedObject var viewModel: AddMeetingViewModel
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
     @State private var searchQuery: String = ""
     @State private var searchResults: [SearchResult] = []
     @State private var selectedLocation: CLLocationCoordinate2D?
     
     var body: some View {
-        VStack {
-            Text("원하는 장소를 터치해주세요")
-                .padding(.top, 10)
-                .font(.headline)
-                .fontWeight(.bold)
-            TextField("장소 검색", text: $searchQuery)
-                .font(.body)
-                .padding(.vertical, 10)
-                .padding(.horizontal, 6)
-                .background(Color(.systemGray6))
-                .cornerRadius(3)
-                .padding(.horizontal)
-                .onChange(of: searchQuery) { newValue in
-                    viewModel.fetchSearchResults(query: newValue) { results in
-                        DispatchQueue.main.async {
-                            self.searchResults = results
-                        }
-                    }
-                }
+        NavigationStack {
+            VStack(spacing: 12) {
+                Text("검색하거나 지도에서 원하는 장소를 터치해 주세요")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
 
-            if !searchResults.isEmpty {
-                List(searchResults, id: \.address) { result in
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(result.title)
-                            .font(.subheadline)
-                        Text(result.address)
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-                    .padding(.vertical, 4)
-                    .onTapGesture {
-                        let address = result.address
-                        viewModel.meeting.meetingAddress = address
-                        viewModel.geocode(address: address) { coordinate in
+                TextField("장소 검색", text: $searchQuery)
+                    .font(.body)
+                    .padding(12)
+                    .glassSurface(radius: 12)
+                    .padding(.horizontal, 16)
+                    .onChange(of: searchQuery) { newValue in
+                        viewModel.fetchSearchResults(query: newValue) { results in
                             DispatchQueue.main.async {
-                                self.selectedLocation = coordinate
+                                searchResults = results
                             }
                         }
-                        searchResults = []
-                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     }
-                }
-                .frame(height: 200)
-                .listStyle(PlainListStyle())
-            }
 
-            ZStack(alignment: .bottomTrailing) {
+                if !searchResults.isEmpty {
+                    List(searchResults, id: \.address) { result in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(result.title)
+                                .font(.subheadline)
+                            Text(result.address)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.vertical, 4)
+                        .onTapGesture {
+                            let address = result.address
+                            viewModel.meeting.meetingAddress = address
+                            viewModel.geocode(address: address) { coordinate in
+                                DispatchQueue.main.async {
+                                    selectedLocation = coordinate
+                                }
+                            }
+                            searchResults = []
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        }
+                        .listRowBackground(Color.clear)
+                    }
+                    .frame(height: 180)
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                }
+
                 MapView(isMarkerEnabled: true, viewModel: viewModel, selectedLocation: $selectedLocation)
-                    .navigationBarHidden(true)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .edgesIgnoringSafeArea(.all)
-                VStack {
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .padding(.horizontal, 16)
+            }
+            .padding(.top, 12)
+            .safeAreaInset(edge: .bottom) {
+                VStack(spacing: 12) {
                     Text(viewModel.meeting.meetingAddress ?? "지정 된 장소 없음")
                         .font(.headline)
                         .multilineTextAlignment(.center)
-                        .fontWeight(.bold)
-                        .background(Color.black)
-                        .foregroundColor(.white)
-                        .cornerRadius(5)
+                        .frame(maxWidth: .infinity)
+                        .padding(12)
+                        .glassSurface(radius: 12)
 
-                    HStack {
-                        Button("선택") {
-                            presentationMode.wrappedValue.dismiss()
-                        }
-                        .font(.title2)
-                        .foregroundColor(.white)
-                        .frame(width: 100, height: 50)
-                        .background(Color.blue)
-                        .cornerRadius(30)
-                        .padding(.bottom, 20)
+                    Button {
+                        dismiss()
+                    } label: {
+                        Text("이 장소 선택").frame(maxWidth: .infinity)
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.horizontal, 20)
+                    .glassPrimaryAction()
+                    .controlSize(.large)
+                    .disabled(viewModel.meeting.meetingAddress == nil)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(GlassBackdrop())
+            }
+            .background(GlassBackdrop())
+            .navigationTitle("장소 선택")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("취소") { dismiss() }
                 }
             }
         }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 }
 

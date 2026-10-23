@@ -19,56 +19,56 @@ struct EditMeetingView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
+            ScrollView {
+                VStack(spacing: 20) {
                 Spacer().frame(height: 20)
                 Text("모임 이름을 입력하세요")
                     .font(.title2)
                 TextField("모임 이름", text: $viewModel.meetingName)
                     .font(.system(size: 16))
                     .autocapitalization(.none)
-                    .frame(width: 350, height: 40)
+                    .frame(maxWidth: .infinity, minHeight: 40)
                     .keyboardType(.default)
-                    .background(Color.gray.opacity(0.2))
+                    .glassSurface(radius: 10)
+                    .padding(.horizontal, 24)
                 
                 Button(action: {
                     showDatePicker.toggle()
                 }) {
-                    Text("날짜 선택")
-                        .font(.headline)
-                        .padding()
+                    Label("날짜 선택", systemImage: "calendar")
                         .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .frame(width: 100, height: 50)
                 }
+                .glassSecondaryAction()
+                .controlSize(.large)
+                .padding(.horizontal, 24)
                 HStack {
                     Image(systemName: "calendar")
                         .foregroundColor(.gray)
                         .imageScale(.small)
                     Text("\(viewModel.meetingDate, formatter: dateFormatter)")
                         .font(.headline)
+                        .multilineTextAlignment(.center)
                 }
+                .padding(.horizontal, 16)
                 
                 Button(action: {
                     showLocationModal.toggle()
                 }) {
-                    Text("장소 선택")
-                        .font(.headline)
-                        .padding()
+                    Label("장소 선택", systemImage: "map")
                         .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .frame(width: 100, height: 50)
                 }
+                .glassSecondaryAction()
+                .controlSize(.large)
+                .padding(.horizontal, 24)
                 HStack {
                     Image(systemName: "map")
                         .foregroundColor(.gray)
                         .imageScale(.small)
                     Text(viewModel.meetingAddress)
                         .font(.headline)
+                        .multilineTextAlignment(.center)
                 }
+                .padding(.horizontal, 16)
                 
                 Button(action: {
                     viewModel.updateMeetingData(meetingID: meetingID)
@@ -77,38 +77,26 @@ struct EditMeetingView: View {
                     
                 }) {
                     Text("수정하기")
-                        .font(.title2)
-                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(30)
-                        .frame(width: 150, height: 50)
                 }
+                .glassPrimaryAction()
+                .controlSize(.large)
+                .padding(.horizontal, 24)
                 Text("모임은 \(viewModel.meetingDate.addingTimeInterval(7200), formatter: dateFormatter)에 삭제됩니다")
                     .font(.footnote)
                     .foregroundColor(.red)
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
+                }
+                .padding(.vertical, 20)
+                .padding(.bottom, 100)
+                .frame(maxWidth: .infinity)
             }
-            .padding(.vertical, 20)
-            .padding(.bottom, 100)
             .sheet(isPresented: $showLocationModal) {
                 EditLocationView(viewModel: viewModel)
             }
             .sheet(isPresented: $showDatePicker) {
-                VStack {
-                    DatePicker("Select a date", selection: $viewModel.meetingDate, in: Date()..., displayedComponents: [.date, .hourAndMinute])
-                        .datePickerStyle(GraphicalDatePickerStyle())
-                        .environment(\.locale, Locale(identifier: String(Locale.preferredLanguages[0])))
-                        .padding()
-                    
-                    Button("완료") {
-                        showDatePicker = false
-                    }
-                    .font(.headline)
-                    .padding(.leading, 300)
-                }
+                GlassDatePickerSheet(date: $viewModel.meetingDate)
             }
             .onAppear {
                 viewModel.fetchMeetingData(meetingID: meetingID)
@@ -138,6 +126,7 @@ struct EditMeetingView: View {
                         .bold()
                 }
             }
+            .background(GlassBackdrop())
         }
     }
     
@@ -145,7 +134,7 @@ struct EditMeetingView: View {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.timeZone = TimeZone(abbreviation: "KST")
-        formatter.dateFormat = "YYYY년 M월 d일 a h:mm"
+        formatter.dateFormat = "yyyy년 M월 d일 a h:mm"
         return formatter
     }
 }

@@ -21,15 +21,12 @@ struct ReportView: View {
             
             Text("신고내용")
                 .font(.headline)
-                .foregroundColor(Color.black)
+                .foregroundColor(.primary)
             
             TextEditor(text: $viewModel.reportContent)
                 .padding()
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.gray, lineWidth: 1)
-                )
-                .background(Color.white)
+                .scrollContentBackground(.hidden)
+                .glassSurface(radius: 8)
                 .frame(height: 200)
                 .focused($isTextEditorFocused)
                 .overlay(
@@ -62,6 +59,7 @@ struct ReportView: View {
             }
         }
         .padding()
+        .background(GlassBackdrop())
         .overlay(
             Group {
                 if viewModel.isSubmitting {

@@ -13,6 +13,7 @@ struct MeetingListView: View {
     @State private var lastOpenedMeetingID: String?
     @State private var hideForMeetingRequests = false
     @State private var hideForMeetingDetail = false
+    @FocusState private var isSearchFocused: Bool
 
     init(isTabBarHidden: Binding<Bool>) {
         self._isTabBarHidden = isTabBarHidden
@@ -39,6 +40,7 @@ struct MeetingListView: View {
             .hidden()
 
             ZStack {
+                GlassBackdrop()
                 VStack {
                     if viewModel.shouldShowBirthdayBanner, let name = viewModel.userProfile?.name {
                         HStack {
@@ -52,13 +54,55 @@ struct MeetingListView: View {
                             }
                         }
                         .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .glassSurface(radius: 14)
+                        .padding(.horizontal, 16)
                     }
 
-                    if viewModel.meetings.isEmpty {
+                    HStack(spacing: 10) {
+                        HStack(spacing: 10) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.secondary)
+                            TextField("모임 검색", text: $viewModel.searchText)
+                                .focused($isSearchFocused)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .submitLabel(.search)
+                                .onSubmit { isSearchFocused = false }
+                            if !viewModel.searchText.isEmpty {
+                                Button {
+                                    viewModel.searchText = ""
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("검색어 지우기")
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .frame(height: 48)
+                        .glassSurface(radius: 18)
+
+                        if isSearchFocused {
+                            Button("취소") {
+                                viewModel.searchText = ""
+                                isSearchFocused = false
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(GlassTheme.blue)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+
+                    if viewModel.filteredMeetings.isEmpty {
                         VStack {
                             Spacer()
                             HStack {
-                                Text("+ 버튼을 눌러서 새로운 모임을 생성하세요!")
+                                Text(viewModel.searchText.isEmpty
+                                     ? "+ 버튼을 눌러서 새로운 모임을 생성하세요!"
+                                     : "검색 결과가 없습니다")
                                     .font(.headline)
                                     .foregroundColor(.gray)
                                     .padding()
@@ -75,7 +119,7 @@ struct MeetingListView: View {
                                             Text(meeting.title)
                                                 .font(.headline)
                                                 .padding()
-                                                .foregroundColor(.black)
+                                                .foregroundStyle(.primary)
                                             Spacer()
                                             VStack(alignment: .trailing) {
                                                 Text("\(meeting.date, formatter: viewModel.listDateFormatter)")
@@ -91,13 +135,7 @@ struct MeetingListView: View {
                                             .padding()
                                         }
                                         .padding(.vertical, 8)
-                                        .background(Color.white)
-                                        .cornerRadius(8)
-                                        .shadow(radius: 2)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.blue, lineWidth: 2)
-                                        )
+                                        .glassSurface(radius: 12)
                                     }
                                     Divider()
                                         .padding(.vertical, 2)
@@ -105,12 +143,13 @@ struct MeetingListView: View {
                             }
                             .padding(.horizontal)
                         }
+                        .scrollDismissesKeyboard(.interactively)
                         .padding(.top, 10)
                     }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-            .overlay(
+            .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
                 NavigationLink(
                     destination: AddMeetingView(viewModel: addMeetingViewModel)
                         .onAppear { isTabBarHidden = true }
@@ -120,19 +159,19 @@ struct MeetingListView: View {
                         }
                 ) {
                     Image(systemName: "plus")
-                        .font(.largeTitle)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .clipShape(Circle())
-                        .shadow(radius: 5)
+                        .font(.system(size: 26, weight: .semibold))
+                        .frame(width: 58, height: 58)
+                        .foregroundStyle(GlassTheme.blue)
+                        .glassSubtleCircle()
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("모임 추가")
                 .padding(.trailing, 20)
-                .padding(.bottom, 40),
-                alignment: .bottomTrailing
-            )
+                .padding(.bottom, 12)
+            }
             .navigationTitle("모임")
-            .searchable(text: $viewModel.searchText, prompt: "검색어를 입력하세요")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -182,6 +221,7 @@ struct MeetingListView: View {
                 viewModel.meetingViewModel.fetchPendingMeetingRequests()
             }
         }
+        .background(GlassBackdrop())
         .onReceive(router.$pendingRoute) { dest in
             guard let dest = dest else { return }
             switch dest {

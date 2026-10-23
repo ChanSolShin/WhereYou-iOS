@@ -15,8 +15,8 @@ struct AddFriendEmailModal: View {
         VStack(spacing: 20) {
             Text("추가할 친구의 이메일을 입력해 주세요")
             TextField("이메일", text: $viewModel.friendEmailInput)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
+                .glassSurface(radius: 10)
                 .keyboardType(.emailAddress)
             Button(action: {
                 viewModel.sendFriendRequest(toEmail: viewModel.friendEmailInput)
@@ -33,5 +33,7 @@ struct AddFriendEmailModal: View {
             .padding(.horizontal)
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(GlassBackdrop())
     }
 }

@@ -16,6 +16,8 @@ struct MainTabView: View {
 
     var body: some View {
         CustomTabView(isTabBarHidden: $isTabBarHidden)
+            .ignoresSafeArea()
+            .background(GlassBackdrop())
             .onAppear {
                 isTabBarHidden = false
                 checkUserValidity()  // 사용자 유효성 검사 호출
@@ -53,6 +55,7 @@ struct MainTabView: View {
 struct CustomTabView: UIViewControllerRepresentable {
     @Binding var isTabBarHidden: Bool
     @EnvironmentObject var router: AppRouter
+    @EnvironmentObject var loginViewModel: LoginViewModel
 
     // Keep router in sync when user taps tabs
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -72,6 +75,8 @@ struct CustomTabView: UIViewControllerRepresentable {
         let tabBarController = UITabBarController()
         tabBarController.delegate = context.coordinator
 
+        tabBarController.tabBar.tintColor = UIColor(GlassTheme.blue)
+
         let meetingListView = UIHostingController(
             rootView: MeetingListView(isTabBarHidden: $isTabBarHidden)
                 .environmentObject(router)
@@ -87,6 +92,7 @@ struct CustomTabView: UIViewControllerRepresentable {
         let profileView = UIHostingController(
             rootView: ProfileView(isTabBarHidden: $isTabBarHidden)
                 .environmentObject(router)
+                .environmentObject(loginViewModel)
         )
         profileView.tabBarItem = UITabBarItem(title: "설정", image: UIImage(systemName: "gear"), tag: 2)
 
@@ -100,5 +106,127 @@ struct CustomTabView: UIViewControllerRepresentable {
             uiViewController.selectedIndex = router.selectedTabIndex
         }
         uiViewController.tabBar.isHidden = isTabBarHidden
+    }
+}
+
+// Translucent surfaces share the same treatment without changing a screen's layout.
+enum GlassTheme {
+    static let blue = Color(red: 0.18, green: 0.43, blue: 0.94)
+    static let cyan = Color(red: 0.13, green: 0.78, blue: 0.84)
+}
+
+struct GlassBackdrop: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                LinearGradient(
+                    colors: colorScheme == .dark
+                        ? [Color(red: 0.06, green: 0.13, blue: 0.24), Color(red: 0.04, green: 0.20, blue: 0.25)]
+                        : [Color(red: 0.85, green: 0.93, blue: 1.0), Color(red: 0.87, green: 0.98, blue: 0.97)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+
+                Circle()
+                    .fill(GlassTheme.cyan.opacity(colorScheme == .dark ? 0.28 : 0.42))
+                    .frame(width: 280, height: 280)
+                    .blur(radius: 50)
+                    .position(x: geometry.size.width * 0.9, y: 80)
+
+                Circle()
+                    .fill(GlassTheme.blue.opacity(colorScheme == .dark ? 0.25 : 0.27))
+                    .frame(width: 320, height: 320)
+                    .blur(radius: 60)
+                    .position(x: geometry.size.width * 0.1, y: geometry.size.height * 0.85)
+            }
+        }
+        .ignoresSafeArea()
+        .accessibilityHidden(true)
+    }
+}
+
+struct GlassPanel: View {
+    @Environment(\.colorScheme) private var colorScheme
+    var radius: CGFloat = 18
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        shape
+            .fill(Color.white.opacity(colorScheme == .dark ? 0.06 : 0.12))
+            .overlay {
+                shape.strokeBorder(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(colorScheme == .dark ? 0.35 : 0.55),
+                            Color.white.opacity(colorScheme == .dark ? 0.08 : 0.20)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+            }
+            .shadow(color: GlassTheme.blue.opacity(colorScheme == .dark ? 0.12 : 0.08), radius: 12, y: 5)
+    }
+}
+
+struct ClearGlassButtonStyle: ButtonStyle {
+    var isPrimary = false
+
+    @ViewBuilder
+    func makeBody(configuration: Configuration) -> some View {
+        let label = configuration.label
+            .foregroundStyle(isPrimary ? GlassTheme.blue : Color.primary)
+            .fontWeight(isPrimary ? .semibold : .regular)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .frame(minHeight: 44)
+            .opacity(configuration.isPressed ? 0.65 : 1)
+
+        if #available(iOS 26.0, *) {
+            label.glassEffect(.clear.interactive(), in: .rect(cornerRadius: 16))
+        } else {
+            label.background(GlassPanel(radius: 16))
+        }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func glassSurface(radius: CGFloat = 18) -> some View {
+        if #available(iOS 26.0, *) {
+            glassEffect(.clear, in: .rect(cornerRadius: radius))
+        } else {
+            background(GlassPanel(radius: radius))
+        }
+    }
+
+    func glassPrimaryAction() -> some View {
+        buttonStyle(ClearGlassButtonStyle(isPrimary: true))
+    }
+
+    func glassSecondaryAction() -> some View {
+        buttonStyle(ClearGlassButtonStyle())
+    }
+
+    @ViewBuilder
+    func glassSelectionAction(selected: Bool) -> some View {
+        if selected {
+            glassPrimaryAction()
+        } else {
+            glassSecondaryAction()
+        }
+    }
+
+    @ViewBuilder
+    func glassSubtleCircle() -> some View {
+        if #available(iOS 26.0, *) {
+            glassEffect(.clear.interactive(), in: Circle())
+        } else {
+            background(Color.white.opacity(0.12), in: Circle())
+                .overlay(Circle().strokeBorder(Color.white.opacity(0.6), lineWidth: 1))
+        }
     }
 }
