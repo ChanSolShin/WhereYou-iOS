@@ -11,7 +11,6 @@ struct LoginView: View {
     
     @EnvironmentObject var viewModel: LoginViewModel  // 전역 LoginViewModel 사용 (초기화하지 않음)
     @State private var showPassword = false
-    @State private var showAlert = false  // 로그인 실패 Alert용
     
     var body: some View {
         NavigationView {
@@ -86,7 +85,15 @@ struct LoginView: View {
                 Button(action: {
                     viewModel.login()
                 }) {
-                    Text("이메일로 로그인")
+                    Group {
+                        if viewModel.isLoggingIn {
+                            ProgressView()
+                                .tint(.white)
+                                .accessibilityLabel("로그인 중")
+                        } else {
+                            Text("이메일로 로그인")
+                        }
+                    }
                         .frame(width: 350, height: 50)
                         .background(Color.blue)
                         .foregroundColor(.white)
@@ -94,6 +101,7 @@ struct LoginView: View {
                         .cornerRadius(40)
                 }
                 .contentShape(Rectangle())
+                .disabled(viewModel.isLoggingIn)
                 .padding(.bottom, 20)
                 
                 HStack {
@@ -116,32 +124,14 @@ struct LoginView: View {
                 .padding(.horizontal, 40)
                 Spacer()
             }
-            .onAppear {
-                let loggedInStatus = UserDefaults.standard.bool(forKey: "isLoggedIn")
-                print(loggedInStatus)
-            }
-            .fullScreenCover(isPresented: $viewModel.isLoggedIn) {
-                MainTabView()
-            }
-            .alert(isPresented: Binding<Bool>(
-                get: {
-                    showAlert || viewModel.currentAlert != nil
-                },
-                set: { newValue in
-                    if !newValue {
-                        showAlert = false
-                        viewModel.currentAlert = nil
-                    }
-                }
-            )) {
-                if showAlert {
-                    return Alert(
-                        title: Text("로그인 실패"),
-                        message: Text("이메일 또는 비밀번호가 일치하지 않습니다."),
-                        dismissButton: .default(Text("확인"))
-                    )
-                } else if let alertType = viewModel.currentAlert {
-                    switch alertType {
+            .alert(item: $viewModel.currentAlert) { alertType in
+                switch alertType {
+                    case .loginFailed(let message):
+                        return Alert(
+                            title: Text("로그인 실패"),
+                            message: Text(message),
+                            dismissButton: .default(Text("확인"))
+                        )
                     case .forcedLogout:
                         return Alert(
                             title: Text("강제 로그아웃"),
@@ -159,15 +149,6 @@ struct LoginView: View {
                                 viewModel.cancelNewDeviceLogin()
                             })
                         )
-                    }
-                } else {
-                    return Alert(title: Text(""), message: Text(""), dismissButton: .default(Text("확인")))
-                }
-            }
-            .onChange(of: viewModel.loginErrorMessage) { errorMessage in
-                if errorMessage != nil {
-                    showAlert = true
-                    viewModel.loginErrorMessage = nil
                 }
             }
         }
