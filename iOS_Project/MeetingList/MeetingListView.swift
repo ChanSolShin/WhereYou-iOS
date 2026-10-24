@@ -150,7 +150,7 @@ struct MeetingListView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-            .overlay(alignment: .bottomTrailing) {
+            .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
                 Button {
                     showingAddMeeting = true
                 } label: {
@@ -327,8 +327,6 @@ struct MeetingListView: View {
     }
 
     private func updateTabBarVisibility() {
-        if router.selectedTabIndex == AppTabIndex.meeting.rawValue {
-            isTabBarHidden = hideForMeetingRequests || hideForMeetingDetail
-        }
+        isTabBarHidden = hideForMeetingRequests || hideForMeetingDetail
     }
 }
