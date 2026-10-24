@@ -1,6 +1,9 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { createMeetingMemberNotificationHandler } = require('../meetingMemberNotification');
+const {
+  createMeetingMemberNotificationHandler,
+  cleanupExpiredMeetingNotificationCooldowns,
+} = require('../meetingMemberNotification');
 
 function fakeServices() {
   const records = new Map([
@@ -11,6 +14,7 @@ function fakeServices() {
   const messages = [];
   let nextId = 0;
   let sendError;
+  let beforeTransaction;
 
   const snapshot = (ref) => ({
     exists: records.has(ref.path),
@@ -24,9 +28,30 @@ function fakeServices() {
           ref.get = async () => snapshot(ref);
           return ref;
         },
+        where(field, operator, cutoff) {
+          assert.equal(operator, '<=');
+          return {
+            limit(count) {
+              return {
+                async get() {
+                  const docs = [...records.entries()]
+                    .filter(([path, data]) => path.startsWith(`${name}/`) && data[field] <= cutoff)
+                    .slice(0, count)
+                    .map(([path]) => ({ ref: { path } }));
+                  return { docs };
+                },
+              };
+            },
+          };
+        },
       };
     },
     async runTransaction(callback) {
+      if (beforeTransaction) {
+        const change = beforeTransaction;
+        beforeTransaction = undefined;
+        change();
+      }
       const changes = [];
       const transaction = {
         get: async (ref) => snapshot(ref),
@@ -60,6 +85,7 @@ function fakeServices() {
     db, messaging, records, messages,
     logger: { error() {} },
     setSendError: (error) => { sendError = error; },
+    setBeforeTransaction: (callback) => { beforeTransaction = callback; },
   };
 }
 
@@ -121,4 +147,40 @@ test('releases the cooldown after a temporary FCM failure', async () => {
   await assert.rejects(send(request), { code: 'unavailable' });
   services.setSendError(null);
   assert.deepEqual(await send(request), { sent: true });
+});
+
+test('deletes cooldown records after 30 seconds without changing the send limit', async () => {
+  const services = fakeServices();
+  let currentTime = 100_000;
+  const send = createMeetingMemberNotificationHandler({ ...services, now: () => currentTime });
+  const cleanup = () => cleanupExpiredMeetingNotificationCooldowns({
+    ...services, now: () => currentTime,
+  });
+  const path = '_meetingNotificationCooldowns/meeting_sender_recipient';
+
+  await send(request);
+  currentTime = 129_999;
+  assert.deepEqual(await cleanup(), { deleted: 0, failed: 0 });
+  assert.equal(services.records.has(path), true);
+  await assert.rejects(send(request), { code: 'resource-exhausted' });
+
+  currentTime = 130_000;
+  assert.deepEqual(await cleanup(), { deleted: 1, failed: 0 });
+  assert.equal(services.records.has(path), false);
+  assert.deepEqual(await send(request), { sent: true });
+});
+
+test('keeps a cooldown record refreshed while cleanup was querying it', async () => {
+  const services = fakeServices();
+  const path = '_meetingNotificationCooldowns/meeting_sender_recipient';
+  services.records.set(path, { lastSentAtMs: 100_000, reservationId: 'old' });
+  services.setBeforeTransaction(() => {
+    services.records.set(path, { lastSentAtMs: 140_000, reservationId: 'new' });
+  });
+
+  const result = await cleanupExpiredMeetingNotificationCooldowns({
+    ...services, now: () => 150_000,
+  });
+  assert.deepEqual(result, { deleted: 0, failed: 0 });
+  assert.equal(services.records.get(path).reservationId, 'new');
 });

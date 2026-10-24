@@ -4,7 +4,10 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require('firebase-functions/scheduler'); // V2에서는 onSchedule 사용
 const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { onCall } = require('firebase-functions/v2/https');
-const { createMeetingMemberNotificationHandler } = require('./meetingMemberNotification');
+const {
+  createMeetingMemberNotificationHandler,
+  cleanupExpiredMeetingNotificationCooldowns,
+} = require('./meetingMemberNotification');
 
 admin.initializeApp({
   databaseURL: "https://meetingapp-2985d-default-rtdb.firebaseio.com"
@@ -17,6 +20,14 @@ const messaging = admin.messaging(); // Firebase Cloud Messaging 인스턴스 �
 exports.sendMeetingMemberNotification = onCall(
   { region: 'us-central1' },
   createMeetingMemberNotificationHandler({ db, messaging })
+);
+
+exports.cleanupExpiredMeetingNotificationCooldowns = onSchedule(
+  { schedule: 'every 1 minutes', region: 'us-central1' },
+  async () => {
+    const { deleted } = await cleanupExpiredMeetingNotificationCooldowns({ db });
+    if (deleted > 0) console.log(`🗑 만료된 모임 알림 제한 기록 ${deleted}개 삭제`);
+  }
 );
 
 // ✅ 친구 요청 알림 함수 (Firestore에 friendRequests 문서가 생성될 때)
