@@ -21,6 +21,7 @@ struct MainTabView: View {
             .onAppear {
                 isTabBarHidden = false
                 checkUserValidity()  // 사용자 유효성 검사 호출
+                PushTokenManager.syncCurrentToken()
             }
     }
 
