@@ -42,118 +42,121 @@ struct MeetingView: View {
             }
             .padding(.bottom, 10)
             
-            if meetingViewModel.locationCoordinator.authorizationStatus == .authorizedAlways {
-                MeetingMapView(
-                    selectedUserLocation: $meetingViewModel.selectedUserLocation,
-                    meeting: MeetingModel(
-                        id: meeting.id,
-                        title: meeting.title,
-                        date: meeting.date,
-                        meetingAddress: meeting.meetingAddress,
-                        meetingLocation: meeting.meetingLocation,
-                        meetingMemberIDs: meeting.meetingMemberIDs,
-                        meetingMasterID: meeting.meetingMasterID,
-                        isLocationTrackingEnabled: meeting.isLocationTrackingEnabled
-                    ),
-                    meetingViewModel: meetingViewModel
-                )
-                .frame(height: min(450, UIScreen.main.bounds.height * 0.50))
-            } else {
-                VStack(spacing: 12) {
-                    Text("위치 권한이 필요합니다")
-                        .font(.headline)
-                    Text("상대방의 위치를 보려면, 내 위치도 공유해야 합니다.")
-                        .font(.subheadline)
-                        .multilineTextAlignment(.center)
-                    Button("설정으로 이동") {
-                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                            UIApplication.shared.open(url)
+            // 지도와 모임장소 버튼 간격 20pt
+            VStack(spacing: 20) {
+                if meetingViewModel.locationCoordinator.authorizationStatus == .authorizedAlways {
+                    MeetingMapView(
+                        selectedUserLocation: $meetingViewModel.selectedUserLocation,
+                        meeting: MeetingModel(
+                            id: meeting.id,
+                            title: meeting.title,
+                            date: meeting.date,
+                            meetingAddress: meeting.meetingAddress,
+                            meetingLocation: meeting.meetingLocation,
+                            meetingMemberIDs: meeting.meetingMemberIDs,
+                            meetingMasterID: meeting.meetingMasterID,
+                            isLocationTrackingEnabled: meeting.isLocationTrackingEnabled
+                        ),
+                        meetingViewModel: meetingViewModel
+                    )
+                    // 실제 남는 높이 기준: 공간이 부족 시 지도 높이 줄어듦
+                    .frame(maxHeight: 450)
+                } else {
+                    VStack(spacing: 12) {
+                        Text("위치 권한이 필요합니다")
+                            .font(.headline)
+                        Text("상대방의 위치를 보려면, 내 위치도 공유해야 합니다.")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                        Button("설정으로 이동") {
+                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(url)
+                            }
                         }
+                        .glassSecondaryAction()
+                        .controlSize(.large)
                     }
-                    .glassSecondaryAction()
-                    .controlSize(.large)
-                }
-                .frame(height: min(450, UIScreen.main.bounds.height * 0.50))
-                .glassSurface(radius: 16)
-                .padding(.horizontal, 16)
-            }
-            
-            Button(action: {
-                meetingViewModel.stopTrackingMember()
-                meetingViewModel.selectedUserLocation = nil
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    meetingViewModel.selectedUserLocation = meeting.meetingLocation
+                    .frame(maxHeight: 450)
+                    .glassSurface(radius: 16)
+                    .padding(.horizontal, 16)
                 }
 
-                selectedMemberID = nil
-                selectedButton = "meetingLocation"
-            }) {
-                Text("모임장소")
+                Button(action: {
+                    meetingViewModel.stopTrackingMember()
+                    meetingViewModel.selectedUserLocation = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        meetingViewModel.selectedUserLocation = meeting.meetingLocation
+                    }
+
+                    selectedMemberID = nil
+                    selectedButton = "meetingLocation"
+                }) {
+                    Text("모임장소")
+                }
+                .glassSelectionAction(selected: selectedButton == "meetingLocation")
+                .controlSize(.large)
             }
-            .glassSelectionAction(selected: selectedButton == "meetingLocation")
-            .controlSize(.large)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 16) {
                     ForEach(sortedMemberIDs(), id: \.self) { memberID in
-                        ZStack {
-                            Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
+                        VStack(spacing: 0) {
+                            // 모임장 왕관: 모든 멤버에 같은 자리를 두어 버튼 높이를 맞춤 (기존 offset -40 위치와 동일)
+                            Image(systemName: "crown.fill")
+                                .foregroundColor(.yellow)
+                                .frame(height: 32)
+                                .opacity(memberID == (meetingViewModel.meetingMasterID ?? meeting.meetingMasterID) ? 1 : 0)
 
-                            if memberID == (meetingViewModel.meetingMasterID ?? meeting.meetingMasterID) {
-                                Image(systemName: "crown.fill")
-                                    .foregroundColor(.yellow)
-                                    .offset(x: 0, y: -40)
-                                    .zIndex(1)
-                            }
-                        }
-                        .fontWeight(selectedMemberID == memberID ? .semibold : .regular)
-                        .foregroundColor(selectedMemberID == memberID ? GlassTheme.blue : .primary)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .frame(minHeight: 44)
-                        .background {
-                            if selectedMemberID == memberID {
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(GlassTheme.blue.opacity(0.12))
-                            }
-                        }
-                        .glassSurface(radius: 16)
-                        .contentShape(RoundedRectangle(cornerRadius: 16))
-                        .padding(.vertical, 2)
-                        .overlay {
-                            MemberTouchCapture(
-                                onTap: { selectMemberLocation(memberID) },
-                                onHoldStart: { window, anchor in
-                                    beginQuickNotification(for: memberID, in: window, anchor: anchor)
-                                },
-                                onHoldMove: { movement in
-                                    guard radialMemberID == memberID else { return }
-                                    let highlighted = preset(for: movement)
-                                    if highlighted != radialHighlightedPreset {
-                                        radialHighlightedPreset = highlighted
-                                        MeetingQuickOverlayPresenter.shared.update(highlightedPreset: highlighted)
-                                        if highlighted != nil {
-                                            UISelectionFeedbackGenerator().selectionChanged()
-                                        }
+                            Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
+                                .fontWeight(selectedMemberID == memberID ? .semibold : .regular)
+                                .foregroundColor(selectedMemberID == memberID ? GlassTheme.blue : .primary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .frame(minHeight: 44)
+                                .background {
+                                    if selectedMemberID == memberID {
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .fill(GlassTheme.blue.opacity(0.12))
                                     }
-                                },
-                                onHoldEnd: { movement in
-                                    let selectedPreset = preset(for: movement)
-                                    let shouldSend = radialMemberID == memberID && canNotify(memberID)
-                                    radialMemberID = nil
-                                    radialHighlightedPreset = nil
-                                    MeetingQuickOverlayPresenter.shared.dismiss()
-                                    if shouldSend, let selectedPreset {
-                                        Task { await sendQuickNotification(selectedPreset, to: memberID) }
-                                    }
-                                },
-                                onHoldCancel: {
-                                    guard radialMemberID == memberID else { return }
-                                    radialMemberID = nil
-                                    radialHighlightedPreset = nil
-                                    MeetingQuickOverlayPresenter.shared.dismiss()
                                 }
-                            )
+                                .glassSurface(radius: 16)
+                                .contentShape(RoundedRectangle(cornerRadius: 16))
+                                .padding(.vertical, 2)
+                                .overlay {
+                                    MemberTouchCapture(
+                                        onTap: { selectMemberLocation(memberID) },
+                                        onHoldStart: { window, anchor in
+                                            beginQuickNotification(for: memberID, in: window, anchor: anchor)
+                                        },
+                                        onHoldMove: { movement in
+                                            guard radialMemberID == memberID else { return }
+                                            let highlighted = preset(for: movement)
+                                            if highlighted != radialHighlightedPreset {
+                                                radialHighlightedPreset = highlighted
+                                                MeetingQuickOverlayPresenter.shared.update(highlightedPreset: highlighted)
+                                                if highlighted != nil {
+                                                    UISelectionFeedbackGenerator().selectionChanged()
+                                                }
+                                            }
+                                        },
+                                        onHoldEnd: { movement in
+                                            let selectedPreset = preset(for: movement)
+                                            let shouldSend = radialMemberID == memberID && canNotify(memberID)
+                                            radialMemberID = nil
+                                            radialHighlightedPreset = nil
+                                            MeetingQuickOverlayPresenter.shared.dismiss()
+                                            if shouldSend, let selectedPreset {
+                                                Task { await sendQuickNotification(selectedPreset, to: memberID) }
+                                            }
+                                        },
+                                        onHoldCancel: {
+                                            guard radialMemberID == memberID else { return }
+                                            radialMemberID = nil
+                                            radialHighlightedPreset = nil
+                                            MeetingQuickOverlayPresenter.shared.dismiss()
+                                        }
+                                    )
+                                }
                         }
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel(meetingViewModel.meetingMemberNames[memberID] ?? "모임 멤버")
@@ -175,8 +178,10 @@ struct MeetingView: View {
                 }
                 .padding(.horizontal)
                 .padding(.horizontal)
-                .padding(.top, 35)
+                .padding(.top, 3)
             }
+            // 콘텐츠 높이로 고정: 남는 높이를 차지X
+            .fixedSize(horizontal: false, vertical: true)
 
             Text(Auth.auth().currentUser == nil
                  ? "로그인 후 알림을 보낼 수 있어요"
@@ -511,3 +516,4 @@ private struct MemberTouchCapture: UIViewRepresentable {
         }
     }
 }
+
