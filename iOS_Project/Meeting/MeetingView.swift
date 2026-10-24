@@ -93,6 +93,16 @@ struct MeetingView: View {
             .glassSelectionAction(selected: selectedButton == "meetingLocation")
             .controlSize(.large)
 
+            // 멤버 버튼 영역 안내 문구
+            Text(Auth.auth().currentUser == nil
+                 ? "로그인 후 알림을 보낼 수 있어요"
+                 : "탭하면 위치 확인 · 다른 멤버를 길게 누르면 빠른 알림")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 16) {
                     ForEach(sortedMemberIDs(), id: \.self) { memberID in
@@ -177,14 +187,8 @@ struct MeetingView: View {
                 .padding(.horizontal)
                 .padding(.top, 35)
             }
-
-            Text(Auth.auth().currentUser == nil
-                 ? "로그인 후 알림을 보낼 수 있어요"
-                 : "탭하면 위치 확인 · 다른 멤버를 길게 누르면 빠른 알림")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, minHeight: 52)
-                .padding(.horizontal, 16)
+            // 콘텐츠 높이로 고정: 남는 높이를 차지X
+            .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(GlassBackdrop())
