@@ -23,6 +23,7 @@
 		EA86C1262CC2F15700989E43 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C10A2CC2F15700989E43 /* LoginView.swift */; };
 		EA86C1272CC2F15700989E43 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C10B2CC2F15700989E43 /* LoginViewModel.swift */; };
 		EA86C1282CC2F15700989E43 /* MeetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C10D2CC2F15700989E43 /* MeetingView.swift */; };
+		F11300032D00000000000001 /* MeetingQuickNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11300042D00000000000001 /* MeetingQuickNotification.swift */; };
 		EA86C1292CC2F15700989E43 /* MeetingListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C10F2CC2F15700989E43 /* MeetingListModel.swift */; };
 		EA86C12A2CC2F15700989E43 /* MeetingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1102CC2F15700989E43 /* MeetingListView.swift */; };
 		EA86C12B2CC2F15700989E43 /* MeetingListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA86C1112CC2F15700989E43 /* MeetingListViewModel.swift */; };
@@ -51,6 +52,7 @@
 		EAB9CBCE2CD0037300BFA8DD /* AddFriendEmailModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAB9CBCD2CD0036D00BFA8DD /* AddFriendEmailModal.swift */; };
 		EAD481B02CBD7D4B0052D22B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EAD481AF2CBD7D4B0052D22B /* FirebaseAuth */; };
 		EAD481B22CBD7D4B0052D22B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EAD481B12CBD7D4B0052D22B /* FirebaseFirestore */; };
+		F11300012D00000000000001 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = F11300022D00000000000001 /* FirebaseFunctions */; };
 		EAEA149B2CDCC0EE00C7FD9D /* EditMeetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA149A2CDCC0E900C7FD9D /* EditMeetingView.swift */; };
 		EAEA149D2CDCCB0F00C7FD9D /* EditMeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA149C2CDCCB0900C7FD9D /* EditMeetingViewModel.swift */; };
 		EAEA149F2CDCD04800C7FD9D /* EditLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAEA149E2CDCD04000C7FD9D /* EditLocationView.swift */; };
@@ -124,6 +126,7 @@
 		EA86C10A2CC2F15700989E43 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		EA86C10B2CC2F15700989E43 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		EA86C10D2CC2F15700989E43 /* MeetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingView.swift; sourceTree = "<group>"; };
+		F11300042D00000000000001 /* MeetingQuickNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingQuickNotification.swift; sourceTree = "<group>"; };
 		EA86C10F2CC2F15700989E43 /* MeetingListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingListModel.swift; sourceTree = "<group>"; };
 		EA86C1102CC2F15700989E43 /* MeetingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingListView.swift; sourceTree = "<group>"; };
 		EA86C1112CC2F15700989E43 /* MeetingListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingListViewModel.swift; sourceTree = "<group>"; };
@@ -197,6 +200,7 @@
 			files = (
 				EAD481B02CBD7D4B0052D22B /* FirebaseAuth in Frameworks */,
 				EAD481B22CBD7D4B0052D22B /* FirebaseFirestore in Frameworks */,
+				F11300012D00000000000001 /* FirebaseFunctions in Frameworks */,
 				F55D6CF72D66D9D20036E89F /* FirebaseMessaging in Frameworks */,
 				EAF0656F2E22C76D004AC01B /* NMapsMap in Frameworks */,
 				EA5429E72E0B30B3002EC15E /* FirebaseRemoteConfig in Frameworks */,
@@ -273,6 +277,7 @@
 				EAB9CBBB2CC84A5C00BFA8DD /* MeetingMapView.swift */,
 				EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */,
 				EA86C10D2CC2F15700989E43 /* MeetingView.swift */,
+				F11300042D00000000000001 /* MeetingQuickNotification.swift */,
 				EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */,
 			);
 			path = Meeting;
@@ -481,6 +486,7 @@
 			packageProductDependencies = (
 				EAD481AF2CBD7D4B0052D22B /* FirebaseAuth */,
 				EAD481B12CBD7D4B0052D22B /* FirebaseFirestore */,
+				F11300022D00000000000001 /* FirebaseFunctions */,
 				F54542312CE257060043B1E2 /* FirebaseDatabase */,
 				F55D6CF62D66D9D20036E89F /* FirebaseMessaging */,
 				EA5429E62E0B30B3002EC15E /* FirebaseRemoteConfig */,
@@ -629,6 +635,7 @@
 				F5ADB1D02CD90DAA00A1011C /* ProfileModel.swift in Sources */,
 				EA27C0A12D8FCB3A0053F213 /* AddFriendNumberModal.swift in Sources */,
 				EA86C1282CC2F15700989E43 /* MeetingView.swift in Sources */,
+				F11300032D00000000000001 /* MeetingQuickNotification.swift in Sources */,
 				F50FDDBA2CD3A9F2006E96B2 /* FindEmailModel.swift in Sources */,
 				EA6EE1DD2CD39B07002961A9 /* MeetingRequestModel.swift in Sources */,
 				EA86C1292CC2F15700989E43 /* MeetingListModel.swift in Sources */,
@@ -1061,6 +1068,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		F11300022D00000000000001 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EAD481AE2CBD7D4B0052D22B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
 		};
 		EAF0656E2E22C76D004AC01B /* NMapsMap */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -9,6 +9,7 @@ import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
 import Combine
+import UIKit
 
 struct MeetingView: View {
     @Environment(\.dismiss) var dismiss
@@ -24,6 +25,11 @@ struct MeetingView: View {
     @State private var showingKickOutModal = false
     @State private var selectedMemberID: String? = nil
     @State private var selectedButton: String? = nil
+    @State private var notificationRecipient: MeetingNotificationRecipient?
+    @State private var radialMemberID: String?
+    @State private var radialHighlightedPreset: MeetingNotificationPreset?
+    @State private var isSendingNotification = false
+    @State private var toastMessage: String?
     // 강퇴 알림 1회성 표시 플래그
     @State private var showKickedAlert: Bool = false
     
@@ -90,46 +96,119 @@ struct MeetingView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 16) {
                     ForEach(sortedMemberIDs(), id: \.self) { memberID in
-                        Button(action: {
-                            if meetingViewModel.trackedMemberID == memberID {
-                                meetingViewModel.stopTrackingMember()
-                                selectedMemberID = nil
-                            } else {
-                                meetingViewModel.moveToUserLocation(userID: memberID)
-                                selectedMemberID = memberID
-                            }
-                            selectedButton = memberID // 멤버 버튼 선택 상태로 설정
-                        }) {
-                            ZStack {
-                                Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
+                        ZStack {
+                            Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
 
-                                if memberID == (meetingViewModel.meetingMasterID ?? meeting.meetingMasterID) {
-                                    Image(systemName: "crown.fill")
-                                        .foregroundColor(.yellow)
-                                        .offset(x: 0, y: -40)
-                                        .zIndex(1)
+                            if memberID == (meetingViewModel.meetingMasterID ?? meeting.meetingMasterID) {
+                                Image(systemName: "crown.fill")
+                                    .foregroundColor(.yellow)
+                                    .offset(x: 0, y: -40)
+                                    .zIndex(1)
+                            }
+                        }
+                        .fontWeight(selectedMemberID == memberID ? .semibold : .regular)
+                        .foregroundColor(selectedMemberID == memberID ? GlassTheme.blue : .primary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .frame(minHeight: 44)
+                        .background {
+                            if selectedMemberID == memberID {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(GlassTheme.blue.opacity(0.12))
+                            }
+                        }
+                        .glassSurface(radius: 16)
+                        .contentShape(RoundedRectangle(cornerRadius: 16))
+                        .padding(.vertical, 2)
+                        .overlay {
+                            MemberTouchCapture(
+                                onTap: { selectMemberLocation(memberID) },
+                                onHoldStart: { window, anchor in
+                                    beginQuickNotification(for: memberID, in: window, anchor: anchor)
+                                },
+                                onHoldMove: { movement in
+                                    guard radialMemberID == memberID else { return }
+                                    let highlighted = preset(for: movement)
+                                    if highlighted != radialHighlightedPreset {
+                                        radialHighlightedPreset = highlighted
+                                        MeetingQuickOverlayPresenter.shared.update(highlightedPreset: highlighted)
+                                        if highlighted != nil {
+                                            UISelectionFeedbackGenerator().selectionChanged()
+                                        }
+                                    }
+                                },
+                                onHoldEnd: { movement in
+                                    let selectedPreset = preset(for: movement)
+                                    let shouldSend = radialMemberID == memberID && canNotify(memberID)
+                                    radialMemberID = nil
+                                    radialHighlightedPreset = nil
+                                    MeetingQuickOverlayPresenter.shared.dismiss()
+                                    if shouldSend, let selectedPreset {
+                                        Task { await sendQuickNotification(selectedPreset, to: memberID) }
+                                    }
+                                },
+                                onHoldCancel: {
+                                    guard radialMemberID == memberID else { return }
+                                    radialMemberID = nil
+                                    radialHighlightedPreset = nil
+                                    MeetingQuickOverlayPresenter.shared.dismiss()
+                                }
+                            )
+                        }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(meetingViewModel.meetingMemberNames[memberID] ?? "모임 멤버")
+                        .accessibilityAddTraits(.isButton)
+                        .accessibilityAction {
+                            selectMemberLocation(memberID)
+                        }
+                        .accessibilityActions {
+                            if memberID != Auth.auth().currentUser?.uid {
+                                Button("빠른 알림 보내기") {
+                                    openNotificationSheet(for: memberID)
                                 }
                             }
-                            .padding(.top, 2)
                         }
-                        .glassSelectionAction(selected: selectedMemberID == memberID)
-                        .controlSize(.large)
-                        .padding(.vertical, 2)
+                        .accessibilityHint(memberID == Auth.auth().currentUser?.uid
+                                           ? "한 번 탭하면 내 위치 확인"
+                                           : "한 번 탭하면 위치 확인, 길게 누르면 빠른 알림")
                     }
                 }
                 .padding(.horizontal)
                 .padding(.horizontal)
                 .padding(.top, 35)
             }
+
+            Text(Auth.auth().currentUser == nil
+                 ? "로그인 후 알림을 보낼 수 있어요"
+                 : "탭하면 위치 확인 · 다른 멤버를 길게 누르면 빠른 알림")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, minHeight: 52)
+                .padding(.horizontal, 16)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(GlassBackdrop())
+        .overlay(alignment: .bottom) {
+            if let toastMessage {
+                Text(toastMessage)
+                    .font(.subheadline.weight(.medium))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 12)
+                    .glassSurface(radius: 18)
+                    .padding(.bottom, 14)
+                    .accessibilityAddTraits(.updatesFrequently)
+            }
+        }
         .onAppear {
             meetingViewModel.errorMessage = nil
             meetingViewModel.fetchMeetingData(meetingID: meeting.id)
             meetingViewModel.stopTrackingMember()
             selectedMemberID = nil
             selectedButton = nil
+            radialMemberID = nil
+            radialHighlightedPreset = nil
+            MeetingQuickOverlayPresenter.shared.dismiss()
             meetingViewModel.consumeKickedEvent()   // 이전 화면에서 남아있을 수 있는 isKicked 상태 초기화
             showKickedAlert = false                 // 로컬 1회성 알림 플래그 초기화
         }
@@ -138,6 +217,9 @@ struct MeetingView: View {
             meetingViewModel.stopMeetingListeners()
             meetingViewModel.consumeKickedEvent()   // 이 화면을 떠날 때 전역 isKicked 상태 정리
             showKickedAlert = false
+            radialMemberID = nil
+            radialHighlightedPreset = nil
+            MeetingQuickOverlayPresenter.shared.dismiss()
         }
         .navigationTitle(meeting.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -184,6 +266,11 @@ struct MeetingView: View {
         .sheet(isPresented: $showingAddFriendModal) {
             AddSelectedFriend(meeting: meeting)
         }
+        .sheet(item: $notificationRecipient) { recipient in
+            MeetingNotificationSheet(meetingID: meeting.id, recipient: recipient) { message in
+                showToast(message)
+            }
+        }
         .alert(isPresented: $showAlert) {
             Alert(title: Text("알림"), message: Text(alertMessage), dismissButton: .default(Text("확인")))
         }
@@ -191,6 +278,21 @@ struct MeetingView: View {
             if let message = message {
                 alertMessage = message
                 showAlert = true
+            }
+        }
+        .onReceive(meetingViewModel.$currentMemberIDs) { memberIDs in
+            if let selectedMemberID, !memberIDs.contains(selectedMemberID) {
+                self.selectedMemberID = nil
+                selectedButton = nil
+                meetingViewModel.stopTrackingMember()
+            }
+            if let radialMemberID, !memberIDs.contains(radialMemberID) {
+                self.radialMemberID = nil
+                radialHighlightedPreset = nil
+                MeetingQuickOverlayPresenter.shared.dismiss()
+            }
+            if let notificationRecipient, !memberIDs.contains(notificationRecipient.id) {
+                self.notificationRecipient = nil
             }
         }
         // 1회성 알림 표시 (이전 화면에서 남은 true를 방지)
@@ -225,6 +327,83 @@ struct MeetingView: View {
         return "모임시간: \(formatter.string(from: date))"
     }
 
+    private func selectMemberLocation(_ memberID: String) {
+        if meetingViewModel.trackedMemberID == memberID {
+            meetingViewModel.stopTrackingMember()
+            selectedMemberID = nil
+        } else {
+            meetingViewModel.moveToUserLocation(userID: memberID)
+            selectedMemberID = memberID
+        }
+        selectedButton = selectedMemberID == nil ? nil : memberID
+    }
+
+    private func openNotificationSheet(for memberID: String) {
+        guard canNotify(memberID) else { return }
+        notificationRecipient = MeetingNotificationRecipient(
+            id: memberID,
+            name: meetingViewModel.meetingMemberNames[memberID] ?? "모임 멤버"
+        )
+    }
+
+    private func beginQuickNotification(for memberID: String, in window: UIWindow, anchor: CGRect) {
+        guard canNotify(memberID), !isSendingNotification else { return }
+        if radialMemberID != memberID {
+            radialMemberID = memberID
+            radialHighlightedPreset = nil
+            MeetingQuickOverlayPresenter.shared.present(
+                in: window,
+                anchor: anchor,
+                recipientName: meetingViewModel.meetingMemberNames[memberID] ?? "모임 멤버"
+            )
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        }
+    }
+
+    private func canNotify(_ memberID: String) -> Bool {
+        guard let currentUserID = Auth.auth().currentUser?.uid else { return false }
+        return memberID != currentUserID && meetingViewModel.currentMemberIDs.contains(memberID)
+    }
+
+    private func preset(for movement: CGSize) -> MeetingNotificationPreset? {
+        guard hypot(movement.width, movement.height) > 52 else { return nil }
+        if abs(movement.width) > abs(movement.height) {
+            return movement.width > 0 ? .almostThere : .whereAreYou
+        }
+        return movement.height > 0 ? .runningLate : .startingSoon
+    }
+
+    @MainActor
+    private func sendQuickNotification(_ preset: MeetingNotificationPreset, to memberID: String) async {
+        guard canNotify(memberID), !isSendingNotification else { return }
+        isSendingNotification = true
+        let memberName = meetingViewModel.meetingMemberNames[memberID] ?? "모임 멤버"
+        showToast("알림을 보내는 중...")
+        do {
+            try await MeetingNotificationSender.send(
+                meetingID: meeting.id,
+                recipientID: memberID,
+                preset: preset
+            )
+            showToast("\(memberName)님에게 ‘\(preset.shortTitle)’ 알림을 보냈어요.")
+        } catch {
+            toastMessage = nil
+            alertMessage = error.localizedDescription
+            showAlert = true
+        }
+        isSendingNotification = false
+    }
+
+    private func showToast(_ message: String) {
+        toastMessage = message
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            if toastMessage == message {
+                toastMessage = nil
+            }
+        }
+    }
+
     private var canManageMeeting: Bool {
         guard let currentUserID = Auth.auth().currentUser?.uid else { return false }
         return meetingViewModel.isMeetingMaster(
@@ -236,7 +415,7 @@ struct MeetingView: View {
 
     private func sortedMemberIDs() -> [String] {
         let leaderID = meetingViewModel.meetingMasterID ?? meeting.meetingMasterID
-        let ids = meeting.meetingMemberIDs
+        let ids = meetingViewModel.currentMemberIDs
         // 멤버 버튼 순서: 모임장이 항상 첫 번째
         let others = ids.filter { $0 != leaderID }
         let sortedOthers = others.sorted { (a, b) -> Bool in
@@ -249,6 +428,86 @@ struct MeetingView: View {
             return [leaderID] + sortedOthers
         } else {
             return sortedOthers
+        }
+    }
+}
+
+/// Keeps a normal tap separate from the hold-and-drag quick notification gesture.
+private struct MemberTouchCapture: UIViewRepresentable {
+    let onTap: () -> Void
+    let onHoldStart: (UIWindow, CGRect) -> Void
+    let onHoldMove: (CGSize) -> Void
+    let onHoldEnd: (CGSize) -> Void
+    let onHoldCancel: () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.backgroundColor = .clear
+
+        let hold = UILongPressGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleHold(_:))
+        )
+        hold.minimumPressDuration = 0.6
+        hold.allowableMovement = 12
+
+        let tap = UITapGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleTap(_:))
+        )
+        tap.require(toFail: hold)
+
+        view.addGestureRecognizer(hold)
+        view.addGestureRecognizer(tap)
+        return view
+    }
+
+    func updateUIView(_ view: UIView, context: Context) {
+        context.coordinator.parent = self
+    }
+
+    final class Coordinator: NSObject {
+        var parent: MemberTouchCapture
+        private var holdOrigin: CGPoint?
+
+        init(parent: MemberTouchCapture) {
+            self.parent = parent
+        }
+
+        @objc func handleTap(_ recognizer: UITapGestureRecognizer) {
+            guard recognizer.state == .ended else { return }
+            parent.onTap()
+        }
+
+        @objc func handleHold(_ recognizer: UILongPressGestureRecognizer) {
+            guard let view = recognizer.view else { return }
+            switch recognizer.state {
+            case .began:
+                holdOrigin = recognizer.location(in: view)
+                if let window = view.window {
+                    parent.onHoldStart(window, view.convert(view.bounds, to: window))
+                }
+            case .changed:
+                guard let holdOrigin else { return }
+                parent.onHoldMove(movement(from: holdOrigin, to: recognizer.location(in: view)))
+            case .ended:
+                guard let holdOrigin else { return }
+                let movement = movement(from: holdOrigin, to: recognizer.location(in: view))
+                self.holdOrigin = nil
+                parent.onHoldEnd(movement)
+            case .cancelled, .failed:
+                guard holdOrigin != nil else { return }
+                holdOrigin = nil
+                parent.onHoldCancel()
+            default:
+                break
+            }
+        }
+
+        private func movement(from start: CGPoint, to end: CGPoint) -> CGSize {
+            CGSize(width: end.x - start.x, height: end.y - start.y)
         }
     }
 }

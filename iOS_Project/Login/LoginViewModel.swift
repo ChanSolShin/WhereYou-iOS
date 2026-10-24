@@ -10,7 +10,6 @@ import Foundation
 import Combine
 import FirebaseAuth
 import FirebaseFirestore
-import FirebaseMessaging  // FCM 토큰 기능 추가
 
 // Alert 타입 enum -> 강제로그아웃 or 중복로그인 알림 case 구분
 enum LoginAlert: Identifiable {
@@ -131,9 +130,7 @@ class LoginViewModel: ObservableObject {
                                 self.isLoggedIn = true
                                 UserDefaults.standard.set(true, forKey: "isLoggedIn")
                                 self.startListeningForForcedLogout(uid: uid)
-                                self.getFCMToken { token in
-                                    if let token = token { self.saveFCMTokenToFirestore(fcmToken: token) }
-                                }
+                                PushTokenManager.syncCurrentToken()
                             }
                         }
                     }
@@ -180,36 +177,6 @@ class LoginViewModel: ObservableObject {
         }
     }
     
-    // FCM 토큰 가져오기
-    private func getFCMToken(completion: @escaping (String?) -> Void) {
-        Messaging.messaging().token { token, error in
-            if let error = error {
-                print("FCM 토큰 가져오기 오류: \(error.localizedDescription)")
-                completion(nil)
-            } else if let token = token {
-                completion(token)
-            } else {
-                print("FCM 토큰을 받을 수 없습니다.")
-                completion(nil)
-            }
-        }
-    }
-    
-    // Firestore에 FCM 토큰 저장
-    private func saveFCMTokenToFirestore(fcmToken: String) {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
-        
-        db.collection("users").document(userId).updateData([
-            "fcmToken": fcmToken
-        ]) { error in
-            if let error = error {
-                print("FCM 토큰 저장 오류: \(error.localizedDescription)")
-            } else {
-                print("FCM 토큰 저장 성공")
-            }
-        }
-    }
-    
     // 새로운 기기 로그인 확인 후 호출되는 함수
     func confirmNewDeviceLogin() {
         guard let userRef = pendingUserRef,
@@ -245,9 +212,7 @@ class LoginViewModel: ObservableObject {
                 self.pendingUserRef = nil
                 UserDefaults.standard.set(true, forKey: "isLoggedIn")
                 self.startListeningForForcedLogout(uid: uid)
-                self.getFCMToken { token in
-                    if let token = token { self.saveFCMTokenToFirestore(fcmToken: token) }
-                }
+                PushTokenManager.syncCurrentToken()
             }
         }
     }

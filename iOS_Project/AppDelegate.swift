@@ -10,6 +10,7 @@ import UIKit
 import Firebase
 import FirebaseAuth
 import FirebaseMessaging
+import FirebaseFirestore
 import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate {
@@ -71,6 +72,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     // 디바이스 토큰을 받았을 때 FCM에 등록하는 함수
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken  // FCM에 APNS 토큰을 전달
+        PushTokenManager.syncCurrentToken()
+    }
+
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        PushTokenManager.syncCurrentToken()
     }
 }
 
@@ -79,12 +85,50 @@ extension AppDelegate: MessagingDelegate {
     
     // FCM 토큰을 받았을 때 호출되는 함수
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        if let fcmToken = fcmToken {
-            print("FCM 토큰: \(fcmToken)")
-            // 받은 토큰을 Firebase Firestore에 저장하거나 서버로 전송하는 등의 작업을 함
-            
-            let dataDict: [String: String] = ["token": fcmToken]
-            // 여기서 Firestore에 저장하는 작업을 할 수 있음
+        guard let fcmToken else { return }
+        PushTokenManager.store(fcmToken)
+    }
+}
+
+enum PushTokenManager {
+    static func syncCurrentToken() {
+        guard Auth.auth().currentUser != nil else { return }
+        Messaging.messaging().token { token, error in
+            if let error {
+                print("FCM 토큰 갱신 실패: \(error.localizedDescription)")
+                return
+            }
+            guard let token else { return }
+            store(token)
+        }
+    }
+
+    static func store(_ token: String) {
+        guard !token.isEmpty,
+              let uid = Auth.auth().currentUser?.uid,
+              let deviceID = UIDevice.current.identifierForVendor?.uuidString else { return }
+
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(uid)
+        db.runTransaction({ transaction, errorPointer -> Any? in
+            do {
+                let user = try transaction.getDocument(userRef)
+                guard Auth.auth().currentUser?.uid == uid,
+                      user.data()?["deviceID"] as? String == deviceID,
+                      user.data()?["loginStatus"] as? Bool == true else { return false }
+                if user.data()?["fcmToken"] as? String == token { return true }
+                transaction.updateData([
+                    "fcmToken": token
+                ], forDocument: userRef)
+                return true
+            } catch {
+                errorPointer?.pointee = error as NSError
+                return nil
+            }
+        }) { _, error in
+            if let error {
+                print("FCM 토큰 저장 실패: \(error.localizedDescription)")
+            }
         }
     }
 }

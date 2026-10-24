@@ -3,6 +3,8 @@ const admin = require('firebase-admin');
 const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require('firebase-functions/scheduler'); // V2에서는 onSchedule 사용
 const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
+const { onCall } = require('firebase-functions/v2/https');
+const { createMeetingMemberNotificationHandler } = require('./meetingMemberNotification');
 
 admin.initializeApp({
   databaseURL: "https://meetingapp-2985d-default-rtdb.firebaseio.com"
@@ -10,6 +12,12 @@ admin.initializeApp({
 
 const db = getFirestore(); // Firestore 인스턴스 가져오기
 const messaging = admin.messaging(); // Firebase Cloud Messaging 인스턴스 가져오기
+
+// 모임 멤버 한 명에게만 보내는 빠른 알림. 발신자와 수신자는 서버에서 다시 검증한다.
+exports.sendMeetingMemberNotification = onCall(
+  { region: 'us-central1' },
+  createMeetingMemberNotificationHandler({ db, messaging })
+);
 
 // ✅ 친구 요청 알림 함수 (Firestore에 friendRequests 문서가 생성될 때)
 exports.sendFriendRequestNotification = functions.firestore.onDocumentCreated('friendRequests/{requestId}', async (event) => {

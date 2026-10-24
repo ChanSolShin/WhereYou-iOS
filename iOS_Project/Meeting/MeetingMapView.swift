@@ -21,7 +21,6 @@ struct MeetingMapView: View {
                 coordinate: $selectedUserLocation,
                 meeting: meeting
             )
-            .edgesIgnoringSafeArea(.all) // 미팅의 좌표, 제목 및 주소를 넘겨줌
         }
         .navigationTitle(meeting.title)
         .navigationBarTitleDisplayMode(.inline)

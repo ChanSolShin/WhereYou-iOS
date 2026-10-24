@@ -37,7 +37,7 @@ class MeetingViewModel: NSObject, ObservableObject {
     private var memberListener: ListenerRegistration?
 
     private var db = Firestore.firestore()
-    private var currentMemberIDs: [String] = []
+    @Published private(set) var currentMemberIDs: [String] = []
     
     init(locationCoordinator: AppLocationCoordinator = AppLocationCoordinator.shared) {
         self.locationCoordinator = locationCoordinator
@@ -57,6 +57,7 @@ class MeetingViewModel: NSObject, ObservableObject {
     // 모임 선택 및 초기화
     func selectMeeting(meeting: MeetingModel) {
         self.meeting = meeting
+        self.currentMemberIDs = meeting.meetingMemberIDs
         self.observingMeetingID = meeting.id
         // 재초대 방지: 이전에 처리한 강퇴 이벤트 기록 제거
         self.handledKickedIDs.remove(meeting.id)
@@ -307,14 +308,13 @@ class MeetingViewModel: NSObject, ObservableObject {
                         return
                     }
                     // 멤버 배열 변경 시 이름 리스너 재구독 로직 유지
-                    if memberIDs != self?.currentMemberIDs {
-                        self?.currentMemberIDs = memberIDs
-                        DispatchQueue.main.async {
-                            for id in memberIDs where self?.meetingMemberNames[id] == nil {
-                                self?.meetingMemberNames[id] = "불러오는 중..."
-                            }
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self, memberIDs != self.currentMemberIDs else { return }
+                        self.currentMemberIDs = memberIDs
+                        for id in memberIDs where self.meetingMemberNames[id] == nil {
+                            self.meetingMemberNames[id] = "불러오는 중..."
                         }
-                        self?.listenToMemberNameChanges(memberIDs: memberIDs)
+                        self.listenToMemberNameChanges(memberIDs: memberIDs)
                     }
                 }
             }
