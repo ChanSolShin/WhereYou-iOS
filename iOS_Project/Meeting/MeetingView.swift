@@ -106,64 +106,62 @@ struct MeetingView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 16) {
                     ForEach(sortedMemberIDs(), id: \.self) { memberID in
-                        ZStack {
-                            Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
+                        VStack(spacing: 6) {
+                            // 모임장 왕관: 모든 멤버에 같은 자리를 두어 버튼 높이를 맞춤
+                            Image(systemName: "crown.fill")
+                                .foregroundColor(.yellow)
+                                .opacity(memberID == (meetingViewModel.meetingMasterID ?? meeting.meetingMasterID) ? 1 : 0)
 
-                            if memberID == (meetingViewModel.meetingMasterID ?? meeting.meetingMasterID) {
-                                Image(systemName: "crown.fill")
-                                    .foregroundColor(.yellow)
-                                    .offset(x: 0, y: -40)
-                                    .zIndex(1)
-                            }
-                        }
-                        .fontWeight(selectedMemberID == memberID ? .semibold : .regular)
-                        .foregroundColor(selectedMemberID == memberID ? GlassTheme.blue : .primary)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .frame(minHeight: 44)
-                        .background {
-                            if selectedMemberID == memberID {
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(GlassTheme.blue.opacity(0.12))
-                            }
-                        }
-                        .glassSurface(radius: 16)
-                        .contentShape(RoundedRectangle(cornerRadius: 16))
-                        .padding(.vertical, 2)
-                        .overlay {
-                            MemberTouchCapture(
-                                onTap: { selectMemberLocation(memberID) },
-                                onHoldStart: { window, anchor in
-                                    beginQuickNotification(for: memberID, in: window, anchor: anchor)
-                                },
-                                onHoldMove: { movement in
-                                    guard radialMemberID == memberID else { return }
-                                    let highlighted = preset(for: movement)
-                                    if highlighted != radialHighlightedPreset {
-                                        radialHighlightedPreset = highlighted
-                                        MeetingQuickOverlayPresenter.shared.update(highlightedPreset: highlighted)
-                                        if highlighted != nil {
-                                            UISelectionFeedbackGenerator().selectionChanged()
-                                        }
+                            Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
+                                .fontWeight(selectedMemberID == memberID ? .semibold : .regular)
+                                .foregroundColor(selectedMemberID == memberID ? GlassTheme.blue : .primary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .frame(minHeight: 44)
+                                .background {
+                                    if selectedMemberID == memberID {
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .fill(GlassTheme.blue.opacity(0.12))
                                     }
-                                },
-                                onHoldEnd: { movement in
-                                    let selectedPreset = preset(for: movement)
-                                    let shouldSend = radialMemberID == memberID && canNotify(memberID)
-                                    radialMemberID = nil
-                                    radialHighlightedPreset = nil
-                                    MeetingQuickOverlayPresenter.shared.dismiss()
-                                    if shouldSend, let selectedPreset {
-                                        Task { await sendQuickNotification(selectedPreset, to: memberID) }
-                                    }
-                                },
-                                onHoldCancel: {
-                                    guard radialMemberID == memberID else { return }
-                                    radialMemberID = nil
-                                    radialHighlightedPreset = nil
-                                    MeetingQuickOverlayPresenter.shared.dismiss()
                                 }
-                            )
+                                .glassSurface(radius: 16)
+                                .contentShape(RoundedRectangle(cornerRadius: 16))
+                                .padding(.vertical, 2)
+                                .overlay {
+                                    MemberTouchCapture(
+                                        onTap: { selectMemberLocation(memberID) },
+                                        onHoldStart: { window, anchor in
+                                            beginQuickNotification(for: memberID, in: window, anchor: anchor)
+                                        },
+                                        onHoldMove: { movement in
+                                            guard radialMemberID == memberID else { return }
+                                            let highlighted = preset(for: movement)
+                                            if highlighted != radialHighlightedPreset {
+                                                radialHighlightedPreset = highlighted
+                                                MeetingQuickOverlayPresenter.shared.update(highlightedPreset: highlighted)
+                                                if highlighted != nil {
+                                                    UISelectionFeedbackGenerator().selectionChanged()
+                                                }
+                                            }
+                                        },
+                                        onHoldEnd: { movement in
+                                            let selectedPreset = preset(for: movement)
+                                            let shouldSend = radialMemberID == memberID && canNotify(memberID)
+                                            radialMemberID = nil
+                                            radialHighlightedPreset = nil
+                                            MeetingQuickOverlayPresenter.shared.dismiss()
+                                            if shouldSend, let selectedPreset {
+                                                Task { await sendQuickNotification(selectedPreset, to: memberID) }
+                                            }
+                                        },
+                                        onHoldCancel: {
+                                            guard radialMemberID == memberID else { return }
+                                            radialMemberID = nil
+                                            radialHighlightedPreset = nil
+                                            MeetingQuickOverlayPresenter.shared.dismiss()
+                                        }
+                                    )
+                                }
                         }
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel(meetingViewModel.meetingMemberNames[memberID] ?? "모임 멤버")
@@ -185,7 +183,6 @@ struct MeetingView: View {
                 }
                 .padding(.horizontal)
                 .padding(.horizontal)
-                .padding(.top, 35)
             }
             // 콘텐츠 높이로 고정: 남는 높이를 차지X
             .fixedSize(horizontal: false, vertical: true)
@@ -515,3 +512,4 @@ private struct MemberTouchCapture: UIViewRepresentable {
         }
     }
 }
+
