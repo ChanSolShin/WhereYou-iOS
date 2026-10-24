@@ -5,12 +5,12 @@ struct FriendListView: View {
     @StateObject private var viewModel = FriendListViewModel()
     @Binding var isTabBarHidden: Bool
     @State private var addFriendType: AddFriendType?
-    @State private var showAddFriendActionSheet = false
+    @State private var showAddFriendAlert = false
     @EnvironmentObject var router: AppRouter
     @State private var openFriendRequests = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 NavigationLink(
                     destination: friendRequestsDestination,
@@ -18,7 +18,7 @@ struct FriendListView: View {
                 ) { EmptyView() }
                 .hidden()
 
-                Color.white.ignoresSafeArea()
+                GlassBackdrop()
                 VStack {
                     if viewModel.friends.isEmpty {
                         Text("+ 버튼을 눌러서 새로운 친구를 추가하세요!")
@@ -39,6 +39,8 @@ struct FriendListView: View {
                                     }
                                     Spacer()
                                 }
+                                .padding(12)
+                                .glassSurface(radius: 12)
                                 .swipeActions {
                                     Button {
                                         viewModel.removeFriend(friendID: friend.id)
@@ -47,16 +49,21 @@ struct FriendListView: View {
                                     }
                                     .tint(.red)
                                 }
+                                .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
                             }
                             .onDelete(perform: deleteFriend)
                         }
                         .listStyle(PlainListStyle())
-                        .background(Color.clear)
+                        .scrollContentBackground(.hidden)
                     }
                 }
             }
-            .background(Color.white.edgesIgnoringSafeArea(.all))
             .navigationTitle("친구")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .glassBarBackdrop()
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -76,15 +83,17 @@ struct FriendListView: View {
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showAddFriendActionSheet = true }) {
+                    Button(action: { showAddFriendAlert = true }) {
                         Image(systemName: "plus")
                     }
+                    .alert("친구 추가", isPresented: $showAddFriendAlert) {
+                        Button("이메일로 추가") { presentEmailModal() }
+                        Button("전화번호로 추가") { presentPhoneModal() }
+                        Button("취소", role: .cancel) {}
+                    } message: {
+                        Text("추가 방법을 선택해 주세요")
+                    }
                 }
-            }
-            .confirmationDialog("친구 추가", isPresented: $showAddFriendActionSheet, titleVisibility: .visible) {
-                Button("이메일로 친구 추가") { presentEmailModal() }
-                Button("전화번호로 친구 추가") { presentPhoneModal() }
-                Button("취소", role: .cancel) {}
             }
             .sheet(item: $addFriendType) { type in
                 switch type {
@@ -114,6 +123,7 @@ struct FriendListView: View {
                 )
             }
         }
+        .background(GlassBackdrop())
         .onAppear {
             viewModel.observePendingRequests()
         }

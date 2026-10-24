@@ -32,7 +32,10 @@ struct AddSelectedFriend: View {
                             FriendRow(friend: friend, isSelected: selectedFriends.contains(friend.id)) {
                                 toggleSelection(for: friend)
                             }
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
                         }
+                        .scrollContentBackground(.hidden)
                     }
                 }
                 .onAppear {
@@ -44,16 +47,18 @@ struct AddSelectedFriend: View {
                     Spacer()
                     Button(action: sendMeetingInvitations) {
                         Image(systemName: "plus")
-                            .font(.largeTitle)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .clipShape(Circle())
-                            .shadow(radius: 5)
+                            .font(.system(size: 24, weight: .semibold))
+                            .frame(width: 56, height: 56)
+                            .foregroundStyle(GlassTheme.blue)
+                            .glassSubtleCircle()
                     }
+                    .buttonStyle(.plain)
+                    .disabled(selectedFriends.isEmpty)
+                    .accessibilityLabel("선택한 친구 초대")
                     .padding(.bottom, 20) 
                 }
             }
+            .background(GlassBackdrop())
             .alert(isPresented: $showAlert) {
                 Alert(title: Text("알림"), message: Text(alertMessage), dismissButton: .default(Text("확인"), action: {
                     // 알림이 닫힐 때 모달도 닫기
@@ -163,7 +168,7 @@ struct AddSelectedFriend: View {
                 }
             }
             .padding()
-            .background(Color.white)
+            .glassSurface(radius: 10)
             .onTapGesture {
                 onTap()
             }

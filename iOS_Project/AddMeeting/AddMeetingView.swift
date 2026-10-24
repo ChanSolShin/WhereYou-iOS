@@ -25,23 +25,21 @@ struct AddMeetingView: View {
                 TextField("모임 이름", text: $viewModel.meeting.meetingName)
                     .font(.system(size: 16))
                     .autocapitalization(.none)
-                    .frame(width: 350, height: 40)
+                    .frame(maxWidth: .infinity, minHeight: 40)
                     .keyboardType(.default) // 키보드 타입 변경
-                    .background(Color.gray.opacity(0.2))
+                    .glassSurface(radius: 10)
+                    .padding(.horizontal, 24)
                 
                 // 날짜 선택 버튼과 선택된 날짜 표시
                 Button(action: {
                     showDatePicker.toggle()
                 }) {
-                    Text("날짜 선택")
-                        .font(.headline)
-                        .padding()
+                    Label("날짜 선택", systemImage: "calendar")
                         .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .frame(width: 100, height: 50)
                 }
+                .glassSecondaryAction()
+                .controlSize(.large)
+                .padding(.horizontal, 24)
                 
                 // 선택된 날짜를 텍스트로 표시
                 HStack {
@@ -50,21 +48,20 @@ struct AddMeetingView: View {
                         .imageScale(.small)
                     Text("\(viewModel.meeting.meetingDate, formatter: dateFormatter)")
                         .font(.headline)
+                        .multilineTextAlignment(.center)
                 }
+                .padding(.horizontal, 16)
                 
                 // 장소 선택 버튼과 선택된 주소 표시
                 Button(action: {
                     showLocationModal.toggle()
                 }) {
-                    Text("장소 선택")
-                        .font(.headline)
-                        .padding()
+                    Label("장소 선택", systemImage: "map")
                         .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .frame(width: 100, height: 50)
                 }
+                .glassSecondaryAction()
+                .controlSize(.large)
+                .padding(.horizontal, 24)
                 
                 HStack {
                     Image(systemName: "map")
@@ -72,7 +69,9 @@ struct AddMeetingView: View {
                         .imageScale(.small)
                     Text(viewModel.meeting.meetingAddress ?? "선택된 장소 없음")
                         .font(.headline)
+                        .multilineTextAlignment(.center)
                 }
+                .padding(.horizontal, 16)
                 
                 // 추가하기 버튼
                 Button(action: {
@@ -89,44 +88,28 @@ struct AddMeetingView: View {
                     print("모임 좌표: \(location.latitude), \(location.longitude)")
                 }) {
                     Text("추가하기")
-                        .font(.title2)
-                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(viewModel.successAddMeeting ? Color.gray : Color.blue)
-                        .background(Color.blue)
-                        .cornerRadius(30)
-                        .frame(width: 150, height: 50)
                 }
+                .glassPrimaryAction()
+                .controlSize(.large)
+                .padding(.horizontal, 24)
+                .disabled(viewModel.successAddMeeting)
                 Text("모임은 \(viewModel.meeting.meetingDate.addingTimeInterval(7200), formatter: dateFormatter) 에 삭제됩니다")
                     .font(.footnote)
                     .foregroundColor(.red)
-                .disabled(viewModel.successAddMeeting)
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
             }
             .padding(.vertical, 20)
             .sheet(isPresented: $showDatePicker) {
-                VStack {
-                    DatePicker("Select a date", selection: $viewModel.meeting.meetingDate, in: Date()..., displayedComponents: [.date, .hourAndMinute])
-                        .datePickerStyle(GraphicalDatePickerStyle())
-                        .environment(\.locale, Locale(identifier: String(Locale.preferredLanguages[0])))
-                        .frame(height: 500)
-                        .padding()
-                    
-                    Button("완료") {
-                        showDatePicker = false
-                    }
-                    .font(.headline)
-                    .padding(.leading, 300)
-                }
+                GlassDatePickerSheet(date: $viewModel.meeting.meetingDate)
             }
             .sheet(isPresented: $showLocationModal) {
                 AddLocationView(viewModel: viewModel)
             }
         }
+        .background(GlassBackdrop())
         .navigationTitle("모임추가")
-        .font(.largeTitle)
         
     }
     
@@ -134,7 +117,42 @@ struct AddMeetingView: View {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.timeZone = TimeZone(abbreviation: "KST")
-        formatter.dateFormat = "YYYY년 M월 d일 a h:mm"
+        formatter.dateFormat = "yyyy년 M월 d일 a h:mm"
         return formatter
+    }
+}
+
+struct GlassDatePickerSheet: View {
+    @Binding var date: Date
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                DatePicker("모임 날짜", selection: $date, in: Date()..., displayedComponents: [.date, .hourAndMinute])
+                    .datePickerStyle(.graphical)
+                    .tint(GlassTheme.blue)
+                    .padding(16)
+                    .glassSurface(radius: 20)
+                    .padding(.horizontal, 20)
+
+                Spacer(minLength: 0)
+
+                Button { dismiss() } label: {
+                    Text("완료").frame(maxWidth: .infinity)
+                }
+                    .glassPrimaryAction()
+                    .controlSize(.large)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 20)
+            }
+            .padding(.top, 20)
+            .background(GlassBackdrop())
+            .navigationTitle("날짜 선택")
+            .navigationBarTitleDisplayMode(.inline)
+            .environment(\.locale, Locale(identifier: "ko_KR"))
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 }

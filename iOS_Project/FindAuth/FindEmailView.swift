@@ -36,8 +36,7 @@ struct FindEmailView: View {
                             }
                     }
                     .padding()
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(8)
+                    .glassSurface(radius: 8)
                     .padding(.horizontal)
                     .padding(.bottom, 10)
 
@@ -56,8 +55,7 @@ struct FindEmailView: View {
                             .font(.system(size: 16))
                     }
                     .padding()
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(8)
+                    .glassSurface(radius: 8)
                     .padding(.horizontal)
                     .padding(.bottom, 10)
 
@@ -109,8 +107,7 @@ struct FindEmailView: View {
                             }
                     }
                     .padding()
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(8)
+                    .glassSurface(radius: 8)
                     .padding(.horizontal)
                     .padding(.bottom, 20)
 
@@ -166,6 +163,7 @@ struct FindEmailView: View {
             }
             .navigationTitle("이메일 찾기")
         }
+        .background(GlassBackdrop())
         .onAppear {
             countryCodes = loadCountryCodes()
         }

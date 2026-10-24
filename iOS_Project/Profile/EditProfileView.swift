@@ -46,8 +46,7 @@ struct EditProfileView: View {
                             .font(.title3)
                         TextField("이름", text: $name)
                             .padding()
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(10)
+                            .glassSurface(radius: 10)
                             .focused($focusedField, equals: .name)
                             .submitLabel(.done)
                     }
@@ -57,8 +56,7 @@ struct EditProfileView: View {
                         TextField("생일", text: $birthday)
                             .disabled(true)
                             .padding()
-                            .background(Color.gray.opacity(0.08))
-                            .cornerRadius(10)
+                            .glassSurface(radius: 10)
                             .focused($focusedField, equals: .birthday)
                     }
                     
@@ -68,8 +66,7 @@ struct EditProfileView: View {
                         TextField("이메일", text: $email)
                             .disabled(true)
                             .padding()
-                            .background(Color.gray.opacity(0.08))
-                            .cornerRadius(10)
+                            .glassSurface(radius: 10)
                             .keyboardType(.emailAddress)
                             .focused($focusedField, equals: .email)
                             .submitLabel(.done)
@@ -81,8 +78,7 @@ struct EditProfileView: View {
                         TextField("전화번호", text: $phoneNumber)
                             .disabled(true)
                             .padding()
-                            .background(Color.gray.opacity(0.08))
-                            .cornerRadius(10)
+                            .glassSurface(radius: 10)
                             .keyboardType(.numberPad)
                             .focused($focusedField, equals: .phone)
                     }
@@ -111,6 +107,7 @@ struct EditProfileView: View {
                 }
             }
         }
+        .background(GlassBackdrop())
         .onAppear {
             name = viewModel.profile?.name ?? ""
             email = viewModel.profile?.email ?? ""

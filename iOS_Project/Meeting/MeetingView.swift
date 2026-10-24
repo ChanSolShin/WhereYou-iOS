@@ -51,7 +51,7 @@ struct MeetingView: View {
                     ),
                     meetingViewModel: meetingViewModel
                 )
-                .frame(height: 450)
+                .frame(height: min(450, UIScreen.main.bounds.height * 0.50))
             } else {
                 VStack(spacing: 12) {
                     Text("위치 권한이 필요합니다")
@@ -64,11 +64,12 @@ struct MeetingView: View {
                             UIApplication.shared.open(url)
                         }
                     }
-                    .padding()
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(10)
+                    .glassSecondaryAction()
+                    .controlSize(.large)
                 }
-                .frame(height: 450)
+                .frame(height: min(450, UIScreen.main.bounds.height * 0.50))
+                .glassSurface(radius: 16)
+                .padding(.horizontal, 16)
             }
             
             Button(action: {
@@ -82,15 +83,9 @@ struct MeetingView: View {
                 selectedButton = "meetingLocation"
             }) {
                 Text("모임장소")
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(selectedButton == "meetingLocation" ? Color.yellow : Color.clear, lineWidth: 4)
-                    )
             }
+            .glassSelectionAction(selected: selectedButton == "meetingLocation")
+            .controlSize(.large)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 16) {
@@ -107,14 +102,6 @@ struct MeetingView: View {
                         }) {
                             ZStack {
                                 Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
-                                    .padding()
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(selectedMemberID == memberID ? Color.yellow : Color.clear, lineWidth: 4)
-                                    )
 
                                 if memberID == (meetingViewModel.meetingMasterID ?? meeting.meetingMasterID) {
                                     Image(systemName: "crown.fill")
@@ -125,6 +112,8 @@ struct MeetingView: View {
                             }
                             .padding(.top, 2)
                         }
+                        .glassSelectionAction(selected: selectedMemberID == memberID)
+                        .controlSize(.large)
                         .padding(.vertical, 2)
                     }
                 }
@@ -133,6 +122,8 @@ struct MeetingView: View {
                 .padding(.top, 35)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(GlassBackdrop())
         .onAppear {
             meetingViewModel.errorMessage = nil
             meetingViewModel.fetchMeetingData(meetingID: meeting.id)
@@ -173,6 +164,20 @@ struct MeetingView: View {
                             .rotationEffect(.degrees(90))
                             .imageScale(.large)
                     }
+                    .alert("모임 관리", isPresented: $showActionSheet) {
+                        if canManageMeeting {
+                            Button("모임 정보 수정") { showingEditMeetingModal = true }
+                            Button("모임장 변경") { leaderSelctionModal = true }
+                            Button("멤버 강퇴하기") { showingKickOutModal = true }
+                        }
+                        Button("모임 나가기", role: .destructive) {
+                            meetingViewModel.leaveMeeting(meetingID: meeting.id)
+                            dismiss()
+                        }
+                        Button("취소", role: .cancel) {}
+                    } message: {
+                        Text("원하는 작업을 선택하세요")
+                    }
                 }
             }
         }
@@ -201,60 +206,6 @@ struct MeetingView: View {
                 dismiss()
             }
         }
-        .actionSheet(isPresented: $showActionSheet) {
-            var buttons: [ActionSheet.Button] = [
-                .destructive(Text("나가기")) {
-                    meetingViewModel.leaveMeeting(meetingID: meeting.id)
-                    dismiss()
-                },
-                .cancel(Text("취소"))
-            ]
-            
-            if let currentUserID = Auth.auth().currentUser?.uid {
-                if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID) {
-                    buttons.insert(.default(Text("멤버 강퇴하기")) {
-                        showingKickOutModal = true
-                    }, at: 0)
-                } else {
-                    buttons.insert(.default(Text("멤버 강퇴하기")) {
-                        alertMessage = "모임장만 사용할 수 있는 기능입니다"
-                        showAlert = true
-                    }, at: 0)
-                }
-            }
-            
-            if let currentUserID = Auth.auth().currentUser?.uid {
-                if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID) {
-                    buttons.insert(.default(Text("모임정보 수정")) {
-                        showingEditMeetingModal = true
-                    }, at: 0)
-                } else {
-                    buttons.insert(.default(Text("모임 정보 수정")) {
-                        alertMessage = "모임장만 사용할 수 있는 기능입니다"
-                        showAlert = true
-                    }, at: 0)
-                }
-            }
-            
-            if let currentUserID = Auth.auth().currentUser?.uid {
-                if meetingViewModel.isMeetingMaster(meetingID: meeting.id, currentUserID: currentUserID, meetingMasterID: meeting.meetingMasterID) {
-                    buttons.insert(.default(Text("모임장 변경")) {
-                        leaderSelctionModal = true
-                    }, at: 1)
-                } else {
-                    buttons.insert(.default(Text("모임장 변경")) {
-                        alertMessage = "모임장만 사용할 수 있는 기능입니다"
-                        showAlert = true
-                    }, at: 1)
-                }
-            }
-            
-            return ActionSheet(
-                title: Text("모임 관리"),
-                message: Text("원하는 작업을 선택하세요."),
-                buttons: buttons
-            )
-        }
         .fullScreenCover(isPresented: $showingEditMeetingModal) {
             NavigationStack {
                 EditMeetingView(meetingID: meeting.id)
@@ -272,6 +223,15 @@ struct MeetingView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy년 MM월 dd일 HH:mm"
         return "모임시간: \(formatter.string(from: date))"
+    }
+
+    private var canManageMeeting: Bool {
+        guard let currentUserID = Auth.auth().currentUser?.uid else { return false }
+        return meetingViewModel.isMeetingMaster(
+            meetingID: meeting.id,
+            currentUserID: currentUserID,
+            meetingMasterID: meeting.meetingMasterID
+        )
     }
 
     private func sortedMemberIDs() -> [String] {
@@ -292,4 +252,3 @@ struct MeetingView: View {
         }
     }
 }
-

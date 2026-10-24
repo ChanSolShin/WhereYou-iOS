@@ -6,8 +6,7 @@ struct AddFriendNumberModal: View {
     @State private var countryCodes: [CountryCode] = []
 
     var body: some View {
-        GeometryReader { geometry in
-            VStack(spacing: 20) {
+        VStack(spacing: 20) {
                 Text("추가할 친구의 전화번호를 입력해 주세요")
 
                 HStack(spacing: 20) {
@@ -32,7 +31,8 @@ struct AddFriendNumberModal: View {
 
                     TextField("전화번호", text: $viewModel.friendPhoneNumberInput)
                         .keyboardType(.numberPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(12)
+                        .glassSurface(radius: 10)
                 }
 
                 Button(action: {
@@ -54,10 +54,10 @@ struct AddFriendNumberModal: View {
                 }
                 .disabled(viewModel.friendPhoneNumberInput.isEmpty || viewModel.selectedCountry == nil)
                 .padding(.horizontal)
-            }
-            .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
+        .background(GlassBackdrop())
         .onAppear {
             countryCodes = loadCountryCodes().reversed()
         }

@@ -11,47 +11,52 @@ import FirebaseFirestore
 
 struct EditLocationView: View {
     @ObservedObject var viewModel: EditMeetingViewModel
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
     
     var body: some View {
-        Text("원하는 장소를 터치하여 수정해주세요")
-            .padding(.top, 10)
-            .font(.headline)
-            .fontWeight(.bold)
-        
-        ZStack(alignment: .bottomTrailing) {
-            EditMapView(isMarkerEnabled: true, viewModel: viewModel)
-                .navigationBarHidden(true)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .edgesIgnoringSafeArea(.all)
-            
-            VStack {
-                Text(viewModel.meetingAddress)
-                    .font(.headline)
-                    .multilineTextAlignment(.center)
-                    .fontWeight(.bold)
-                    .background(Color.black)
-                    .foregroundColor(.white)
-                    .cornerRadius(5)
-                
-                HStack {
-                    Button("확인") {
-                        // 선택 완료 후 이전 화면으로 돌아가기
-                        presentationMode.wrappedValue.dismiss()
+        NavigationStack {
+            VStack(spacing: 12) {
+                Text("지도에서 원하는 장소를 터치해 주세요")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                EditMapView(isMarkerEnabled: true, viewModel: viewModel)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .padding(.horizontal, 16)
+            }
+            .padding(.top, 12)
+            .safeAreaInset(edge: .bottom) {
+                VStack(spacing: 12) {
+                    Text(viewModel.meetingAddress)
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(12)
+                        .glassSurface(radius: 12)
+
+                    Button { dismiss() } label: {
+                        Text("이 장소 선택").frame(maxWidth: .infinity)
                     }
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .frame(width: 100, height: 50)
-                    .background(Color.blue)
-                    .cornerRadius(30)
-                    .padding(.bottom, 20)
+                        .glassPrimaryAction()
+                        .controlSize(.large)
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(GlassBackdrop())
+            }
+            .background(GlassBackdrop())
+            .navigationTitle("장소 수정")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("취소") { dismiss() }
+                }
             }
         }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 }
 

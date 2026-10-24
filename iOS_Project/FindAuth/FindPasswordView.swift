@@ -30,8 +30,7 @@ struct FindPasswordView: View {
                         .keyboardType(.emailAddress)
                 }
                 .padding()
-                .background(Color.gray.opacity(0.2))
-                .cornerRadius(8)
+                .glassSurface(radius: 8)
                 .padding(.horizontal)
                 
                 Button(action: {
@@ -51,6 +50,7 @@ struct FindPasswordView: View {
                 }
             }
         }
+        .background(GlassBackdrop())
         .navigationTitle("비밀번호 재설정")
     }
 }

@@ -37,8 +37,7 @@ struct LoginView: View {
                         .keyboardType(.emailAddress)
                 }
                 .padding()
-                .background(Color.gray.opacity(0.2))
-                .cornerRadius(8)
+                .glassSurface(radius: 12)
                 .padding(.horizontal, 30)
                 
                 // 비밀번호 입력
@@ -65,8 +64,7 @@ struct LoginView: View {
                     }
                 }
                 .padding()
-                .background(Color.gray.opacity(0.2))
-                .cornerRadius(8)
+                .glassSurface(radius: 12)
                 .padding(.horizontal, 30)
                 .padding(.bottom, 5)
                 .padding(.top, 10)
@@ -75,7 +73,7 @@ struct LoginView: View {
                     Text("비밀번호 찾기")
                 }
                 .font(.system(size: 14))
-                .padding(.leading, 250)
+                .frame(maxWidth: .infinity, alignment: .trailing)
                 .foregroundColor(.gray)
                 .underline()
                 .padding(.horizontal, 10)
@@ -94,13 +92,14 @@ struct LoginView: View {
                             Text("이메일로 로그인")
                         }
                     }
-                        .frame(width: 350, height: 50)
+                        .frame(maxWidth: .infinity, minHeight: 50)
                         .background(Color.blue)
                         .foregroundColor(.white)
                         .fontWeight(.bold)
                         .cornerRadius(40)
                 }
                 .contentShape(Rectangle())
+                .padding(.horizontal, 30)
                 .disabled(viewModel.isLoggingIn)
                 .padding(.bottom, 20)
                 
@@ -124,6 +123,7 @@ struct LoginView: View {
                 .padding(.horizontal, 40)
                 Spacer()
             }
+            .background(GlassBackdrop())
             .alert(item: $viewModel.currentAlert) { alertType in
                 switch alertType {
                     case .loginFailed(let message):

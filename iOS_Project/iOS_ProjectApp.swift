@@ -40,6 +40,7 @@ struct iOS_ProjectApp: App {
                             }
                     }
           }
+            .background(GlassBackdrop())
             .environmentObject(loginViewModel) // LoginViewModel을 전역에서 사용
             .environmentObject(AppRouter.shared) 
             .environmentObject(router)

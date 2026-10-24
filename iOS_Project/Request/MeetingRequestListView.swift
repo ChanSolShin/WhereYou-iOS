@@ -42,17 +42,16 @@ struct MeetingRequestListView: View {
                             Spacer()
                         }
                         .padding()
-                        .background(Color.white)
-                        .cornerRadius(8)
-                        .shadow(radius: 2)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.green, lineWidth: 2)
-                        )
+                        .glassSurface(radius: 8)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                     }
                 }
+                .scrollContentBackground(.hidden)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(GlassBackdrop())
         .navigationTitle("모임 요청")
         .onAppear {
             viewModel.fetchPendingMeetingRequests()
