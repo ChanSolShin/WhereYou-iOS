@@ -172,6 +172,7 @@ struct MeetingListView: View {
             .navigationTitle("모임")
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.hidden, for: .navigationBar)
+            .glassBarBackdrop()
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {

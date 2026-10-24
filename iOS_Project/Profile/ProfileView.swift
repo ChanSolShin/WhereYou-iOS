@@ -118,6 +118,7 @@ struct ProfileView: View {
             }
             .background(GlassBackdrop())
             .toolbarBackground(.hidden, for: .navigationBar)
+            .glassBarBackdrop()
             .navigationTitle("설정")
             .navigationBarTitleDisplayMode(.large)
             .onAppear {
