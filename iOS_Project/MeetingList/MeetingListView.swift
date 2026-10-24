@@ -9,6 +9,7 @@ struct MeetingListView: View {
     @EnvironmentObject var router: AppRouter
     @State private var openMeetingRequests = false
     @State private var isShowingMeetingRequests = false
+    @State private var showingAddMeeting = false
     @State private var path = NavigationPath()
     @State private var lastOpenedMeetingID: String?
     @State private var hideForMeetingRequests = false
@@ -149,15 +150,10 @@ struct MeetingListView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-            .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
-                NavigationLink(
-                    destination: AddMeetingView(viewModel: addMeetingViewModel)
-                        .onAppear { isTabBarHidden = true }
-                        .onDisappear {
-                            isTabBarHidden = false
-                            addMeetingViewModel.meeting = AddMeetingModel()
-                        }
-                ) {
+            .overlay(alignment: .bottomTrailing) {
+                Button {
+                    showingAddMeeting = true
+                } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 26, weight: .semibold))
                         .frame(width: 58, height: 58)
@@ -168,6 +164,14 @@ struct MeetingListView: View {
                 .accessibilityLabel("모임 추가")
                 .padding(.trailing, 20)
                 .padding(.bottom, 12)
+            }
+            .navigationDestination(isPresented: $showingAddMeeting) {
+                AddMeetingView(viewModel: addMeetingViewModel)
+                    .onAppear { isTabBarHidden = true }
+                    .onDisappear {
+                        isTabBarHidden = false
+                        addMeetingViewModel.meeting = AddMeetingModel()
+                    }
             }
             .navigationTitle("모임")
             .navigationBarTitleDisplayMode(.large)
@@ -218,6 +222,11 @@ struct MeetingListView: View {
                 }
             }
             .onAppear {
+                if path.isEmpty && !openMeetingRequests && !showingAddMeeting {
+                    hideForMeetingRequests = false
+                    hideForMeetingDetail = false
+                    updateTabBarVisibility()
+                }
                 // 대기 중인 요청을 실시간으로 받아오도록 설정
                 viewModel.meetingViewModel.fetchPendingMeetingRequests()
             }
