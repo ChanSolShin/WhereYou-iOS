@@ -42,74 +42,69 @@ struct MeetingView: View {
             }
             .padding(.bottom, 10)
             
-            if meetingViewModel.locationCoordinator.authorizationStatus == .authorizedAlways {
-                MeetingMapView(
-                    selectedUserLocation: $meetingViewModel.selectedUserLocation,
-                    meeting: MeetingModel(
-                        id: meeting.id,
-                        title: meeting.title,
-                        date: meeting.date,
-                        meetingAddress: meeting.meetingAddress,
-                        meetingLocation: meeting.meetingLocation,
-                        meetingMemberIDs: meeting.meetingMemberIDs,
-                        meetingMasterID: meeting.meetingMasterID,
-                        isLocationTrackingEnabled: meeting.isLocationTrackingEnabled
-                    ),
-                    meetingViewModel: meetingViewModel
-                )
-                .frame(height: min(450, UIScreen.main.bounds.height * 0.50))
-            } else {
-                VStack(spacing: 12) {
-                    Text("위치 권한이 필요합니다")
-                        .font(.headline)
-                    Text("상대방의 위치를 보려면, 내 위치도 공유해야 합니다.")
-                        .font(.subheadline)
-                        .multilineTextAlignment(.center)
-                    Button("설정으로 이동") {
-                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                            UIApplication.shared.open(url)
+            // 지도와 모임장소 버튼 간격 20pt
+            VStack(spacing: 20) {
+                if meetingViewModel.locationCoordinator.authorizationStatus == .authorizedAlways {
+                    MeetingMapView(
+                        selectedUserLocation: $meetingViewModel.selectedUserLocation,
+                        meeting: MeetingModel(
+                            id: meeting.id,
+                            title: meeting.title,
+                            date: meeting.date,
+                            meetingAddress: meeting.meetingAddress,
+                            meetingLocation: meeting.meetingLocation,
+                            meetingMemberIDs: meeting.meetingMemberIDs,
+                            meetingMasterID: meeting.meetingMasterID,
+                            isLocationTrackingEnabled: meeting.isLocationTrackingEnabled
+                        ),
+                        meetingViewModel: meetingViewModel
+                    )
+                    // 실제 남는 높이 기준: 공간이 부족 시 지도 높이 줄어듦
+                    .frame(maxHeight: 450)
+                } else {
+                    VStack(spacing: 12) {
+                        Text("위치 권한이 필요합니다")
+                            .font(.headline)
+                        Text("상대방의 위치를 보려면, 내 위치도 공유해야 합니다.")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                        Button("설정으로 이동") {
+                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(url)
+                            }
                         }
+                        .glassSecondaryAction()
+                        .controlSize(.large)
                     }
-                    .glassSecondaryAction()
-                    .controlSize(.large)
-                }
-                .frame(height: min(450, UIScreen.main.bounds.height * 0.50))
-                .glassSurface(radius: 16)
-                .padding(.horizontal, 16)
-            }
-            
-            Button(action: {
-                meetingViewModel.stopTrackingMember()
-                meetingViewModel.selectedUserLocation = nil
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    meetingViewModel.selectedUserLocation = meeting.meetingLocation
+                    .frame(maxHeight: 450)
+                    .glassSurface(radius: 16)
+                    .padding(.horizontal, 16)
                 }
 
-                selectedMemberID = nil
-                selectedButton = "meetingLocation"
-            }) {
-                Text("모임장소")
-            }
-            .glassSelectionAction(selected: selectedButton == "meetingLocation")
-            .controlSize(.large)
+                Button(action: {
+                    meetingViewModel.stopTrackingMember()
+                    meetingViewModel.selectedUserLocation = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        meetingViewModel.selectedUserLocation = meeting.meetingLocation
+                    }
 
-            // 멤버 버튼 영역 안내 문구
-            Text(Auth.auth().currentUser == nil
-                 ? "로그인 후 알림을 보낼 수 있어요"
-                 : "탭하면 위치 확인 · 다른 멤버를 길게 누르면 빠른 알림")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
+                    selectedMemberID = nil
+                    selectedButton = "meetingLocation"
+                }) {
+                    Text("모임장소")
+                }
+                .glassSelectionAction(selected: selectedButton == "meetingLocation")
+                .controlSize(.large)
+            }
 
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 16) {
                     ForEach(sortedMemberIDs(), id: \.self) { memberID in
-                        VStack(spacing: 6) {
-                            // 모임장 왕관: 모든 멤버에 같은 자리를 두어 버튼 높이를 맞춤
+                        VStack(spacing: 0) {
+                            // 모임장 왕관: 모든 멤버에 같은 자리를 두어 버튼 높이를 맞춤 (기존 offset -40 위치와 동일)
                             Image(systemName: "crown.fill")
                                 .foregroundColor(.yellow)
+                                .frame(height: 32)
                                 .opacity(memberID == (meetingViewModel.meetingMasterID ?? meeting.meetingMasterID) ? 1 : 0)
 
                             Text(meetingViewModel.meetingMemberNames[memberID] ?? "멤버 불러오는 중 ...")
@@ -183,9 +178,18 @@ struct MeetingView: View {
                 }
                 .padding(.horizontal)
                 .padding(.horizontal)
+                .padding(.top, 3)
             }
             // 콘텐츠 높이로 고정: 남는 높이를 차지X
             .fixedSize(horizontal: false, vertical: true)
+
+            Text(Auth.auth().currentUser == nil
+                 ? "로그인 후 알림을 보낼 수 있어요"
+                 : "탭하면 위치 확인 · 다른 멤버를 길게 누르면 빠른 알림")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, minHeight: 52)
+                .padding(.horizontal, 16)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(GlassBackdrop())
