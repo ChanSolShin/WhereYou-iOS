@@ -77,6 +77,15 @@ struct CustomTabView: UIViewControllerRepresentable {
 
         tabBarController.tabBar.tintColor = UIColor(GlassTheme.blue)
 
+        // iOS 26 미만: 탭바 투명 고정 및 glassBarBackdrop()로 배경 지정
+        if #unavailable(iOS 26.0) {
+            let appearance = UITabBarAppearance()
+            appearance.configureWithTransparentBackground()
+            appearance.shadowColor = .clear
+            tabBarController.tabBar.standardAppearance = appearance
+            tabBarController.tabBar.scrollEdgeAppearance = appearance
+        }
+
         let meetingListView = UIHostingController(
             rootView: MeetingListView(isTabBarHidden: $isTabBarHidden)
                 .environmentObject(router)
@@ -143,6 +152,34 @@ struct GlassBackdrop: View {
             }
         }
         .ignoresSafeArea()
+        .accessibilityHidden(true)
+    }
+}
+
+// 페이지 배경과 동일한 GlassBackdrop 상단·하단 바 영역에 지정
+struct GlassBarBackdrop: View {
+    var fade: CGFloat = 12
+
+    var body: some View {
+        GeometryReader { geometry in
+            let insets = geometry.safeAreaInsets
+            GlassBackdrop()
+                .mask {
+                    VStack(spacing: 0) {
+                        Rectangle().frame(height: insets.top)
+                        LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
+                            .frame(height: fade)
+                        Spacer(minLength: 0)
+                        LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom)
+                            .frame(height: fade)
+                        Rectangle().frame(height: insets.bottom)
+                    }
+                    .ignoresSafeArea()
+                }
+                .ignoresSafeArea()
+        }
+        .ignoresSafeArea(.keyboard)
+        .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
 }
@@ -217,6 +254,17 @@ extension View {
             glassPrimaryAction()
         } else {
             glassSecondaryAction()
+        }
+    }
+
+    // iOS 26 미만: 투명 네비게이션 바·탭바 배경 지정
+    // iOS 26 이상: 시스템 Liquid Glass
+    @ViewBuilder
+    func glassBarBackdrop() -> some View {
+        if #available(iOS 26.0, *) {
+            self
+        } else {
+            overlay { GlassBarBackdrop() }
         }
     }
 
