@@ -9,6 +9,8 @@ import Combine
 
 class FriendListViewModel: ObservableObject {
     @Published var friends: [FriendModel] = []
+    @Published private(set) var isLoadingFriends = true
+    @Published private(set) var friendsLoadError: String?
     @Published var pendingRequests: [FriendRequestModel] = []
     @Published var friendEmailInput: String = ""
     @Published var friendPhoneNumberInput: String = ""
@@ -30,6 +32,7 @@ class FriendListViewModel: ObservableObject {
        }
     
     private var friendListener: ListenerRegistration?
+    private var friendLoadGeneration = 0
     
     init() {
         fetchCurrentUserName()
@@ -60,46 +63,80 @@ class FriendListViewModel: ObservableObject {
     }
     
     func observeFriends() {
-        guard let userID = currentUserID else { return }
-
         friendListener?.remove()
+        friendLoadGeneration += 1
+        guard let userID = currentUserID else {
+            friends = []
+            isLoadingFriends = false
+            friendsLoadError = "로그인 후 친구 목록을 확인할 수 있습니다."
+            return
+        }
+
+        isLoadingFriends = friends.isEmpty
+        friendsLoadError = nil
 
         friendListener = db.collection("users").document(userID).addSnapshotListener { [weak self] (snapshot, error) in
-            guard let self = self, let document = snapshot, document.exists else {
-                print("No documents")
-                return
-            }
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.friendLoadGeneration += 1
+                let generation = self.friendLoadGeneration
 
-            let data = document.data()
-            let friendIDs = data?["friends"] as? [String] ?? []
+                guard error == nil, let document = snapshot, document.exists else {
+                    self.isLoadingFriends = false
+                    self.friendsLoadError = "친구 목록을 불러오지 못했습니다."
+                    return
+                }
 
-            let dispatchGroup = DispatchGroup()
-            self.friends.removeAll()
+                let friendIDs = Array(Set(document.data()?["friends"] as? [String] ?? []))
+                guard !friendIDs.isEmpty else {
+                    self.friends = []
+                    self.isLoadingFriends = false
+                    self.friendsLoadError = nil
+                    return
+                }
 
-            for friendID in friendIDs {
-                dispatchGroup.enter()
-                self.db.collection("users").document(friendID).getDocument { (friendDocument, error) in
-                    if let friendDocument = friendDocument, friendDocument.exists {
-                        let friendData = friendDocument.data()
-                        let friend = FriendModel(
-                            id: friendID,
-                            name: friendData?["name"] as? String ?? "Unknown",
-                            email: friendData?["email"] as? String ?? "",
-                            phoneNumber: friendData?["phoneNumber"] as? String ?? "",
-                            birthday: friendData?["birthday"] as? String ?? ""
-                        )
-                        if !self.friends.contains(where: { $0.id == friendID }) {
-                            self.friends.append(friend)
+                let dispatchGroup = DispatchGroup()
+                var loadedFriends: [FriendModel] = []
+                var failedToLoadFriend = false
+
+                for friendID in friendIDs {
+                    dispatchGroup.enter()
+                    self.db.collection("users").document(friendID).getDocument { (friendDocument, error) in
+                        DispatchQueue.main.async {
+                            if error != nil {
+                                failedToLoadFriend = true
+                            } else if let friendDocument, friendDocument.exists {
+                                let friendData = friendDocument.data()
+                                loadedFriends.append(FriendModel(
+                                    id: friendID,
+                                    name: friendData?["name"] as? String ?? "Unknown",
+                                    email: friendData?["email"] as? String ?? "",
+                                    phoneNumber: friendData?["phoneNumber"] as? String ?? "",
+                                    birthday: friendData?["birthday"] as? String ?? ""
+                                ))
+                            }
+                            dispatchGroup.leave()
                         }
                     }
-                    dispatchGroup.leave()
+                }
+
+                dispatchGroup.notify(queue: .main) { [weak self] in
+                    guard let self, self.friendLoadGeneration == generation else { return }
+                    if failedToLoadFriend {
+                        self.friendsLoadError = "일부 친구를 불러오지 못했습니다."
+                    } else {
+                        self.friendsLoadError = nil
+                    }
+                    self.friends = loadedFriends.sorted { $0.name < $1.name }
+                    self.isLoadingFriends = false
                 }
             }
-
-            dispatchGroup.notify(queue: .main) {
-                self.friends.sort { $0.name < $1.name }
-            }
         }
+    }
+
+    deinit {
+        friendListener?.remove()
+        requestListener?.remove()
     }
     
     func observePendingRequests() {

@@ -10,7 +10,7 @@ import FirebaseFirestore
 import FirebaseAuth
 
 struct AddSelectedFriend: View {
-    @ObservedObject var friendListViewModel = FriendListViewModel()
+    @StateObject private var friendListViewModel = FriendListViewModel()
     var meeting: MeetingListModel
     
     @State private var selectedFriends: [String] = []
@@ -19,52 +19,65 @@ struct AddSelectedFriend: View {
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .center) {
-                VStack {
-                    if friendListViewModel.friends.isEmpty {
-                        Text("친구 목록이 없습니다.")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                            .padding()
-                    } else {
-                        List(friendListViewModel.friends) { friend in
-                            FriendRow(friend: friend, isSelected: selectedFriends.contains(friend.id)) {
-                                toggleSelection(for: friend)
-                            }
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                        }
-                        .scrollContentBackground(.hidden)
-                    }
-                }
-                .onAppear {
-                    friendListViewModel.observeFriends()
-                }
-                .navigationTitle("멤버 추가")
-                
-                VStack {
-                    Spacer()
-                    Button(action: sendMeetingInvitations) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 24, weight: .semibold))
-                            .frame(width: 56, height: 56)
-                            .foregroundStyle(GlassTheme.blue)
-                            .glassSubtleCircle()
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(selectedFriends.isEmpty)
-                    .accessibilityLabel("선택한 친구 초대")
-                    .padding(.bottom, 20) 
-                }
+        NavigationStack {
+            ZStack {
+                GlassBackdrop()
+                friendListContent
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .background(GlassBackdrop())
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .navigationTitle("멤버 추가")
+            .navigationBarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .bottom) {
+                Button(action: sendMeetingInvitations) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 24, weight: .semibold))
+                        .frame(width: 56, height: 56)
+                        .foregroundStyle(GlassTheme.blue)
+                        .glassSubtleCircle()
+                }
+                .buttonStyle(.plain)
+                .disabled(selectedFriends.isEmpty)
+                .accessibilityLabel("선택한 친구 초대")
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+            }
             .alert(isPresented: $showAlert) {
                 Alert(title: Text("알림"), message: Text(alertMessage), dismissButton: .default(Text("확인"), action: {
                     // 알림이 닫힐 때 모달도 닫기
                     presentationMode.wrappedValue.dismiss()
                 }))
             }
+        }
+    }
+
+    @ViewBuilder
+    private var friendListContent: some View {
+        if friendListViewModel.isLoadingFriends && friendListViewModel.friends.isEmpty {
+            ProgressView("친구 목록을 불러오는 중...")
+        } else if let error = friendListViewModel.friendsLoadError,
+                  friendListViewModel.friends.isEmpty {
+            VStack(spacing: 12) {
+                Text(error)
+                    .foregroundStyle(.secondary)
+                Button("다시 시도") {
+                    friendListViewModel.observeFriends()
+                }
+                .glassSecondaryAction()
+            }
+        } else if friendListViewModel.friends.isEmpty {
+            Text("초대할 친구가 없습니다.")
+                .foregroundStyle(.secondary)
+        } else {
+            List(friendListViewModel.friends) { friend in
+                FriendRow(friend: friend, isSelected: selectedFriends.contains(friend.id)) {
+                    toggleSelection(for: friend)
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
         }
     }
     
