@@ -167,9 +167,9 @@ struct MeetingView: View {
                                         onHoldStart: { window, anchor in
                                             beginQuickNotification(for: memberID, in: window, anchor: anchor)
                                         },
-                                        onHoldMove: { movement in
+                                        onHoldMove: { location in
                                             guard radialMemberID == memberID else { return }
-                                            let highlighted = preset(for: movement)
+                                            let highlighted = MeetingQuickOverlayPresenter.shared.preset(at: location)
                                             if highlighted != radialHighlightedPreset {
                                                 radialHighlightedPreset = highlighted
                                                 MeetingQuickOverlayPresenter.shared.update(highlightedPreset: highlighted)
@@ -178,8 +178,8 @@ struct MeetingView: View {
                                                 }
                                             }
                                         },
-                                        onHoldEnd: { movement in
-                                            let selectedPreset = preset(for: movement)
+                                        onHoldEnd: { location in
+                                            let selectedPreset = MeetingQuickOverlayPresenter.shared.preset(at: location)
                                             let shouldSend = radialMemberID == memberID && canNotify(memberID)
                                             radialMemberID = nil
                                             radialHighlightedPreset = nil
@@ -409,14 +409,6 @@ struct MeetingView: View {
         return memberID != currentUserID && meetingViewModel.currentMemberIDs.contains(memberID)
     }
 
-    private func preset(for movement: CGSize) -> MeetingNotificationPreset? {
-        guard hypot(movement.width, movement.height) > 52 else { return nil }
-        if abs(movement.width) > abs(movement.height) {
-            return movement.width > 0 ? .almostThere : .whereAreYou
-        }
-        return movement.height > 0 ? .runningLate : .startingSoon
-    }
-
     @MainActor
     private func sendQuickNotification(_ preset: MeetingNotificationPreset, to memberID: String) async {
         guard canNotify(memberID), !isSendingNotification else { return }
@@ -480,8 +472,8 @@ struct MeetingView: View {
 private struct MemberTouchCapture: UIViewRepresentable {
     let onTap: () -> Void
     let onHoldStart: (UIWindow, CGRect) -> Void
-    let onHoldMove: (CGSize) -> Void
-    let onHoldEnd: (CGSize) -> Void
+    let onHoldMove: (CGPoint) -> Void
+    let onHoldEnd: (CGPoint) -> Void
     let onHoldCancel: () -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
@@ -514,7 +506,7 @@ private struct MemberTouchCapture: UIViewRepresentable {
 
     final class Coordinator: NSObject {
         var parent: MemberTouchCapture
-        private var holdOrigin: CGPoint?
+        private weak var holdWindow: UIWindow?
 
         init(parent: MemberTouchCapture) {
             self.parent = parent
@@ -529,29 +521,26 @@ private struct MemberTouchCapture: UIViewRepresentable {
             guard let view = recognizer.view else { return }
             switch recognizer.state {
             case .began:
-                holdOrigin = recognizer.location(in: view)
                 if let window = view.window {
+                    holdWindow = window
                     parent.onHoldStart(window, view.convert(view.bounds, to: window))
                 }
             case .changed:
-                guard let holdOrigin else { return }
-                parent.onHoldMove(movement(from: holdOrigin, to: recognizer.location(in: view)))
+                guard let holdWindow else { return }
+                parent.onHoldMove(recognizer.location(in: holdWindow))
             case .ended:
-                guard let holdOrigin else { return }
-                let movement = movement(from: holdOrigin, to: recognizer.location(in: view))
-                self.holdOrigin = nil
-                parent.onHoldEnd(movement)
+                guard let holdWindow else { return }
+                let location = recognizer.location(in: holdWindow)
+                self.holdWindow = nil
+                parent.onHoldEnd(location)
             case .cancelled, .failed:
-                guard holdOrigin != nil else { return }
-                holdOrigin = nil
+                guard holdWindow != nil else { return }
+                holdWindow = nil
                 parent.onHoldCancel()
             default:
                 break
             }
         }
 
-        private func movement(from start: CGPoint, to end: CGPoint) -> CGSize {
-            CGSize(width: end.x - start.x, height: end.y - start.y)
-        }
     }
 }
