@@ -10,16 +10,16 @@ import FirebaseAuth
 import FirebaseFirestore
 
 struct MainTabView: View {
-    @State private var isTabBarHidden = false
+    @State private var hiddenTabIndices: Set<Int> = []
     @EnvironmentObject var loginViewModel: LoginViewModel
     @EnvironmentObject var router: AppRouter
 
     var body: some View {
-        CustomTabView(isTabBarHidden: $isTabBarHidden)
+        CustomTabView(hiddenTabIndices: $hiddenTabIndices)
             .ignoresSafeArea()
             .background(GlassBackdrop())
             .onAppear {
-                isTabBarHidden = false
+                hiddenTabIndices = []
                 checkUserValidity()  // 사용자 유효성 검사 호출
                 PushTokenManager.syncCurrentToken()
             }
@@ -54,14 +54,14 @@ struct MainTabView: View {
 }
 
 struct CustomTabView: UIViewControllerRepresentable {
-    @Binding var isTabBarHidden: Bool
+    @Binding var hiddenTabIndices: Set<Int>
     @EnvironmentObject var router: AppRouter
     @EnvironmentObject var loginViewModel: LoginViewModel
 
     // Keep router in sync when user taps tabs
     func makeCoordinator() -> Coordinator { Coordinator(self) }
     class Coordinator: NSObject, UITabBarControllerDelegate {
-        let parent: CustomTabView
+        var parent: CustomTabView
         init(_ parent: CustomTabView) { self.parent = parent }
         func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
             if let index = tabBarController.viewControllers?.firstIndex(of: viewController) {
@@ -88,19 +88,19 @@ struct CustomTabView: UIViewControllerRepresentable {
         }
 
         let meetingListView = UIHostingController(
-            rootView: MeetingListView(isTabBarHidden: $isTabBarHidden)
+            rootView: MeetingListView(isTabBarHidden: visibilityBinding(for: .meeting))
                 .environmentObject(router)
         )
         meetingListView.tabBarItem = UITabBarItem(title: "모임", image: UIImage(systemName: "list.bullet"), tag: 0)
 
         let friendView = UIHostingController(
-            rootView: FriendListView(isTabBarHidden: $isTabBarHidden)
+            rootView: FriendListView(isTabBarHidden: visibilityBinding(for: .friend))
                 .environmentObject(router)
         )
         friendView.tabBarItem = UITabBarItem(title: "친구", image: UIImage(systemName: "person.3"), tag: 1)
 
         let profileView = UIHostingController(
-            rootView: ProfileView(isTabBarHidden: $isTabBarHidden)
+            rootView: ProfileView(isTabBarHidden: visibilityBinding(for: .profile))
                 .environmentObject(router)
                 .environmentObject(loginViewModel)
         )
@@ -112,10 +112,31 @@ struct CustomTabView: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UITabBarController, context: Context) {
+        context.coordinator.parent = self
         if uiViewController.selectedIndex != router.selectedTabIndex {
             uiViewController.selectedIndex = router.selectedTabIndex
         }
-        uiViewController.tabBar.isHidden = isTabBarHidden
+        let shouldHideTabBar = hiddenTabIndices.contains(uiViewController.selectedIndex)
+        if #available(iOS 18.0, *) {
+            if uiViewController.isTabBarHidden != shouldHideTabBar {
+                uiViewController.setTabBarHidden(shouldHideTabBar, animated: false)
+            }
+        } else if uiViewController.tabBar.isHidden != shouldHideTabBar {
+            uiViewController.tabBar.isHidden = shouldHideTabBar
+        }
+    }
+
+    private func visibilityBinding(for tab: AppTabIndex) -> Binding<Bool> {
+        Binding(
+            get: { hiddenTabIndices.contains(tab.rawValue) },
+            set: { isHidden in
+                if isHidden {
+                    hiddenTabIndices.insert(tab.rawValue)
+                } else {
+                    hiddenTabIndices.remove(tab.rawValue)
+                }
+            }
+        )
     }
 }
 
@@ -221,13 +242,23 @@ struct ClearGlassButtonStyle: ButtonStyle {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .frame(minHeight: 44)
+            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .opacity(configuration.isPressed ? 0.65 : 1)
 
         if #available(iOS 26.0, *) {
-            label.glassEffect(.clear.interactive(), in: .rect(cornerRadius: 16))
+            // Button already owns the touch interaction; glass only draws the surface.
+            label.glassEffect(.clear, in: .rect(cornerRadius: 16))
         } else {
             label.background(GlassPanel(radius: 16))
         }
+    }
+}
+
+struct ClearGlassCircleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .contentShape(Circle())
+            .opacity(configuration.isPressed ? 0.65 : 1)
     }
 }
 
@@ -272,7 +303,8 @@ extension View {
     @ViewBuilder
     func glassSubtleCircle() -> some View {
         if #available(iOS 26.0, *) {
-            glassEffect(.clear.interactive(), in: Circle())
+            contentShape(Circle())
+                .glassEffect(.clear, in: Circle())
         } else {
             background(Color.white.opacity(0.12), in: Circle())
                 .overlay(Circle().strokeBorder(Color.white.opacity(0.6), lineWidth: 1))

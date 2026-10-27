@@ -12,8 +12,7 @@ struct EditMeetingView: View {
     @StateObject private var viewModel = EditMeetingViewModel()
     @Environment(\.dismiss) var dismiss
     var meetingID: String
-    @State private var showDatePicker = false
-    @State private var showLocationModal = false
+    @State private var presentedSheet: MeetingFormSheet?
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
     
@@ -33,7 +32,7 @@ struct EditMeetingView: View {
                     .padding(.horizontal, 24)
                 
                 Button(action: {
-                    showDatePicker.toggle()
+                    presentedSheet = .date
                 }) {
                     Label("날짜 선택", systemImage: "calendar")
                         .frame(maxWidth: .infinity)
@@ -52,7 +51,7 @@ struct EditMeetingView: View {
                 .padding(.horizontal, 16)
                 
                 Button(action: {
-                    showLocationModal.toggle()
+                    presentedSheet = .location
                 }) {
                     Label("장소 선택", systemImage: "map")
                         .frame(maxWidth: .infinity)
@@ -92,11 +91,14 @@ struct EditMeetingView: View {
                 .padding(.bottom, 100)
                 .frame(maxWidth: .infinity)
             }
-            .sheet(isPresented: $showLocationModal) {
-                EditLocationView(viewModel: viewModel)
-            }
-            .sheet(isPresented: $showDatePicker) {
-                GlassDatePickerSheet(date: $viewModel.meetingDate)
+            .scrollBounceBehavior(.basedOnSize)
+            .sheet(item: $presentedSheet) { sheet in
+                switch sheet {
+                case .date:
+                    GlassDatePickerSheet(date: $viewModel.meetingDate)
+                case .location:
+                    EditLocationView(viewModel: viewModel)
+                }
             }
             .onAppear {
                 viewModel.fetchMeetingData(meetingID: meetingID)

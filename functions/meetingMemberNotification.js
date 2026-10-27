@@ -9,6 +9,8 @@ const messages = Object.freeze({
 });
 
 const cooldownMs = 30_000;
+const cooldownCollection = '_meetingNotificationCooldowns';
+const cleanupBatchSize = 100;
 const invalidTokenCodes = new Set([
   'messaging/registration-token-not-registered',
   'messaging/invalid-registration-token',
@@ -53,9 +55,9 @@ function createMeetingMemberNotificationHandler({ db, messaging, now = Date.now,
       throw new HttpsError('failed-precondition', '상대방이 알림을 받을 수 없는 상태입니다.');
     }
 
-    const cooldownRef = db.collection('_meetingNotificationCooldowns')
+    const cooldownRef = db.collection(cooldownCollection)
       .doc(`${meetingId}_${senderId}_${recipientId}`);
-    const reservationId = db.collection('_meetingNotificationCooldowns').doc().id;
+    const reservationId = db.collection(cooldownCollection).doc().id;
     const sentAt = now();
     await db.runTransaction(async (transaction) => {
       const cooldown = await transaction.get(cooldownRef);
@@ -107,4 +109,37 @@ function createMeetingMemberNotificationHandler({ db, messaging, now = Date.now,
   };
 }
 
-module.exports = { createMeetingMemberNotificationHandler };
+async function cleanupExpiredMeetingNotificationCooldowns({ db, now = Date.now, logger = console }) {
+  const cutoff = now() - cooldownMs;
+  const snapshot = await db.collection(cooldownCollection)
+    .where('lastSentAtMs', '<=', cutoff)
+    .limit(cleanupBatchSize)
+    .get();
+
+  const results = await Promise.allSettled(snapshot.docs.map((document) =>
+    db.runTransaction(async (transaction) => {
+      const current = await transaction.get(document.ref);
+      const lastSentAtMs = current.data()?.lastSentAtMs;
+      if (typeof lastSentAtMs !== 'number' || lastSentAtMs > cutoff) return false;
+      transaction.delete(document.ref);
+      return true;
+    })
+  ));
+
+  let deleted = 0;
+  let failed = 0;
+  for (const result of results) {
+    if (result.status === 'rejected') {
+      failed += 1;
+      logger.error('만료된 모임 알림 제한 기록 삭제 실패:', result.reason);
+    } else if (result.value) {
+      deleted += 1;
+    }
+  }
+  return { deleted, failed };
+}
+
+module.exports = {
+  createMeetingMemberNotificationHandler,
+  cleanupExpiredMeetingNotificationCooldowns,
+};
