@@ -11,7 +11,6 @@
 		EA27C0A32D8FCD2A0053F213 /* AddFriendType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA27C0A22D8FCD290053F213 /* AddFriendType.swift */; };
 		EA28F4F82CC83C64004827A3 /* MeetingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */; };
 		EA28F4FA2CC83C6D004827A3 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */; };
-		EA3C8D332DD03E9000DD899E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */; };
 		EA5429E72E0B30B3002EC15E /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = EA5429E62E0B30B3002EC15E /* FirebaseRemoteConfig */; };
 		EA6EE1D92CD39060002961A9 /* AddSelectedFriend.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */; };
 		EA6EE1DB2CD39AE9002961A9 /* MeetingRequestListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1DA2CD39AE2002961A9 /* MeetingRequestListView.swift */; };
@@ -115,7 +114,7 @@
 		EA27C0A22D8FCD290053F213 /* AddFriendType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendType.swift; sourceTree = "<group>"; };
 		EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModel.swift; sourceTree = "<group>"; };
 		EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingViewModel.swift; sourceTree = "<group>"; };
-		EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		7CE392D3E9234D537AB50757 /* Firebase */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Firebase; sourceTree = "<group>"; };
 		EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSelectedFriend.swift; sourceTree = "<group>"; };
 		EA6EE1DA2CD39AE2002961A9 /* MeetingRequestListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRequestListView.swift; sourceTree = "<group>"; };
 		EA6EE1DC2CD39B01002961A9 /* MeetingRequestModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRequestModel.swift; sourceTree = "<group>"; };
@@ -351,7 +350,7 @@
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
 				F53F124A2D7DC0F300E434D4 /* KeyboardAvoidingModifier.swift */,
-				EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */,
+				7CE392D3E9234D537AB50757 /* Firebase */,
 				EA86C11D2CC2F15700989E43 /* Info.plist */,
 			);
 			path = iOS_Project;
@@ -472,6 +471,7 @@
 				EABADF272CB9223E00962A40 /* Sources */,
 				EABADF282CB9223E00962A40 /* Frameworks */,
 				EABADF292CB9223E00962A40 /* Resources */,
+				DBA1F8B15A33B84F2669484F /* Select Firebase plist by configuration */,
 				EA216DB62E22BE3700E9A6BA /* Embed Frameworks */,
 			);
 			buildRules = (
@@ -586,7 +586,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA86C1322CC2F15700989E43 /* Preview Assets.xcassets in Resources */,
-				EA3C8D332DD03E9000DD899E /* GoogleService-Info.plist in Resources */,
 				EA86C1332CC2F15700989E43 /* Assets.xcassets in Resources */,
 				F5038ECE2D841D0100347F13 /* country_codes.json in Resources */,
 			);
@@ -607,6 +606,29 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		DBA1F8B15A33B84F2669484F /* Select Firebase plist by configuration */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Select Firebase plist by configuration";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# 빌드 구성에 맞는 Firebase plist를 앱 번들에 GoogleService-Info.plist로 복사한다.\n# Debug-YH → Firebase/Dev, 그 외(Debug, Release) → Firebase/Prod\n\ncase \"$CONFIGURATION\" in\n    Debug-YH) FIREBASE_ENV=\"Dev\" ;;\n    *) FIREBASE_ENV=\"Prod\" ;;\nesac\n\nSRC=\"$SRCROOT/iOS_Project/Firebase/$FIREBASE_ENV/GoogleService-Info.plist\"\nDEST_DIR=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH\"\nDEST=\"$DEST_DIR/GoogleService-Info.plist\"\n\nif [ ! -f \"$SRC\" ]; then\n    echo \"error: Firebase plist가 없습니다 (configuration=$CONFIGURATION): $SRC\"\n    exit 1\nfi\n\nmkdir -p \"$DEST_DIR\"\ncp \"$SRC\" \"$DEST\"\nplutil -lint \"$DEST\" >/dev/null\n\necho \"Copied Firebase plist: $SRC -> $DEST\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		EABADF272CB9223E00962A40 /* Sources */ = {
@@ -769,6 +791,71 @@
 			};
 			name = Debug;
 		};
+		78430BD4D85763C02CC5B603 /* Debug-YH */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug-YH;
+		};
 		EABADF4E2CB9224100962A40 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -842,6 +929,8 @@
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FIREBASE_APP_URL_SCHEME = "app-1-112211747880-ios-ef2a2772eca1c62491011d";
+				FIREBASE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.112211747880-fkfvk3586f4plvml8uspssk845me5f0b";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iOS_Project/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
@@ -874,6 +963,56 @@
 			};
 			name = Debug;
 		};
+		3252A330D48E078C11208540 /* Debug-YH */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = iOS_Project/iOS_Project.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 77;
+				DEVELOPMENT_ASSET_PATHS = "\"iOS_Project/Preview Content\"";
+				DEVELOPMENT_TEAM = 52AU86437A;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FIREBASE_APP_URL_SCHEME = "app-1-112211747880-ios-61760149d0e33c1891011d";
+				FIREBASE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.112211747880-7e81g425c1pldj2pcbmebm7do2a4d2hs";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = iOS_Project/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 친구에게 위치를 자동으로 업데이트하기 위해 사용합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱 사용 중 친구와 실시간 위치를 공유하기 위해 위치 권한이 필요합니다.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.2.2;
+				PRODUCT_BUNDLE_IDENTIFIER = whereyou.app.dev;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEV_BUNDLE";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug-YH;
+		};
 		EABADF512CB9224100962A40 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -889,6 +1028,8 @@
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FIREBASE_APP_URL_SCHEME = "app-1-112211747880-ios-ef2a2772eca1c62491011d";
+				FIREBASE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.112211747880-fkfvk3586f4plvml8uspssk845me5f0b";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iOS_Project/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "웨어유";
@@ -940,6 +1081,25 @@
 			};
 			name = Debug;
 		};
+		AB1D75261ADC4DF7861639CB /* Debug-YH */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 52AU86437A;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.chansol.iOS-ProjectTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iOS_Project.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iOS_Project";
+			};
+			name = Debug-YH;
+		};
 		EABADF542CB9224100962A40 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -976,6 +1136,23 @@
 			};
 			name = Debug;
 		};
+		094809DFB12FA691B96DAB80 /* Debug-YH */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 52AU86437A;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.chansol.iOS-ProjectUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = iOS_Project;
+			};
+			name = Debug-YH;
+		};
 		EABADF572CB9224100962A40 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1000,6 +1177,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EABADF4D2CB9224100962A40 /* Debug */,
+				78430BD4D85763C02CC5B603 /* Debug-YH */,
 				EABADF4E2CB9224100962A40 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1009,6 +1187,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EABADF502CB9224100962A40 /* Debug */,
+				3252A330D48E078C11208540 /* Debug-YH */,
 				EABADF512CB9224100962A40 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1018,6 +1197,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EABADF532CB9224100962A40 /* Debug */,
+				AB1D75261ADC4DF7861639CB /* Debug-YH */,
 				EABADF542CB9224100962A40 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1027,6 +1207,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EABADF562CB9224100962A40 /* Debug */,
+				094809DFB12FA691B96DAB80 /* Debug-YH */,
 				EABADF572CB9224100962A40 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
