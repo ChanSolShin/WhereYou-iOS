@@ -242,13 +242,23 @@ struct ClearGlassButtonStyle: ButtonStyle {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .frame(minHeight: 44)
+            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .opacity(configuration.isPressed ? 0.65 : 1)
 
         if #available(iOS 26.0, *) {
-            label.glassEffect(.clear.interactive(), in: .rect(cornerRadius: 16))
+            // Button already owns the touch interaction; glass only draws the surface.
+            label.glassEffect(.clear, in: .rect(cornerRadius: 16))
         } else {
             label.background(GlassPanel(radius: 16))
         }
+    }
+}
+
+struct ClearGlassCircleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .contentShape(Circle())
+            .opacity(configuration.isPressed ? 0.65 : 1)
     }
 }
 
@@ -293,7 +303,8 @@ extension View {
     @ViewBuilder
     func glassSubtleCircle() -> some View {
         if #available(iOS 26.0, *) {
-            glassEffect(.clear.interactive(), in: Circle())
+            contentShape(Circle())
+                .glassEffect(.clear, in: Circle())
         } else {
             background(Color.white.opacity(0.12), in: Circle())
                 .overlay(Circle().strokeBorder(Color.white.opacity(0.6), lineWidth: 1))

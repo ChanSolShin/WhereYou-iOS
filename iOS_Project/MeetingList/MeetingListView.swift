@@ -160,7 +160,7 @@ struct MeetingListView: View {
                         .foregroundStyle(GlassTheme.blue)
                         .glassSubtleCircle()
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ClearGlassCircleButtonStyle())
                 .accessibilityLabel("모임 추가")
                 .padding(.trailing, 20)
                 .padding(.bottom, 12)

@@ -57,7 +57,7 @@ struct AddSelectedFriend: View {
                         .foregroundStyle(GlassTheme.blue)
                         .glassSubtleCircle()
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(ClearGlassCircleButtonStyle())
                     .disabled(selectedFriends.isEmpty || !invitationStatus.isReady || isSending)
                     .accessibilityLabel(isSending ? "초대 요청 전송 중" : "선택한 친구 초대")
 

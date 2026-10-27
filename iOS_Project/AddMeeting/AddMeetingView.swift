@@ -9,11 +9,17 @@ import SwiftUI
 import CoreLocation
 import Foundation
 
+enum MeetingFormSheet: Hashable, Identifiable {
+    case date
+    case location
+
+    var id: Self { self }
+}
+
 struct AddMeetingView: View {
     
     @ObservedObject var viewModel: AddMeetingViewModel
-    @State private var showDatePicker = false
-    @State private var showLocationModal = false
+    @State private var presentedSheet: MeetingFormSheet?
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
@@ -32,7 +38,7 @@ struct AddMeetingView: View {
                 
                 // 날짜 선택 버튼과 선택된 날짜 표시
                 Button(action: {
-                    showDatePicker.toggle()
+                    presentedSheet = .date
                 }) {
                     Label("날짜 선택", systemImage: "calendar")
                         .frame(maxWidth: .infinity)
@@ -54,7 +60,7 @@ struct AddMeetingView: View {
                 
                 // 장소 선택 버튼과 선택된 주소 표시
                 Button(action: {
-                    showLocationModal.toggle()
+                    presentedSheet = .location
                 }) {
                     Label("장소 선택", systemImage: "map")
                         .frame(maxWidth: .infinity)
@@ -101,10 +107,13 @@ struct AddMeetingView: View {
                 .padding(.top, 10)
             }
             .padding(.vertical, 20)
-            .sheet(isPresented: $showDatePicker) {
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .sheet(item: $presentedSheet) { sheet in
+            switch sheet {
+            case .date:
                 GlassDatePickerSheet(date: $viewModel.meeting.meetingDate)
-            }
-            .sheet(isPresented: $showLocationModal) {
+            case .location:
                 AddLocationView(viewModel: viewModel)
             }
         }
