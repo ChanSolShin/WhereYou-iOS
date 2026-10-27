@@ -13,11 +13,13 @@ enum DeepLinkDestination: Equatable {
     case friendRequests
     case meetingRequests
     case meeting(id: String)
+    case meetingChat(id: String)
 }
 
 /// 각 탭 인덱스 정의 (MainTabView에서 사용)
 enum AppTabIndex: Int {
     case meeting = 0
-    case friend = 1
-    case profile = 2
+    case chat = 1
+    case friend = 2
+    case profile = 3
 }

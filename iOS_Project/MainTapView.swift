@@ -8,20 +8,39 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
+import UserNotifications
+import Combine
 
 struct MainTabView: View {
     @State private var hiddenTabIndices: Set<Int> = []
+    @StateObject private var chatStore = MeetingChatStore()
+    @StateObject private var badgeCoordinator = AppBadgeCoordinator()
     @EnvironmentObject var loginViewModel: LoginViewModel
     @EnvironmentObject var router: AppRouter
 
     var body: some View {
         CustomTabView(hiddenTabIndices: $hiddenTabIndices)
+            .environmentObject(chatStore)
+            // Each tab's hosting controller handles its own keyboard. Resizing this
+            // outer UIKit container as well would apply keyboard avoidance twice.
             .ignoresSafeArea()
             .background(GlassBackdrop())
             .onAppear {
+                guard !ChatKeyboardUITest.isEnabled else { return }
                 hiddenTabIndices = []
                 checkUserValidity()  // 사용자 유효성 검사 호출
                 PushTokenManager.syncCurrentToken()
+                badgeCoordinator.start(uid: Auth.auth().currentUser?.uid)
+                chatStore.start()
+            }
+            .onReceive(chatStore.$rooms.combineLatest(chatStore.$isLoading, chatStore.$errorMessage)) { rooms, loading, error in
+                guard !loading, error == nil else { return }
+                let unread = rooms.reduce(0) { $0 + $1.unreadCount }
+                badgeCoordinator.updateChatCount(unread, uid: Auth.auth().currentUser?.uid)
+            }
+            .onDisappear {
+                chatStore.stop()
+                badgeCoordinator.stop(clearBadge: Auth.auth().currentUser == nil)
             }
     }
 
@@ -53,10 +72,108 @@ struct MainTabView: View {
     }
 }
 
+@MainActor
+private final class AppBadgeCoordinator: ObservableObject {
+    private let db = Firestore.firestore()
+    private var currentUID: String?
+    private var friendRequests: Int?
+    private var meetingRequests: Int?
+    private var unreadChats: Int?
+    private var friendListener: ListenerRegistration?
+    private var meetingListener: ListenerRegistration?
+    private var queuedCount: Int?
+    private var lastRequestedCount: Int?
+    private var isApplyingBadge = false
+
+    func start(uid: String?) {
+        guard let uid else { stop(); return }
+        guard currentUID != uid else { return }
+        stop(clearBadge: false)
+        currentUID = uid
+
+        friendListener = db.collection("friendRequests")
+            .whereField("toUserID", isEqualTo: uid)
+            .whereField("status", isEqualTo: "pending")
+            .addSnapshotListener { [weak self] snapshot, error in
+                Task { @MainActor [weak self] in
+                    guard let self, self.currentUID == uid else { return }
+                    if let error {
+                        print("친구 요청 뱃지 조회 실패: \(error.localizedDescription)")
+                        return
+                    }
+                    self.friendRequests = snapshot?.documents.count ?? 0
+                    self.publishBadge()
+                }
+            }
+
+        meetingListener = db.collection("meetingRequests")
+            .whereField("toUserID", isEqualTo: uid)
+            .whereField("status", isEqualTo: "pending")
+            .addSnapshotListener { [weak self] snapshot, error in
+                Task { @MainActor [weak self] in
+                    guard let self, self.currentUID == uid else { return }
+                    if let error {
+                        print("모임 요청 뱃지 조회 실패: \(error.localizedDescription)")
+                        return
+                    }
+                    self.meetingRequests = snapshot?.documents.count ?? 0
+                    self.publishBadge()
+                }
+            }
+    }
+
+    func updateChatCount(_ count: Int, uid: String?) {
+        guard currentUID == uid, uid != nil else { return }
+        unreadChats = max(0, count)
+        publishBadge()
+    }
+
+    func stop(clearBadge: Bool = true) {
+        friendListener?.remove()
+        meetingListener?.remove()
+        friendListener = nil
+        meetingListener = nil
+        currentUID = nil
+        friendRequests = nil
+        meetingRequests = nil
+        unreadChats = nil
+        lastRequestedCount = nil
+        if clearBadge { queueBadge(0) }
+    }
+
+    private func publishBadge() {
+        guard let friendRequests, let meetingRequests, let unreadChats else { return }
+        let total = friendRequests + meetingRequests + unreadChats
+        guard lastRequestedCount != total else { return }
+        lastRequestedCount = total
+        queueBadge(total)
+    }
+
+    private func queueBadge(_ count: Int) {
+        queuedCount = count
+        guard !isApplyingBadge else { return }
+        isApplyingBadge = true
+        Task { await applyQueuedBadges() }
+    }
+
+    private func applyQueuedBadges() async {
+        while let count = queuedCount {
+            queuedCount = nil
+            do {
+                try await UNUserNotificationCenter.current().setBadgeCount(count)
+            } catch {
+                print("앱 아이콘 뱃지 갱신 실패: \(error.localizedDescription)")
+            }
+        }
+        isApplyingBadge = false
+    }
+}
+
 struct CustomTabView: UIViewControllerRepresentable {
     @Binding var hiddenTabIndices: Set<Int>
     @EnvironmentObject var router: AppRouter
     @EnvironmentObject var loginViewModel: LoginViewModel
+    @EnvironmentObject var chatStore: MeetingChatStore
 
     // Keep router in sync when user taps tabs
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -78,6 +195,17 @@ struct CustomTabView: UIViewControllerRepresentable {
 
         tabBarController.tabBar.tintColor = UIColor(GlassTheme.blue)
 
+#if DEBUG
+        if ChatKeyboardUITest.isEnabled {
+            tabBarController.viewControllers = [AppTabIndex.meeting, .chat].map { tab in
+                let host = UIHostingController(rootView: ChatKeyboardUITest.Entry(isTabBarHidden: visibilityBinding(for: tab), viaDetail: tab == .meeting))
+                host.tabBarItem = UITabBarItem(title: tab == .meeting ? "모임" : "채팅", image: UIImage(systemName: "bubble.left"), tag: tab.rawValue)
+                return host
+            }
+            return tabBarController
+        }
+#endif
+
         // iOS 26 미만: 탭바 투명 고정 및 glassBarBackdrop()로 배경 지정
         if #unavailable(iOS 26.0) {
             let appearance = UITabBarAppearance()
@@ -90,29 +218,40 @@ struct CustomTabView: UIViewControllerRepresentable {
         let meetingListView = UIHostingController(
             rootView: MeetingListView(isTabBarHidden: visibilityBinding(for: .meeting))
                 .environmentObject(router)
+                .environmentObject(chatStore)
         )
         meetingListView.tabBarItem = UITabBarItem(title: "모임", image: UIImage(systemName: "list.bullet"), tag: 0)
+
+        let chatView = UIHostingController(
+            rootView: MeetingChatListView(isTabBarHidden: visibilityBinding(for: .chat))
+                .environmentObject(chatStore)
+                .environmentObject(router)
+        )
+        chatView.tabBarItem = UITabBarItem(title: "채팅", image: UIImage(systemName: "bubble.left.and.bubble.right"), tag: 1)
 
         let friendView = UIHostingController(
             rootView: FriendListView(isTabBarHidden: visibilityBinding(for: .friend))
                 .environmentObject(router)
         )
-        friendView.tabBarItem = UITabBarItem(title: "친구", image: UIImage(systemName: "person.3"), tag: 1)
+        friendView.tabBarItem = UITabBarItem(title: "친구", image: UIImage(systemName: "person.3"), tag: 2)
 
         let profileView = UIHostingController(
             rootView: ProfileView(isTabBarHidden: visibilityBinding(for: .profile))
                 .environmentObject(router)
                 .environmentObject(loginViewModel)
         )
-        profileView.tabBarItem = UITabBarItem(title: "설정", image: UIImage(systemName: "gear"), tag: 2)
+        profileView.tabBarItem = UITabBarItem(title: "설정", image: UIImage(systemName: "gear"), tag: 3)
 
-        tabBarController.viewControllers = [meetingListView, friendView, profileView]
+        tabBarController.viewControllers = [meetingListView, chatView, friendView, profileView]
         tabBarController.selectedIndex = router.selectedTabIndex
         return tabBarController
     }
 
     func updateUIViewController(_ uiViewController: UITabBarController, context: Context) {
         context.coordinator.parent = self
+        let unread = chatStore.totalUnreadCount
+        uiViewController.viewControllers?[AppTabIndex.chat.rawValue].tabBarItem.badgeValue =
+            unread > 0 ? ChatCountLabel.text(unread) : nil
         if uiViewController.selectedIndex != router.selectedTabIndex {
             uiViewController.selectedIndex = router.selectedTabIndex
         }

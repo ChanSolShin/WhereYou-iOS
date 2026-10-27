@@ -21,6 +21,15 @@ final class AppRouter: ObservableObject {
     // 교차 탭 딥링크 시, 떠나는 탭이 루트로 복귀하도록 지시하는 1회성 이벤트
     @Published var popToRootTab: AppTabIndex?
 
+    private var visibleChat: (id: String, owner: UUID)?
+    var visibleChatMeetingID: String? { visibleChat?.id }
+
+    func chatDidAppear(id: String, owner: UUID) { visibleChat = (id, owner) }
+
+    func chatDidDisappear(owner: UUID) {
+        if visibleChat?.owner == owner { visibleChat = nil }
+    }
+
     private init() {}
 
     // 알림/딥링크가 들어왔을 때 호출
@@ -56,6 +65,8 @@ final class AppRouter: ObservableObject {
             return AppTabIndex.friend.rawValue
         case .meetingRequests, .meeting:
             return AppTabIndex.meeting.rawValue
+        case .meetingChat:
+            return AppTabIndex.chat.rawValue
         }
     }
 }

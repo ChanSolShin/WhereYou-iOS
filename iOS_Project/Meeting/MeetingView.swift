@@ -13,8 +13,11 @@ import UIKit
 
 struct MeetingView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject private var chatStore: MeetingChatStore
     var meeting: MeetingListModel
     @ObservedObject var meetingViewModel: MeetingViewModel
+    var onChatVisibilityChange: (Bool) -> Void
+    @State private var showingChat = false
     @State var meetingDate: Date? = nil
     @State private var showingAddFriendModal = false
     @State private var leaderSelctionModal = false
@@ -81,20 +84,56 @@ struct MeetingView: View {
                     .padding(.horizontal, 16)
                 }
 
-                Button(action: {
-                    meetingViewModel.stopTrackingMember()
-                    meetingViewModel.selectedUserLocation = nil
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        meetingViewModel.selectedUserLocation = meeting.meetingLocation
-                    }
+                ZStack {
+                    Button(action: {
+                        meetingViewModel.stopTrackingMember()
+                        meetingViewModel.selectedUserLocation = nil
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            meetingViewModel.selectedUserLocation = meeting.meetingLocation
+                        }
 
-                    selectedMemberID = nil
-                    selectedButton = "meetingLocation"
-                }) {
-                    Text("모임장소")
+                        selectedMemberID = nil
+                        selectedButton = "meetingLocation"
+                    }) {
+                        Text("모임장소")
+                    }
+                    .glassSelectionAction(selected: selectedButton == "meetingLocation")
+                    .controlSize(.large)
+
+                    HStack {
+                        Button {
+                            onChatVisibilityChange(true)
+                            showingChat = true
+                        } label: {
+                            Image(systemName: "bubble.left.and.bubble.right.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                                .frame(width: 36, height: 36)
+                                .glassSurface(radius: 12)
+                                .overlay(alignment: .topTrailing) {
+                                    let unreadCount = chatStore.unreadCount(for: meeting.id)
+                                    if unreadCount > 0 {
+                                        ChatUnreadBadge(count: unreadCount)
+                                            .offset(x: 8, y: -8)
+                                            .allowsHitTesting(false)
+                                            .accessibilityHidden(true)
+                                    }
+                                }
+                                .frame(width: 44, height: 44)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(chatStore.unreadCount(for: meeting.id) > 0
+                                            ? "모임 채팅 열기, 읽지 않은 메시지 \(chatStore.unreadCount(for: meeting.id))개"
+                                            : "모임 채팅 열기")
+                        .navigationDestination(isPresented: $showingChat) {
+                            MeetingChatView(meetingID: meeting.id, meetingTitle: meeting.title)
+                                .onDisappear { onChatVisibilityChange(false) }
+                        }
+                        Spacer(minLength: 0)
+                    }
                 }
-                .glassSelectionAction(selected: selectedButton == "meetingLocation")
-                .controlSize(.large)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 16)
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -516,4 +555,3 @@ private struct MemberTouchCapture: UIViewRepresentable {
         }
     }
 }
-

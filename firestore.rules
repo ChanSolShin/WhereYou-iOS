@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. 사용자 정보
+    match /users/{userId} {
+      // 읽기: 로그인 없이도 가능 (예: 이메일/전화번호 중복 체크)
+      allow read: if true;
+
+      // 업데이트: friends 필드만 수정하는 경우 누구든지 허용
+      allow update: if request.auth != null && (
+        request.auth.uid == userId || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['friends'])
+        )
+      );
+
+      // 생성 및 삭제: 본인만 가능
+      allow create, delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 1-1. users 컬렉션 쿼리 허용 (이메일, 전화번호 중복 체크)
+    match /users/{document=**} {
+      allow list: if true;
+    }
+
+    // 2. 모임(meetings)
+    match /meetings/{meetingId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null;
+
+      // 초대 수락은 서버에서 초대 문서를 검증한 후 멤버로 추가한다.
+      allow update: if request.auth != null &&
+        request.auth.uid in resource.data.meetingMembers;
+
+      allow delete: if request.auth != null &&
+        request.auth.uid in resource.data.meetingMembers;
+
+      // 메시지와 읽음 상태는 모임 멤버만 읽는다. 변경은 검증된 Callable만 수행한다.
+      match /messages/{messageId} {
+        allow read: if request.auth != null &&
+          exists(/databases/$(database)/documents/meetings/$(meetingId)) &&
+          request.auth.uid in get(/databases/$(database)/documents/meetings/$(meetingId)).data.meetingMembers;
+        allow write: if false;
+      }
+      match /chat/{documentId} {
+        allow read: if request.auth != null && documentId == 'summary' &&
+          exists(/databases/$(database)/documents/meetings/$(meetingId)) &&
+          request.auth.uid in get(/databases/$(database)/documents/meetings/$(meetingId)).data.meetingMembers;
+        allow write: if false;
+      }
+      match /readStates/{userId} {
+        allow read: if request.auth != null && request.auth.uid == userId &&
+          exists(/databases/$(database)/documents/meetings/$(meetingId)) &&
+          request.auth.uid in get(/databases/$(database)/documents/meetings/$(meetingId)).data.meetingMembers;
+        allow write: if false;
+      }
+    }
+
+    // 3. 모임 요청 (meetingRequests)
+    match /meetingRequests/{requestId} {
+      allow create: if request.auth != null &&
+        request.resource.data.fromUserID == request.auth.uid &&
+        request.resource.data.status == 'pending' &&
+        exists(/databases/$(database)/documents/meetings/$(request.resource.data.meetingID)) &&
+        request.auth.uid in get(/databases/$(database)/documents/meetings/$(request.resource.data.meetingID)).data.meetingMembers;
+
+      allow get, delete: if request.auth != null &&
+        (request.auth.uid == resource.data.fromUserID ||
+         request.auth.uid == resource.data.toUserID);
+
+      allow update: if request.auth != null &&
+        request.auth.uid == resource.data.toUserID &&
+        resource.data.status == 'pending' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+        request.resource.data.status in ['accepted', 'rejected'];
+
+      allow list: if request.auth != null;
+    }
+
+    // 4. 친구 요청 (friendRequests)
+    match /friendRequests/{requestId} {
+      allow create: if request.auth != null;
+
+      allow get, update, delete: if request.auth != null &&
+        (request.auth.uid == resource.data.fromUserID ||
+         request.auth.uid == resource.data.toUserID);
+
+      allow list: if request.auth != null;
+    }
+
+    // 5. 신고 기능 (report)
+    match /report/{reportId} {
+      allow create: if request.auth != null;
+    }
+
+    // 6. fallback: 그 외 모두 차단
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

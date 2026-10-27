@@ -26,9 +26,10 @@ struct iOS_ProjectApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                    if loginViewModel.isLoggedIn {
+                    if loginViewModel.isLoggedIn || ChatKeyboardUITest.isEnabled {
                         MainTabView()
                             .onAppear {
+                                guard !ChatKeyboardUITest.isEnabled else { return }
                                 locationCoordinator.startUpdatingLocation()
                                 checkVersion()
                                 // 로그인 후 강제 로그아웃 리스너는 LoginViewModel에서 처리됨.
@@ -45,6 +46,7 @@ struct iOS_ProjectApp: App {
             .environmentObject(AppRouter.shared) 
             .environmentObject(router)
             .onAppear {
+                guard !ChatKeyboardUITest.isEnabled else { return }
                 // 위치 권한이 허용되지 않으면 경고 표시
                 if locationCoordinator.authorizationStatus != .authorizedAlways {
                     showAlert = true
