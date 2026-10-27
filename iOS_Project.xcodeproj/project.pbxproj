@@ -11,7 +11,6 @@
 		EA27C0A32D8FCD2A0053F213 /* AddFriendType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA27C0A22D8FCD290053F213 /* AddFriendType.swift */; };
 		EA28F4F82CC83C64004827A3 /* MeetingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */; };
 		EA28F4FA2CC83C6D004827A3 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */; };
-		EA3C8D332DD03E9000DD899E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */; };
 		EA5429E72E0B30B3002EC15E /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = EA5429E62E0B30B3002EC15E /* FirebaseRemoteConfig */; };
 		EA6EE1D92CD39060002961A9 /* AddSelectedFriend.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */; };
 		EA6EE1DB2CD39AE9002961A9 /* MeetingRequestListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6EE1DA2CD39AE2002961A9 /* MeetingRequestListView.swift */; };
@@ -115,7 +114,7 @@
 		EA27C0A22D8FCD290053F213 /* AddFriendType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendType.swift; sourceTree = "<group>"; };
 		EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModel.swift; sourceTree = "<group>"; };
 		EA28F4F92CC83C68004827A3 /* MeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingViewModel.swift; sourceTree = "<group>"; };
-		EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		7CE392D3E9234D537AB50757 /* Firebase */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Firebase; sourceTree = "<group>"; };
 		EA6EE1D82CD39053002961A9 /* AddSelectedFriend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSelectedFriend.swift; sourceTree = "<group>"; };
 		EA6EE1DA2CD39AE2002961A9 /* MeetingRequestListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRequestListView.swift; sourceTree = "<group>"; };
 		EA6EE1DC2CD39B01002961A9 /* MeetingRequestModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRequestModel.swift; sourceTree = "<group>"; };
@@ -351,7 +350,7 @@
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
 				EA86C11F2CC2F15700989E43 /* MainTapView.swift */,
 				F53F124A2D7DC0F300E434D4 /* KeyboardAvoidingModifier.swift */,
-				EA3C8D322DD03E9000DD899E /* GoogleService-Info.plist */,
+				7CE392D3E9234D537AB50757 /* Firebase */,
 				EA86C11D2CC2F15700989E43 /* Info.plist */,
 			);
 			path = iOS_Project;
@@ -472,6 +471,7 @@
 				EABADF272CB9223E00962A40 /* Sources */,
 				EABADF282CB9223E00962A40 /* Frameworks */,
 				EABADF292CB9223E00962A40 /* Resources */,
+				DBA1F8B15A33B84F2669484F /* Select Firebase plist by configuration */,
 				EA216DB62E22BE3700E9A6BA /* Embed Frameworks */,
 			);
 			buildRules = (
@@ -586,7 +586,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA86C1322CC2F15700989E43 /* Preview Assets.xcassets in Resources */,
-				EA3C8D332DD03E9000DD899E /* GoogleService-Info.plist in Resources */,
 				EA86C1332CC2F15700989E43 /* Assets.xcassets in Resources */,
 				F5038ECE2D841D0100347F13 /* country_codes.json in Resources */,
 			);
@@ -607,6 +606,29 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		DBA1F8B15A33B84F2669484F /* Select Firebase plist by configuration */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Select Firebase plist by configuration";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# 빌드 구성에 맞는 Firebase plist를 앱 번들에 GoogleService-Info.plist로 복사한다.\n# Debug-YH → Firebase/Dev, 그 외(Debug, Release) → Firebase/Prod\n\ncase \"$CONFIGURATION\" in\n    Debug-YH) FIREBASE_ENV=\"Dev\" ;;\n    *) FIREBASE_ENV=\"Prod\" ;;\nesac\n\nSRC=\"$SRCROOT/iOS_Project/Firebase/$FIREBASE_ENV/GoogleService-Info.plist\"\nDEST_DIR=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH\"\nDEST=\"$DEST_DIR/GoogleService-Info.plist\"\n\nif [ ! -f \"$SRC\" ]; then\n    echo \"error: Firebase plist가 없습니다 (configuration=$CONFIGURATION): $SRC\"\n    exit 1\nfi\n\nmkdir -p \"$DEST_DIR\"\ncp \"$SRC\" \"$DEST\"\nplutil -lint \"$DEST\" >/dev/null\n\necho \"Copied Firebase plist: $SRC -> $DEST\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		EABADF272CB9223E00962A40 /* Sources */ = {
