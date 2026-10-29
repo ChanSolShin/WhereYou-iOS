@@ -9,6 +9,8 @@ import SwiftUI
 
 struct MeetingRequestListView: View {
     @ObservedObject var viewModel: MeetingViewModel
+    @State private var acceptingRequestIDs: Set<String> = []
+    @State private var acceptError: String?
 
     var body: some View {
         VStack {
@@ -28,10 +30,17 @@ struct MeetingRequestListView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.bottom, 5)
                                 HStack(spacing: 30) {
-                                    Button("수락") {
+                                    Button {
                                         acceptRequest(request)
+                                    } label: {
+                                        if acceptingRequestIDs.contains(request.id) {
+                                            ProgressView().accessibilityLabel("초대 수락 중")
+                                        } else {
+                                            Text("수락")
+                                        }
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
+                                    .disabled(acceptingRequestIDs.contains(request.id))
                                     
                                     Button("거절") {
                                         rejectRequest(request)
@@ -56,13 +65,25 @@ struct MeetingRequestListView: View {
         .onAppear {
             viewModel.fetchPendingMeetingRequests()
         }
+        .alert("초대 수락 실패", isPresented: Binding(
+            get: { acceptError != nil },
+            set: { if !$0 { acceptError = nil } }
+        )) {
+            Button("확인", role: .cancel) { acceptError = nil }
+        } message: {
+            Text(acceptError ?? "다시 시도해 주세요.")
+        }
     }
     
     private func acceptRequest(_ request: MeetingRequestModel) {
-        viewModel.acceptMeetingRequest(requestID: request.id, toUserID: request.toUserID)
-        
-        // 요청 삭제 후 UI 업데이트
-        deleteRequest(request)
+        guard acceptingRequestIDs.insert(request.id).inserted else { return }
+        viewModel.acceptMeetingRequest(requestID: request.id) { result in
+            acceptingRequestIDs.remove(request.id)
+            if case .failure(let error) = result {
+                acceptError = error.localizedDescription
+            }
+            // 성공하면 pending 리스너에서 목록이 자동으로 갱신된다.
+        }
     }
     
     private func rejectRequest(_ request: MeetingRequestModel) {

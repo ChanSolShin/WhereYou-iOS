@@ -7,6 +7,7 @@ struct MeetingListView: View {
     @Binding var isTabBarHidden: Bool
 
     @EnvironmentObject var router: AppRouter
+    @EnvironmentObject private var chatStore: MeetingChatStore
     @State private var openMeetingRequests = false
     @State private var isShowingMeetingRequests = false
     @State private var showingAddMeeting = false
@@ -14,6 +15,7 @@ struct MeetingListView: View {
     @State private var lastOpenedMeetingID: String?
     @State private var hideForMeetingRequests = false
     @State private var hideForMeetingDetail = false
+    @State private var hideForChat = false
     @FocusState private var isSearchFocused: Bool
 
     init(isTabBarHidden: Binding<Bool>) {
@@ -117,10 +119,15 @@ struct MeetingListView: View {
                                 ForEach(viewModel.filteredMeetings) { meeting in
                                     NavigationLink(value: meeting.id) {
                                         HStack {
-                                            Text(meeting.title)
-                                                .font(.headline)
-                                                .padding()
-                                                .foregroundStyle(.primary)
+                                            VStack(alignment: .leading, spacing: 6) {
+                                                Text(meeting.title)
+                                                    .font(.headline)
+                                                    .foregroundStyle(.primary)
+                                                if chatStore.unreadCount(for: meeting.id) > 0 {
+                                                    ChatUnreadBadge(count: chatStore.unreadCount(for: meeting.id))
+                                                }
+                                            }
+                                            .padding()
                                             Spacer()
                                             VStack(alignment: .trailing) {
                                                 Text("\(meeting.date, formatter: viewModel.listDateFormatter)")
@@ -198,7 +205,14 @@ struct MeetingListView: View {
             }
             .navigationDestination(for: String.self) { id in
                 if let meeting = viewModel.meetings.first(where: { $0.id == id }) {
-                    MeetingView(meeting: meeting, meetingViewModel: viewModel.meetingViewModel)
+                    MeetingView(
+                        meeting: meeting,
+                        meetingViewModel: viewModel.meetingViewModel,
+                        onChatVisibilityChange: { isVisible in
+                            hideForChat = isVisible
+                            updateTabBarVisibility()
+                        }
+                    )
                         .onAppear {
                             hideForMeetingDetail = true
                             updateTabBarVisibility()
@@ -327,6 +341,6 @@ struct MeetingListView: View {
     }
 
     private func updateTabBarVisibility() {
-        isTabBarHidden = hideForMeetingRequests || hideForMeetingDetail
+            isTabBarHidden = hideForMeetingRequests || hideForMeetingDetail || hideForChat
     }
 }

@@ -23,6 +23,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         // Firebase 초기화
         FirebaseApp.configure()
+        if ChatKeyboardUITest.isEnabled { return true }
         
         // 푸시 알림 설정
         configurePushNotifications(application)
@@ -145,10 +146,16 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             print("Message ID: \(messageID)")  // 메시지 ID를 출력하여 디버깅에 활용
         }
         
-        print("Received notification: \(userInfo)")  // 푸시 알림 데이터 출력
-        
-        // 배지, 소리, 배너 표시 설정
-        completionHandler([[.banner, .badge, .sound]])
+        Task { @MainActor in
+            if case .meetingChat(let id) = NotificationPayloadParser.parseDestination(from: userInfo),
+               AppRouter.shared.visibleChatMeetingID == id {
+                // Already visible in this conversation; avoid a duplicate banner/sound.
+                completionHandler([])
+            } else {
+                // 실행 중 아이콘 뱃지는 Firestore의 실시간 합계가 갱신한다.
+                completionHandler([.banner, .sound])
+            }
+        }
     }
 
     // 푸시 알림을 클릭했을 때 호출되는 함수
@@ -158,8 +165,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         if let messageID = userInfo[gcmMessageIDKey] {
             print("Message ID: \(messageID)")
         }
-        
-        print("User Info: \(userInfo)")
         
         if let dest = NotificationPayloadParser.parseDestination(from: userInfo) {
             Task { @MainActor in

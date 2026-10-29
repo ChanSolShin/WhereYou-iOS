@@ -19,6 +19,10 @@ struct NotificationPayloadParser {
             return .friendRequests
         case "meetingRequests":
             return .meetingRequests
+        case "meetingChat":
+            guard let id = (userInfo["meetingId"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !id.isEmpty, id.count <= 128, !id.contains("/") else { return nil }
+            return .meetingChat(id: id)
         case "meetingView":
             if let id = (userInfo["meetingId"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines), !id.isEmpty {
                 return .meeting(id: id)

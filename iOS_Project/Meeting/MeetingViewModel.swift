@@ -11,6 +11,7 @@ import FirebaseFirestore
 import Combine
 import FirebaseAuth
 import FirebaseDatabase
+import FirebaseFunctions
 
 class MeetingViewModel: NSObject, ObservableObject {
     @Published var meetingMemberNames: [String: String] = [:]
@@ -373,42 +374,22 @@ class MeetingViewModel: NSObject, ObservableObject {
         }
     }
     
-    func acceptMeetingRequest(requestID: String, toUserID: String) {
-        let db = Firestore.firestore()
-        
-        // 요청 문서 가져오기
-        db.collection("meetingRequests").document(requestID).getDocument { [weak self] document, error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                print("Error fetching meeting request: \(error)")
-                return
+    func acceptMeetingRequest(requestID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        Functions.functions().httpsCallable("acceptMeetingInvitation")
+            .call(["requestId": requestID]) { result, error in
+                DispatchQueue.main.async {
+                    if let error {
+                        completion(.failure(error))
+                    } else if (result?.data as? [String: Any])?["accepted"] as? Bool == true {
+                        completion(.success(()))
+                    } else {
+                        completion(.failure(NSError(
+                            domain: "MeetingInvitation", code: 1,
+                            userInfo: [NSLocalizedDescriptionKey: "초대 수락 결과를 확인할 수 없습니다."]
+                        )))
+                    }
+                }
             }
-            
-            if let document = document, document.exists {
-                let meetingID = document.data()?["meetingID"] as? String ?? ""
-                // 수락 요청 상태 업데이트
-                self.updateMeetingRequestStatus(requestID: requestID, status: "accepted")
-                
-                // Meeting에 사용자 추가
-                self.addUserToMeeting(meetingID: meetingID, userID: toUserID)
-            }
-        }
-    }
-    
-    private func addUserToMeeting(meetingID: String, userID: String) {
-        let db = Firestore.firestore()
-        
-        // meetings 컬렉션의 해당 문서 업데이트
-        db.collection("meetings").document(meetingID).updateData([
-            "meetingMembers": FieldValue.arrayUnion([userID])  // 사용자 ID 추가
-        ]) { error in
-            if let error = error {
-                print("Error adding user to meeting: \(error)")
-            } else {
-                print("Successfully added user \(userID) to meeting with ID: \(meetingID)")
-            }
-        }
     }
     
     func rejectMeetingRequest(requestID: String) {
@@ -420,17 +401,6 @@ class MeetingViewModel: NSObject, ObservableObject {
                 self?.deleteMeetingRequest(requestID: requestID)
                 // 요청 삭제 후 최신 요청 목록 불러오기
                 self?.fetchPendingMeetingRequests()
-            }
-        }
-    }
-    
-    private func updateMeetingRequestStatus(requestID: String, status: String) {
-        let db = Firestore.firestore()
-        db.collection("meetingRequests").document(requestID).updateData(["status": status]) { error in
-            if let error = error {
-                print("Error updating meeting request: \(error)")
-            } else {
-                self.deleteMeetingRequest(requestID: requestID) // 요청 삭제
             }
         }
     }

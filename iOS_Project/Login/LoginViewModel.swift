@@ -44,6 +44,7 @@ class LoginViewModel: ObservableObject {
     private var ignoreForcedLogoutUntil: Date?
     
     init() {
+        guard !ChatKeyboardUITest.isEnabled else { return }
         checkAutoLogin()
         
         NotificationCenter.default.addObserver(forName: Notification.Name("UserDidLogout"), object: nil, queue: .main) { [weak self] _ in

@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C12000000000000000000011 /* MeetingChatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12000000000000000000001 /* MeetingChatStore.swift */; };
+		C12000000000000000000012 /* MeetingChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12000000000000000000002 /* MeetingChatViewModel.swift */; };
+		C12000000000000000000013 /* MeetingChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12000000000000000000003 /* MeetingChatView.swift */; };
+		C12000000000000000000014 /* ChatKeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12000000000000000000004 /* ChatKeyboardLayout.swift */; };
+		C12000000000000000000031 /* MeetingChatConcurrencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12000000000000000000032 /* MeetingChatConcurrencyTests.swift */; };
 		EA27C0A12D8FCB3A0053F213 /* AddFriendNumberModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA27C0A02D8FCB2D0053F213 /* AddFriendNumberModal.swift */; };
 		EA27C0A32D8FCD2A0053F213 /* AddFriendType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA27C0A22D8FCD290053F213 /* AddFriendType.swift */; };
 		EA28F4F82CC83C64004827A3 /* MeetingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA28F4F72CC83C5F004827A3 /* MeetingModel.swift */; };
@@ -109,6 +114,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C12000000000000000000001 /* MeetingChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingChatStore.swift; sourceTree = "<group>"; };
+		C12000000000000000000002 /* MeetingChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingChatViewModel.swift; sourceTree = "<group>"; };
+		C12000000000000000000003 /* MeetingChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingChatView.swift; sourceTree = "<group>"; };
+		C12000000000000000000004 /* ChatKeyboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatKeyboardLayout.swift; sourceTree = "<group>"; };
+		C12000000000000000000032 /* MeetingChatConcurrencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingChatConcurrencyTests.swift; sourceTree = "<group>"; };
 		B4BDF6F007213E0BCE6A96A3 /* Pods_iOS_Project.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iOS_Project.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA27C0A02D8FCB2D0053F213 /* AddFriendNumberModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendNumberModal.swift; sourceTree = "<group>"; };
 		EA27C0A22D8FCD290053F213 /* AddFriendType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendType.swift; sourceTree = "<group>"; };
@@ -225,6 +235,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C12000000000000000000021 /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				C12000000000000000000001 /* MeetingChatStore.swift */,
+				C12000000000000000000002 /* MeetingChatViewModel.swift */,
+				C12000000000000000000003 /* MeetingChatView.swift */,
+				C12000000000000000000004 /* ChatKeyboardLayout.swift */,
+			);
+			path = Chat;
+			sourceTree = "<group>";
+		};
 		EA6EE1DF2CD39BBB002961A9 /* Request */ = {
 			isa = PBXGroup;
 			children = (
@@ -327,6 +348,7 @@
 		EA86C1202CC2F15700989E43 /* iOS_Project */ = {
 			isa = PBXGroup;
 			children = (
+				C12000000000000000000021 /* Chat */,
 				F5E848732D66F89900047AA1 /* iOS_Project.entitlements */,
 				F50FDDB72CD3A814006E96B2 /* FindAuth */,
 				EA6EE1DF2CD39BBB002961A9 /* Request */,
@@ -360,6 +382,7 @@
 			isa = PBXGroup;
 			children = (
 				EA86C1362CC2F15A00989E43 /* iOS_ProjectTests.swift */,
+				C12000000000000000000032 /* MeetingChatConcurrencyTests.swift */,
 			);
 			path = iOS_ProjectTests;
 			sourceTree = "<group>";
@@ -635,6 +658,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C12000000000000000000011 /* MeetingChatStore.swift in Sources */,
+				C12000000000000000000012 /* MeetingChatViewModel.swift in Sources */,
+				C12000000000000000000013 /* MeetingChatView.swift in Sources */,
+				C12000000000000000000014 /* ChatKeyboardLayout.swift in Sources */,
 				F52E2FF92CD3CC9000520042 /* FindPasswordView.swift in Sources */,
 				EA86C1212CC2F15700989E43 /* AddMeetingModel.swift in Sources */,
 				F52E2FF72CD3CC6300520042 /* FindPasswordModel.swift in Sources */,
@@ -698,6 +725,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA86C1382CC2F15A00989E43 /* iOS_ProjectTests.swift in Sources */,
+				C12000000000000000000031 /* MeetingChatConcurrencyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

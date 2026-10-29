@@ -2,12 +2,19 @@ const functions = require('firebase-functions/v2');
 const admin = require('firebase-admin');
 const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require('firebase-functions/scheduler'); // V2에서는 onSchedule 사용
-const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
+const { onDocumentUpdated, onDocumentDeleted } = require('firebase-functions/v2/firestore');
 const { onCall } = require('firebase-functions/v2/https');
 const {
   createMeetingMemberNotificationHandler,
   cleanupExpiredMeetingNotificationCooldowns,
 } = require('./meetingMemberNotification');
+const {
+  createSendMeetingChatMessageHandler,
+  createMarkMeetingChatReadHandler,
+  createAcceptMeetingInvitationHandler,
+  createCompleteLegacyMeetingInvitationHandler,
+} = require('./meetingChat');
+const { getAppBadgeCount, badgeApns, createSendChatNotificationHandler } = require('./appBadge');
 
 admin.initializeApp({
   databaseURL: "https://meetingapp-2985d-default-rtdb.firebaseio.com"
@@ -15,6 +22,38 @@ admin.initializeApp({
 
 const db = getFirestore(); // Firestore 인스턴스 가져오기
 const messaging = admin.messaging(); // Firebase Cloud Messaging 인스턴스 가져오기
+
+exports.sendMeetingChatMessage = onCall(
+  { region: 'us-central1' }, createSendMeetingChatMessageHandler({ db })
+);
+exports.markMeetingChatRead = onCall(
+  { region: 'us-central1' }, createMarkMeetingChatReadHandler({ db })
+);
+// Keep the deployed trigger name so one message does not invoke two push functions.
+// The push now includes the message preview, chat deep link, and total icon badge.
+exports.sendMeetingChatBadge = functions.firestore.onDocumentCreated(
+  { document: 'meetings/{meetingId}/messages/{messageId}', region: 'us-central1' },
+  createSendChatNotificationHandler({ db, messaging })
+);
+exports.acceptMeetingInvitation = onCall(
+  { region: 'us-central1' }, createAcceptMeetingInvitationHandler({ db })
+);
+
+// Older app versions mark an invitation accepted and then update the meeting
+// directly. Complete the membership change here when direct self-joins are denied.
+exports.completeLegacyMeetingInvitation = onDocumentUpdated(
+  { document: 'meetingRequests/{requestId}', region: 'us-central1' },
+  createCompleteLegacyMeetingInvitationHandler({ db })
+);
+
+// Deleting a Firestore parent does not delete its subcollections. The parent is
+// already gone when this runs, so rules immediately deny former members access.
+exports.deleteMeetingChat = onDocumentDeleted(
+  { document: 'meetings/{meetingId}', region: 'us-central1', retry: true, timeoutSeconds: 540 },
+  async (event) => {
+    if (event.data) await db.recursiveDelete(event.data.ref);
+  }
+);
 
 // 모임 멤버 한 명에게만 보내는 빠른 알림. 발신자와 수신자는 서버에서 다시 검증한다.
 exports.sendMeetingMemberNotification = onCall(
@@ -58,6 +97,12 @@ exports.sendFriendRequestNotification = functions.firestore.onDocumentCreated('f
           },
           token: fcmToken,
         };
+
+        try {
+          message.apns = badgeApns(await getAppBadgeCount(db, toUserID));
+        } catch (error) {
+          console.error('친구 요청 뱃지 계산 실패:', error);
+        }
 
         await messaging.send(message);  // admin.messaging()으로 수정
         console.log('푸시 알림 전송 성공');
@@ -152,6 +197,12 @@ exports.sendMeetingInviteNotification = functions.firestore.onDocumentCreated('m
           },
           token: fcmToken,
         };
+
+        try {
+          message.apns = badgeApns(await getAppBadgeCount(db, toUserID));
+        } catch (error) {
+          console.error('모임 요청 뱃지 계산 실패:', error);
+        }
 
         await messaging.send(message);  // admin.messaging()으로 수정
         console.log('푸시 알림 전송 성공');
