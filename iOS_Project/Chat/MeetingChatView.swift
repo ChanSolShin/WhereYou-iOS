@@ -1,5 +1,4 @@
 import SwiftUI
-import FirebaseAuth
 import UIKit
 
 struct MeetingChatListView: View {
@@ -147,10 +146,10 @@ struct MeetingChatView: View {
         ChatKeyboardLayout(
             messages: viewModel.messages,
             memberNames: viewModel.memberNames,
-            currentUserID: Auth.auth().currentUser?.uid,
+            currentUserID: viewModel.currentUserID,
             hasOlderMessages: viewModel.hasOlderMessages,
             isLoadingOlder: viewModel.isLoadingOlder,
-            showsMessages: viewModel.canChat && !viewModel.isLoading && !viewModel.messages.isEmpty,
+            showsMessages: viewModel.canChat && !viewModel.messages.isEmpty,
             canCompose: viewModel.canChat,
             composer: AnyView(composer),
             emptyState: AnyView(emptyState),
@@ -213,22 +212,17 @@ struct MeetingChatView: View {
                     .padding(.vertical, 10)
                     .glassSurface(radius: 20)
                 Button {
-                    Task { await viewModel.send() }
+                    viewModel.send()
                 } label: {
-                    Group {
-                        if viewModel.isSending {
-                            ProgressView().tint(.white)
-                        } else {
-                            Image(systemName: "arrow.up")
-                                .font(.system(size: 18, weight: .bold))
-                        }
-                    }
-                    .frame(width: 42, height: 42)
-                    .foregroundStyle(.white)
-                    .background(GlassTheme.blue, in: Circle())
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 18, weight: .bold))
+                        .frame(width: 42, height: 42)
+                        .foregroundStyle(.white)
+                        .background(GlassTheme.blue, in: Circle())
                 }
-                .disabled(viewModel.isSending || viewModel.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.draft.utf16.count > 2000)
+                .disabled(!viewModel.canChat || viewModel.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.draft.utf16.count > 2000)
                 .accessibilityLabel("메시지 보내기")
+                .accessibilityIdentifier("chat-composer-send")
             }
         }
         .padding(.horizontal, 14)
@@ -238,7 +232,7 @@ struct MeetingChatView: View {
     }
 
     private func messageRow(_ message: MeetingChatMessage) -> some View {
-        let mine = message.senderID == Auth.auth().currentUser?.uid
+        let mine = message.senderID == viewModel.currentUserID
         return HStack(alignment: .bottom) {
             if mine { Spacer(minLength: 50) }
             VStack(alignment: mine ? .trailing : .leading, spacing: 3) {
@@ -259,8 +253,35 @@ struct MeetingChatView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+                if mine { deliveryStatus(for: message) }
             }
             if !mine { Spacer(minLength: 50) }
+        }
+    }
+
+    @ViewBuilder
+    private func deliveryStatus(for message: MeetingChatMessage) -> some View {
+        switch message.deliveryState {
+        case .queued:
+            Text("전송 대기").font(.caption2).foregroundStyle(.secondary)
+        case .sending:
+            HStack(spacing: 4) {
+                ProgressView().controlSize(.mini)
+                Text("전송 중").font(.caption2).foregroundStyle(.secondary)
+            }
+        case .failed(let reason):
+            HStack(spacing: 8) {
+                Text("전송 실패").font(.caption2).foregroundStyle(.red)
+                Button("다시 보내기") { viewModel.retry(messageID: message.id) }
+                    .font(.caption.weight(.semibold))
+                    .buttonStyle(.plain)
+                    .foregroundStyle(GlassTheme.blue)
+                    .padding(.vertical, 8)
+                    .accessibilityIdentifier("chat-retry-\(message.id)")
+                    .accessibilityHint(reason)
+            }
+        case .sent:
+            EmptyView()
         }
     }
 

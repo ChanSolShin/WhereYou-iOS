@@ -4,14 +4,74 @@ import FirebaseAuth
 import FirebaseFirestore
 import FirebaseFunctions
 
-struct MeetingChatMessage: Identifiable, Equatable {
+enum MeetingChatDeliveryState: Equatable, Sendable {
+    case queued
+    case sending
+    case sent
+    case failed(String)
+}
+
+struct MeetingChatMessage: Identifiable, Equatable, Sendable {
     let id: String
     let senderID: String
     let text: String
     let createdAt: Date?
     let sequence: Int
+    var deliveryState: MeetingChatDeliveryState = .sent
+
+    static func decode(_ doc: QueryDocumentSnapshot) -> MeetingChatMessage? {
+        let data = doc.data()
+        guard let sender = data["senderId"] as? String, !sender.isEmpty,
+              let text = data["text"] as? String else { return nil }
+        return MeetingChatMessage(
+            id: doc.documentID, senderID: sender, text: text,
+            createdAt: (data["createdAt"] as? Timestamp)?.dateValue(),
+            sequence: data["sequence"] as? Int ?? 0
+        )
+    }
 }
 
+/// Network operations return values; only the main-actor model publishes UI state.
+struct MeetingChatOperations: Sendable {
+    var sendMessage: @Sendable (_ meetingID: String, _ messageID: String, _ text: String) async throws -> Void
+    var loadOlderMessages: @Sendable (_ meetingID: String, _ beforeSequence: Int) async throws -> [MeetingChatMessage]
+    var loadMemberName: @Sendable (_ memberID: String) async -> String
+    var markRead: @Sendable (_ meetingID: String, _ messageID: String) async throws -> Void
+
+    static var live: Self {
+        Self(
+            sendMessage: { meetingID, messageID, text in
+                let result = try await Functions.functions()
+                    .httpsCallable("sendMeetingChatMessage")
+                    .call(["meetingId": meetingID, "messageId": messageID, "text": text])
+                guard (result.data as? [String: Any])?["sent"] as? Bool == true else {
+                    throw NSError(domain: "MeetingChat", code: 1,
+                                  userInfo: [NSLocalizedDescriptionKey: "메시지 전송 결과를 확인할 수 없습니다."])
+                }
+            },
+            loadOlderMessages: { meetingID, beforeSequence in
+                let snapshot = try await Firestore.firestore().collection("meetings").document(meetingID)
+                    .collection("messages")
+                    .order(by: "sequence", descending: true)
+                    .start(after: [beforeSequence])
+                    .limit(to: 100)
+                    .getDocuments()
+                return snapshot.documents.compactMap(MeetingChatMessage.decode)
+            },
+            loadMemberName: { memberID in
+                let doc = try? await Firestore.firestore().collection("users").document(memberID).getDocument()
+                return doc?.data()?["name"] as? String ?? "멤버"
+            },
+            markRead: { meetingID, messageID in
+                _ = try await Functions.functions()
+                    .httpsCallable("markMeetingChatRead")
+                    .call(["meetingId": meetingID, "messageId": messageID])
+            }
+        )
+    }
+}
+
+@MainActor
 final class MeetingChatViewModel: ObservableObject {
     @Published private(set) var messages: [MeetingChatMessage] = []
     @Published private(set) var memberNames: [String: String] = [:]
@@ -24,18 +84,27 @@ final class MeetingChatViewModel: ObservableObject {
     @Published private(set) var hasOlderMessages = false
 
     let meetingID: String
-    private let db = Firestore.firestore()
+    private var db: Firestore { Firestore.firestore() }
+    private let operations: MeetingChatOperations
+    private let userID: @MainActor () -> String?
     private var messageListener: ListenerRegistration?
     private var meetingListener: ListenerRegistration?
     private var lastRequestedReadID: String?
     private var didRetryRead = false
-    private var oldestDocument: QueryDocumentSnapshot?
+    private var oldestSequence: Int?
     private var olderMessages: [MeetingChatMessage] = []
-    private var pendingMessageID: String?
-    private var pendingText: String?
+    private var receivedMessages: [String: MeetingChatMessage] = [:]
+    private var outgoingMessages: [MeetingChatMessage] = []
+    private var sendQueue: [String] = []
+    private var sendTask: Task<Void, Never>?
 
-    init(meetingID: String) {
+    var currentUserID: String? { userID() }
+
+    init(meetingID: String, operations: MeetingChatOperations = .live,
+         currentUserID: @escaping @MainActor () -> String? = { Auth.auth().currentUser?.uid }) {
         self.meetingID = meetingID
+        self.operations = operations
+        self.userID = currentUserID
 #if DEBUG
         if ChatKeyboardUITest.isEnabled {
             let count = ProcessInfo.processInfo.arguments.contains("--short-chat") ? 2 : 40
@@ -52,7 +121,11 @@ final class MeetingChatViewModel: ObservableObject {
 
     func start() {
         guard !ChatKeyboardUITest.isEnabled else { return }
-        guard let uid = Auth.auth().currentUser?.uid else { canChat = false; return }
+        guard let uid = currentUserID else {
+            canChat = false
+            isLoading = false
+            return
+        }
         guard messageListener == nil else { return }
         isLoading = true
         meetingListener = db.collection("meetings").document(meetingID)
@@ -87,12 +160,7 @@ final class MeetingChatViewModel: ObservableObject {
                         self.errorMessage = "메시지를 불러오지 못했습니다: \(error.localizedDescription)"
                         return
                     }
-                    let recent = snapshot?.documents ?? []
-                    if self.olderMessages.isEmpty {
-                        self.oldestDocument = recent.last
-                        self.hasOlderMessages = recent.count == 100
-                    }
-                    self.merge(recent.compactMap(Self.decode))
+                    self.receiveRecentMessages((snapshot?.documents ?? []).compactMap(MeetingChatMessage.decode))
                     self.loadNames(for: Array(Set(self.messages.map(\.senderID))))
                 }
             }
@@ -106,70 +174,101 @@ final class MeetingChatViewModel: ObservableObject {
     }
 
     func loadOlder() async {
-        guard !isLoadingOlder, hasOlderMessages, let oldestDocument else { return }
+        guard canChat, !isLoadingOlder, hasOlderMessages, let oldestSequence else { return }
         isLoadingOlder = true
+        defer { isLoadingOlder = false }
         do {
-            let snapshot = try await db.collection("meetings").document(meetingID)
-                .collection("messages")
-                .order(by: "sequence", descending: true)
-                .start(afterDocument: oldestDocument)
-                .limit(to: 100)
-                .getDocuments()
-            if let last = snapshot.documents.last { self.oldestDocument = last }
-            hasOlderMessages = snapshot.documents.count == 100
-            olderMessages.append(contentsOf: snapshot.documents.compactMap(Self.decode))
+            let page = try await operations.loadOlderMessages(meetingID, oldestSequence)
+            guard canChat else { return }
+            if let oldest = page.map(\.sequence).min() { self.oldestSequence = oldest }
+            hasOlderMessages = page.count == 100
+            olderMessages.append(contentsOf: page)
             merge([])
             loadNames(for: Array(Set(messages.map(\.senderID))))
         } catch {
             errorMessage = "이전 메시지를 불러오지 못했습니다: \(error.localizedDescription)"
         }
-        isLoadingOlder = false
     }
 
-    func send() async {
+    /// Snapshot and clear synchronously with the tap. Network completion never edits the draft.
+    func send() {
         guard !ChatKeyboardUITest.isEnabled else { return }
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard canChat, !isSending, !text.isEmpty else { return }
+        guard canChat, !text.isEmpty else { return }
+        guard let uid = currentUserID else {
+            errorMessage = "로그인 후 메시지를 보낼 수 있습니다."
+            return
+        }
         guard text.utf16.count <= 2000 else {
             errorMessage = "메시지는 2000자까지 입력할 수 있습니다."
             return
         }
-        isSending = true
+        let message = MeetingChatMessage(id: UUID().uuidString, senderID: uid, text: text,
+                                         createdAt: Date(), sequence: 0, deliveryState: .queued)
+        outgoingMessages.append(message)
+        sendQueue.append(message.id)
+        draft = ""
         errorMessage = nil
-        let messageID: String
-        if pendingText == text, let pendingMessageID {
-            messageID = pendingMessageID
-        } else {
-            messageID = UUID().uuidString
-            pendingMessageID = messageID
-            pendingText = text
+        publishMessages()
+        startSendingIfNeeded()
+    }
+
+    func retry(messageID: String) {
+        guard canChat,
+              let message = outgoingMessages.first(where: { $0.id == messageID }),
+              message.senderID == currentUserID,
+              case .failed = message.deliveryState else { return }
+        setDelivery(.queued, for: messageID)
+        sendQueue.append(messageID)
+        startSendingIfNeeded()
+    }
+
+    private func startSendingIfNeeded() {
+        guard sendTask == nil, !sendQueue.isEmpty else { return }
+        isSending = true
+        sendTask = Task { await drainSendQueue() }
+    }
+
+    private func drainSendQueue() async {
+        defer {
+            isSending = false
+            sendTask = nil
         }
-        do {
-            let result = try await Functions.functions()
-                .httpsCallable("sendMeetingChatMessage")
-                .call(["meetingId": meetingID, "messageId": messageID, "text": text])
-            guard (result.data as? [String: Any])?["sent"] as? Bool == true else {
-                throw NSError(domain: "MeetingChat", code: 1,
-                              userInfo: [NSLocalizedDescriptionKey: "메시지 전송 결과를 확인할 수 없습니다."])
+        while !sendQueue.isEmpty {
+            let id = sendQueue.removeFirst()
+            guard let message = outgoingMessages.first(where: { $0.id == id }) else { continue }
+            guard canChat, message.senderID == currentUserID else {
+                setDelivery(.failed("로그인 상태와 모임 참여 상태를 확인해 주세요."), for: id)
+                continue
             }
-            if draft.trimmingCharacters(in: .whitespacesAndNewlines) == text { draft = "" }
-            pendingMessageID = nil
-            pendingText = nil
-        } catch {
-            errorMessage = "전송하지 못했습니다. 다시 시도해 주세요. \(error.localizedDescription)"
+            setDelivery(.sending, for: id)
+            do {
+                try await operations.sendMessage(meetingID, id, message.text)
+                setDelivery(.sent, for: id)
+            } catch {
+                // A snapshot may already have confirmed the write while its HTTP
+                // response was lost. Never turn that confirmed message into a failure.
+                if receivedMessages[id] == nil {
+                    setDelivery(.failed(error.localizedDescription), for: id)
+                }
+            }
         }
-        isSending = false
+    }
+
+    private func setDelivery(_ state: MeetingChatDeliveryState, for id: String) {
+        guard let index = outgoingMessages.firstIndex(where: { $0.id == id }) else { return }
+        outgoingMessages[index].deliveryState = state
+        publishMessages()
     }
 
     func markLatestRead() {
         guard !ChatKeyboardUITest.isEnabled else { return }
-        guard canChat, let id = messages.last?.id, id != lastRequestedReadID else { return }
+        guard canChat, let id = receivedMessages.values.max(by: { $0.sequence < $1.sequence })?.id,
+              id != lastRequestedReadID else { return }
         lastRequestedReadID = id
         Task {
             do {
-                _ = try await Functions.functions()
-                    .httpsCallable("markMeetingChatRead")
-                    .call(["meetingId": meetingID, "messageId": id])
+                try await operations.markRead(meetingID, id)
                 didRetryRead = false
             } catch {
                 if !didRetryRead {
@@ -183,29 +282,32 @@ final class MeetingChatViewModel: ObservableObject {
     private func loadNames(for memberIDs: [String]) {
         for id in memberIDs where memberNames[id] == nil {
             memberNames[id] = "멤버"
-            db.collection("users").document(id).getDocument { [weak self] doc, _ in
-                DispatchQueue.main.async {
-                    self?.memberNames[id] = doc?.data()?["name"] as? String ?? "멤버"
-                }
+            Task { [weak self, operations] in
+                let name = await operations.loadMemberName(id)
+                self?.memberNames[id] = name
             }
         }
     }
 
-    private static func decode(_ doc: QueryDocumentSnapshot) -> MeetingChatMessage? {
-        let data = doc.data()
-        guard let sender = data["senderId"] as? String, !sender.isEmpty,
-              let text = data["text"] as? String else { return nil }
-        return MeetingChatMessage(
-            id: doc.documentID, senderID: sender,
-            text: text,
-            createdAt: (data["createdAt"] as? Timestamp)?.dateValue(),
-            sequence: data["sequence"] as? Int ?? 0
-        )
+    func receiveRecentMessages(_ recent: [MeetingChatMessage]) {
+        guard canChat else { return }
+        isLoading = false
+        if olderMessages.isEmpty {
+            oldestSequence = recent.map(\.sequence).min()
+            hasOlderMessages = recent.count == 100
+        }
+        merge(recent)
     }
 
     private func merge(_ recent: [MeetingChatMessage]) {
-        var byID = Dictionary(uniqueKeysWithValues: messages.map { ($0.id, $0) })
-        for message in olderMessages + recent { byID[message.id] = message }
-        messages = byID.values.sorted { $0.sequence < $1.sequence }
+        for message in olderMessages + recent { receivedMessages[message.id] = message }
+        outgoingMessages.removeAll { receivedMessages[$0.id] != nil }
+        sendQueue.removeAll { receivedMessages[$0] != nil }
+        publishMessages()
+    }
+
+    private func publishMessages() {
+        guard canChat else { return }
+        messages = receivedMessages.values.sorted { $0.sequence < $1.sequence } + outgoingMessages
     }
 }

@@ -18,6 +18,7 @@ enum ChatCountLabel {
     static func text(_ count: Int) -> String { count > 999 ? "999+" : "\(count)" }
 }
 
+@MainActor
 final class MeetingChatStore: ObservableObject {
     @Published private(set) var rooms: [MeetingChatRoom] = []
     @Published private(set) var errorMessage: String?
