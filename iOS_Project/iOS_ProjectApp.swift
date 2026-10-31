@@ -26,7 +26,8 @@ struct iOS_ProjectApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                    if loginViewModel.isLoggedIn || ChatKeyboardUITest.isEnabled {
+                    switch ChatKeyboardUITest.isEnabled ? .loggedIn : loginViewModel.authState {
+                    case .loggedIn:
                         MainTabView()
                             .onAppear {
                                 guard !ChatKeyboardUITest.isEnabled else { return }
@@ -34,7 +35,11 @@ struct iOS_ProjectApp: App {
                                 checkVersion()
                                 // 로그인 후 강제 로그아웃 리스너는 LoginViewModel에서 처리됨.
                             }
-                    } else {
+                    case .needsProfile:
+                        SocialSignUpView()
+                    case .checking, .checkFailed:
+                        AuthCheckView()
+                    case .loggedOut:
                         LoginView()
                             .onAppear {
                                 checkVersion()

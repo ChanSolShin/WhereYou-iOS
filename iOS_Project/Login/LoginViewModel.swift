@@ -25,9 +25,18 @@ enum LoginAlert: Identifiable {
     case loginFailed(String)
 }
 
+// 인증 상태별 화면 분기
+enum AuthState: Equatable {
+    case checking       // 앱 시작 시 사용자 문서 확인 중
+    case checkFailed    // 사용자 문서 확인 실패 (재시도 필요)
+    case loggedOut
+    case needsProfile   // 소셜 최초 로그인 후 회원정보 미입력
+    case loggedIn
+}
+
 class LoginViewModel: ObservableObject {
     @Published var user: SignUpUserModel = SignUpUserModel(username: "", password: "")
-    @Published var isLoggedIn: Bool = false
+    @Published var authState: AuthState = .checking
     @Published var isLoggingIn: Bool = false
     // 기존 forcedLogout, showNewDeviceLoginAlert -> 하나로 통합
     @Published var currentAlert: LoginAlert?
@@ -145,7 +154,7 @@ class LoginViewModel: ObservableObject {
     private func completeLogin(uid: String) {
         loginAttemptID = nil
         isLoggingIn = false
-        isLoggedIn = true
+        authState = .loggedIn
         UserDefaults.standard.set(true, forKey: "isLoggedIn")
         startListeningForForcedLogout(uid: uid)
         PushTokenManager.syncCurrentToken()
@@ -230,7 +239,7 @@ class LoginViewModel: ObservableObject {
         do {
             try Auth.auth().signOut()
             DispatchQueue.main.async {
-                self.isLoggedIn = false
+                self.authState = .loggedOut
                 self.currentAlert = nil
                 UserDefaults.standard.set(false, forKey: "isLoggedIn")
             }
@@ -238,18 +247,52 @@ class LoginViewModel: ObservableObject {
             print("Error signing out: \(signOutError.localizedDescription)")
         }
     }
-    
+
     // 앱 시작 시 자동 로그인 상태 확인
+    // 사용자 문서 유무로 메인 / 회원정보 입력 / 로그아웃 분기
     private func checkAutoLogin() {
-        if Auth.auth().currentUser != nil {
-            self.isLoggedIn = true
-            if let uid = Auth.auth().currentUser?.uid {
-                self.startListeningForForcedLogout(uid: uid)
-            }
-        } else {
-            self.isLoggedIn = false
+        guard let currentUser = Auth.auth().currentUser else {
+            authState = .loggedOut
             UserDefaults.standard.set(false, forKey: "isLoggedIn")
+            return
         }
+
+        authState = .checking
+        let uid = currentUser.uid
+        db.collection("users").document(uid).getDocument { [weak self] snapshot, error in
+            DispatchQueue.main.async {
+                // 확인 중 로그아웃 등으로 사용자가 바뀐 경우 무시
+                guard let self = self, Auth.auth().currentUser?.uid == uid else { return }
+                if let error = error {
+                    print("[Login] Auto login check failed (code: \((error as NSError).code))")
+                    self.authState = .checkFailed
+                    return
+                }
+                if snapshot?.exists == true {
+                    self.authState = .loggedIn
+                    self.startListeningForForcedLogout(uid: uid)
+                } else if Self.hasSocialProvider(currentUser) {
+                    // 소셜 가입 도중 이탈 → 회원정보 입력 이어서 진행
+                    self.authState = .needsProfile
+                } else {
+                    // 이메일 가입 도중 이탈한 임시 계정: 로그아웃 (임시 계정은 Functions에서 정리)
+                    self.signOut(updateFirestore: false)
+                }
+            }
+        }
+    }
+
+    // 사용자 문서 확인 실패 시 재시도
+    func retryAutoLoginCheck() {
+        checkAutoLogin()
+    }
+
+    // 소셜 로그인 수단 연결 여부
+    // TODO: 카카오/네이버 - providerData에 남지 않으므로 도입 시 판별 기준 추가 필요
+    private static let socialProviderIDs: Set<String> = ["google.com", "apple.com"]
+
+    private static func hasSocialProvider(_ user: FirebaseAuth.User) -> Bool {
+        user.providerData.contains { socialProviderIDs.contains($0.providerID) }
     }
     
     // Firestore 문서 변경 감지 -> 다른 기기에서 로그인 시 강제 로그아웃 처리
@@ -285,7 +328,7 @@ class LoginViewModel: ObservableObject {
     // 로그아웃 처리
     func signOut(updateFirestore: Bool = true) {
         guard let uid = Auth.auth().currentUser?.uid else {
-            self.isLoggedIn = false
+            self.authState = .loggedOut
             return
         }
         
@@ -303,7 +346,7 @@ class LoginViewModel: ObservableObject {
                     try Auth.auth().signOut()
                     UserDefaults.standard.set(false, forKey: "isLoggedIn")
                     DispatchQueue.main.async {
-                        self.isLoggedIn = false
+                        self.authState = .loggedOut
                     }
                 } catch let signOutError as NSError {
                     print("Error signing out: \(signOutError.localizedDescription)")
@@ -314,7 +357,7 @@ class LoginViewModel: ObservableObject {
                 try Auth.auth().signOut()
                 UserDefaults.standard.set(false, forKey: "isLoggedIn")
                 DispatchQueue.main.async {
-                    self.isLoggedIn = false
+                    self.authState = .loggedOut
                 }
             } catch let signOutError as NSError {
                 print("Error signing out: \(signOutError.localizedDescription)")
