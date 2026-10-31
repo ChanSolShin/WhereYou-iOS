@@ -88,56 +88,67 @@ class LoginViewModel: ObservableObject {
                     return
                 }
 
-                let userRef = self.db.collection("users").document(uid)
                 print("[Login] Authentication succeeded; loading user document")
-                userRef.getDocument { [weak self] snapshot, error in
+                self.establishSession(uid: uid, attemptID: attemptID)
+            }
+        }
+    }
+
+    // Firebase 인증 이후 공통 세션 처리
+    // 이메일/소셜 로그인 모두 인증 성공 후 호출
+    private func establishSession(uid: String, attemptID: UUID) {
+        let userRef = db.collection("users").document(uid)
+        userRef.getDocument { [weak self] snapshot, error in
+            DispatchQueue.main.async {
+                guard let self = self, self.loginAttemptID == attemptID else { return }
+                if let error = error {
+                    print("[Login] User document read failed (code: \((error as NSError).code))")
+                    self.failLogin("사용자 정보를 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도해주세요. (\(error.localizedDescription))")
+                    return
+                }
+                guard let data = snapshot?.data() else {
+                    print("[Login] User document missing")
+                    self.failLogin("사용자 정보가 없습니다. 고객센터에 문의해주세요.")
+                    return
+                }
+                print("[Login] User document loaded")
+                self.pendingUserRef = userRef
+                if let existingDeviceID = data["deviceID"] as? String,
+                   existingDeviceID != self.deviceID {
+                    self.loginAttemptID = nil
+                    self.isLoggingIn = false
+                    self.currentAlert = .newDeviceLogin
+                    return
+                }
+
+                userRef.setData([
+                    "loginStatus": true,
+                    "deviceID": self.deviceID,
+                    "lastLogin": Timestamp(date: Date())
+                ], merge: true) { [weak self] error in
                     DispatchQueue.main.async {
                         guard let self = self, self.loginAttemptID == attemptID else { return }
                         if let error = error {
-                            print("[Login] User document read failed (code: \((error as NSError).code))")
-                            self.failLogin("사용자 정보를 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도해주세요. (\(error.localizedDescription))")
+                            print("[Login] Login state write failed (code: \((error as NSError).code))")
+                            self.failLogin("로그인 상태를 저장하지 못했습니다. 다시 시도해주세요. (\(error.localizedDescription))")
                             return
                         }
-                        guard let data = snapshot?.data() else {
-                            print("[Login] User document missing")
-                            self.failLogin("사용자 정보가 없습니다. 고객센터에 문의해주세요.")
-                            return
-                        }
-                        print("[Login] User document loaded")
-                        self.pendingUserRef = userRef
-                        if let existingDeviceID = data["deviceID"] as? String,
-                           existingDeviceID != self.deviceID {
-                            self.loginAttemptID = nil
-                            self.isLoggingIn = false
-                            self.currentAlert = .newDeviceLogin
-                            return
-                        }
-
-                        userRef.setData([
-                            "loginStatus": true,
-                            "deviceID": self.deviceID,
-                            "lastLogin": Timestamp(date: Date())
-                        ], merge: true) { [weak self] error in
-                            DispatchQueue.main.async {
-                                guard let self = self, self.loginAttemptID == attemptID else { return }
-                                if let error = error {
-                                    print("[Login] Login state write failed (code: \((error as NSError).code))")
-                                    self.failLogin("로그인 상태를 저장하지 못했습니다. 다시 시도해주세요. (\(error.localizedDescription))")
-                                    return
-                                }
-                                print("[Login] Login state saved")
-                                self.loginAttemptID = nil
-                                self.isLoggingIn = false
-                                self.isLoggedIn = true
-                                UserDefaults.standard.set(true, forKey: "isLoggedIn")
-                                self.startListeningForForcedLogout(uid: uid)
-                                PushTokenManager.syncCurrentToken()
-                            }
-                        }
+                        print("[Login] Login state saved")
+                        self.completeLogin(uid: uid)
                     }
                 }
             }
         }
+    }
+
+    // 로그인 확정 후 공통 처리 (상태 반영, 강제 로그아웃 리스너, FCM 토큰 동기화)
+    private func completeLogin(uid: String) {
+        loginAttemptID = nil
+        isLoggingIn = false
+        isLoggedIn = true
+        UserDefaults.standard.set(true, forKey: "isLoggedIn")
+        startListeningForForcedLogout(uid: uid)
+        PushTokenManager.syncCurrentToken()
     }
 
     private func failLogin(_ message: String) {
@@ -206,14 +217,9 @@ class LoginViewModel: ObservableObject {
                     self.failLogin("기기 전환에 실패했습니다. 다시 시도해주세요. (\(error.localizedDescription))")
                     return
                 }
-                self.loginAttemptID = nil
-                self.isLoggingIn = false
-                self.isLoggedIn = true
                 self.currentAlert = nil
                 self.pendingUserRef = nil
-                UserDefaults.standard.set(true, forKey: "isLoggedIn")
-                self.startListeningForForcedLogout(uid: uid)
-                PushTokenManager.syncCurrentToken()
+                self.completeLogin(uid: uid)
             }
         }
     }
