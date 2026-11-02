@@ -11,6 +11,7 @@ import FirebaseAuth
 import CoreLocation
 import UserNotifications
 import FirebaseRemoteConfig
+import GoogleSignIn
 
 @main
 struct iOS_ProjectApp: App {
@@ -50,6 +51,10 @@ struct iOS_ProjectApp: App {
             .environmentObject(loginViewModel) // LoginViewModel을 전역에서 사용
             .environmentObject(AppRouter.shared) 
             .environmentObject(router)
+            // Google 로그인 완료 후 앱으로 돌아오는 URL 처리
+            .onOpenURL { url in
+                _ = GIDSignIn.sharedInstance.handle(url)
+            }
             .onAppear {
                 guard !ChatKeyboardUITest.isEnabled else { return }
                 // 위치 권한이 허용되지 않으면 경고 표시

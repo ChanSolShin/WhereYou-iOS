@@ -11,6 +11,7 @@ import Firebase
 import FirebaseAuth
 import FirebaseMessaging
 import FirebaseFirestore
+import GoogleSignIn
 import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate {
@@ -24,6 +25,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Firebase 초기화
         FirebaseApp.configure()
         if ChatKeyboardUITest.isEnabled { return true }
+
+        // Google 로그인 클라이언트 ID (빌드 구성별 GoogleService-Info.plist 기준)
+        if let clientID = FirebaseApp.app()?.options.clientID {
+            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+        }
         
         // 푸시 알림 설정
         configurePushNotifications(application)
