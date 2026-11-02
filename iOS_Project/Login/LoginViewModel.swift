@@ -121,6 +121,9 @@ class LoginViewModel: ObservableObject {
                     return
                 }
                 print("[Login] User document loaded")
+                if let user = Auth.auth().currentUser {
+                    UserAuthInfo.syncIfNeeded(user: user, existing: data)
+                }
                 self.pendingUserRef = userRef
                 if let existingDeviceID = data["deviceID"] as? String,
                    existingDeviceID != self.deviceID {
@@ -268,9 +271,11 @@ class LoginViewModel: ObservableObject {
                     self.authState = .checkFailed
                     return
                 }
-                if snapshot?.exists == true {
+                if let data = snapshot?.data() {
                     self.authState = .loggedIn
                     self.startListeningForForcedLogout(uid: uid)
+                    // 로그인 유지 중인 기존 유저도 providers, loginEmail backfill
+                    UserAuthInfo.syncIfNeeded(user: currentUser, existing: data)
                 } else if Self.hasSocialProvider(currentUser) {
                     // 소셜 가입 도중 이탈 → 회원정보 입력 이어서 진행
                     self.authState = .needsProfile

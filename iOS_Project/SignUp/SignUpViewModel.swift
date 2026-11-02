@@ -140,7 +140,11 @@ class SignUpViewModel: ObservableObject {
         if !birthday.isEmpty {
             userData["birthday"] = birthday
         }
-        
+        // 로그인 수단 (phone, password), loginEmail
+        if let user = Auth.auth().currentUser {
+            userData.merge(UserAuthInfo.fields(for: user)) { _, new in new }
+        }
+
         db.collection("users").document(uid).setData(userData) { [weak self] error in
             if let error = error {
                 print("Firestore 저장 오류: \(error.localizedDescription)")
