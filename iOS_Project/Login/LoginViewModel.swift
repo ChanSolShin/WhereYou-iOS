@@ -294,7 +294,7 @@ class LoginViewModel: ObservableObject {
 
     // 소셜 로그인 수단 연결 여부
     // TODO: 카카오/네이버 - providerData에 남지 않으므로 도입 시 판별 기준 추가 필요
-    private static let socialProviderIDs: Set<String> = ["google.com", "apple.com"]
+    private static let socialProviderIDs = Set(SocialAuthProvider.allCases.map(\.providerID))
 
     private static func hasSocialProvider(_ user: FirebaseAuth.User) -> Bool {
         user.providerData.contains { socialProviderIDs.contains($0.providerID) }
