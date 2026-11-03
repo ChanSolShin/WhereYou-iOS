@@ -29,7 +29,20 @@ struct EditProfileView: View {
     // 키보드 활성화 감지
     @State private var isKeyboardVisible = false
     @State private var showDeleteButton = true // 탈퇴하기 버튼 표시 여부
-    
+    @State private var showBirthdayPicker = false
+
+    // 생년월일 표시 (변환할 수 없는 기존 값은 다시 선택 안내)
+    private var birthdayDisplayText: String {
+        guard !birthday.isEmpty else { return "입력 안 함" }
+        guard let date = BirthdayWheelPicker.date(from: birthday) else {
+            return "\(birthday) (다시 선택해 주세요)"
+        }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "yyyy년 M월 d일"
+        return formatter.string(from: date)
+    }
+
     var body: some View {
         VStack {
             ScrollView {
@@ -51,25 +64,59 @@ struct EditProfileView: View {
                             .submitLabel(.done)
                     }
                     Group {
-                        Text("생년월일 (YYYYDDMM)")
+                        Text("생년월일")
                             .font(.title3)
-                        TextField("생일", text: $birthday)
-                            .disabled(true)
+                        Button(action: {
+                            focusedField = nil
+                            withAnimation {
+                                showBirthdayPicker.toggle()
+                            }
+                        }) {
+                            HStack {
+                                Text(birthdayDisplayText)
+                                    .foregroundColor(birthday.isEmpty ? .gray : .primary)
+                                Spacer()
+                                Image(systemName: showBirthdayPicker ? "chevron.up" : "chevron.down")
+                                    .foregroundColor(.gray)
+                            }
                             .padding()
+                            .frame(maxWidth: .infinity)
                             .glassSurface(radius: 10)
-                            .focused($focusedField, equals: .birthday)
+                        }
+                        if showBirthdayPicker {
+                            BirthdayWheelPicker(birthday: $birthday)
+                                .frame(maxWidth: .infinity)
+                            if !birthday.isEmpty {
+                                Button("생년월일 지우기") {
+                                    birthday = ""
+                                    withAnimation {
+                                        showBirthdayPicker = false
+                                    }
+                                }
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
                     }
-                    
+
                     Group {
                         Text("이메일")
                             .font(.title3)
                         TextField("이메일", text: $email)
-                            .disabled(true)
+                            .disabled(!viewModel.canEditEmail)
+                            .foregroundColor(viewModel.canEditEmail ? .primary : .gray)
+                            .autocapitalization(.none)
                             .padding()
                             .glassSurface(radius: 10)
                             .keyboardType(.emailAddress)
                             .focused($focusedField, equals: .email)
                             .submitLabel(.done)
+                        Text(viewModel.canEditEmail
+                             ? "친구가 이메일로 나를 찾을 때 사용됩니다. 비워 둘 수 있습니다."
+                             : "로그인 이메일은 변경할 수 없습니다.")
+                            .font(.caption)
+                            .foregroundColor(.gray)
                     }
                     
                     Group {
@@ -156,13 +203,15 @@ struct EditProfileView: View {
             },
             trailing: Button("완료") {
                 focusedField = nil
-                if viewModel.updateProfileData(newName: name, newEmail: email, newPhoneNumber: phoneNumber, newBirthday: birthday) {
-                    presentationMode.wrappedValue.dismiss()
-                } else {
-                    validationAlertMessage = viewModel.errorMessage ?? "입력한 정보를 다시 확인해주세요."
-                    viewModel.activeAlert = nil
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                        viewModel.activeAlert = .validation
+                viewModel.updateProfileData(newName: name, newEmail: email, newBirthday: birthday) { success in
+                    if success {
+                        presentationMode.wrappedValue.dismiss()
+                    } else {
+                        validationAlertMessage = viewModel.errorMessage ?? "입력한 정보를 다시 확인해주세요."
+                        viewModel.activeAlert = nil
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                            viewModel.activeAlert = .validation
+                        }
                     }
                 }
             }

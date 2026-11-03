@@ -58,48 +58,89 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    // Firestore에서 데이터 업데이트
-    func updateProfileData(newName: String, newEmail: String, newPhoneNumber: String, newBirthday: String) -> Bool {
-        guard isValidEmail(newEmail) else {
+    // 이메일 수정 가능 여부
+    // 비밀번호 로그인 계정(통합 계정 포함)은 로그인 이메일로 고정, 소셜 전용 계정만 수정 가능
+    var canEditEmail: Bool {
+        guard let user = Auth.auth().currentUser else { return false }
+        return !user.providerData.contains { $0.providerID == "password" }
+    }
+
+    // Firestore에서 데이터 업데이트 (연락처는 수정 불가)
+    func updateProfileData(newName: String, newEmail: String, newBirthday: String, completion: @escaping (Bool) -> Void) {
+        let trimmedEmail = newEmail.trimmingCharacters(in: .whitespacesAndNewlines)
+        if canEditEmail, !trimmedEmail.isEmpty, !isValidEmail(trimmedEmail) {
             errorMessage = "유효하지 않은 이메일 형식입니다."
-            return false
+            completion(false)
+            return
         }
-        
-        guard isValidBirthday(newBirthday) else {
-            errorMessage = "생년월일은 8자리 숫자로 입력해 주세요."
-            return false
+
+        // 생년월일은 선택 입력, 변환할 수 없는 기존 값은 수정 전까지 그대로 유지
+        guard newBirthday.isEmpty || newBirthday == profile?.birthday || BirthdayWheelPicker.date(from: newBirthday) != nil else {
+            errorMessage = "생년월일을 다시 선택해 주세요."
+            completion(false)
+            return
         }
-        
-        guard let uid = Auth.auth().currentUser?.uid else { return false }
-        
-        db.collection("users").document(uid).updateData([
+
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(false)
+            return
+        }
+
+        var updates: [String: Any] = [
             "name": newName,
-            "email": newEmail,
-            "phoneNumber": newPhoneNumber,
-            "birthday": newBirthday
-        ]) { error in
-            if let error = error {
-                print("Error updating profile data: \(error)")
-            } else {
-                self.profile?.name = newName
-                self.profile?.email = newEmail
-                self.profile?.phoneNumber = newPhoneNumber
-                self.profile?.birthday = newBirthday
+            "birthday": newBirthday.isEmpty ? FieldValue.delete() : newBirthday
+        ]
+        if canEditEmail {
+            updates["email"] = trimmedEmail.isEmpty ? FieldValue.delete() : trimmedEmail
+        }
+
+        let save = { [weak self] in
+            self?.db.collection("users").document(uid).updateData(updates) { error in
+                self?.isProcessing = false
+                if let error = error {
+                    print("Error updating profile data: \(error)")
+                    self?.errorMessage = "저장하지 못했습니다. 잠시 후 다시 시도해주세요."
+                    completion(false)
+                    return
+                }
+                self?.profile?.name = newName
+                self?.profile?.birthday = newBirthday
+                if self?.canEditEmail == true {
+                    self?.profile?.email = trimmedEmail
+                }
+                completion(true)
             }
         }
-        return true
+
+        isProcessing = true
+        // 이메일을 바꾼 경우만 다른 유저와 중복 검사
+        guard canEditEmail, !trimmedEmail.isEmpty, trimmedEmail != profile?.email else {
+            save()
+            return
+        }
+        db.collection("users").whereField("email", isEqualTo: trimmedEmail).getDocuments { [weak self] snapshot, error in
+            if let error = error {
+                print("Error checking email: \(error)")
+                self?.isProcessing = false
+                self?.errorMessage = "이메일 확인 중 오류가 발생했습니다. 다시 시도해주세요."
+                completion(false)
+                return
+            }
+            if snapshot?.documents.contains(where: { $0.documentID != uid }) == true {
+                self?.isProcessing = false
+                self?.errorMessage = "이미 사용 중인 이메일입니다."
+                completion(false)
+                return
+            }
+            save()
+        }
     }
-    
+
     // 이메일 유효성 검사
     private func isValidEmail(_ email: String) -> Bool {
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
         let emailTest = NSPredicate(format: "SELF MATCHES %@", emailRegEx)
         return emailTest.evaluate(with: email)
-    }
-    
-    // 생일 유효성 검사
-    private func isValidBirthday(_ birthday: String) -> Bool {
-        return birthday.count == 8 && birthday.allSatisfy { $0.isNumber }
     }
     
     // MARK: - 계정 탈퇴 (재인증 후 진행)
