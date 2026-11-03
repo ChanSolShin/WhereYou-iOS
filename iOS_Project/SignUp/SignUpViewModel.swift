@@ -17,7 +17,6 @@ class SignUpViewModel: ObservableObject {
     @Published var agreedToTerms: Bool = false
     @Published var realName: String = ""
     @Published var birthday: String = ""
-    @Published var birthdayDate: Date? = nil
     @Published var phoneNumber: String = ""
     @Published var verificationCode: String = ""
     @Published var signUpErrorMessage: String?

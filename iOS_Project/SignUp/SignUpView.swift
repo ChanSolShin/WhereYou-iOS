@@ -269,18 +269,9 @@ struct SignUpView: View {
         switch currentStep {
         case 0:
             // 이름 입력 단계
-            let trimmedName = viewModel.realName.trimmingCharacters(in: .whitespacesAndNewlines)
-            let koreanNameRegex = "^[가-힣]{2,10}$"
-            let englishNameRegex = "^[A-Za-z]{2,}(\\s[A-Za-z]+)*$"
-            let namePredicate = NSPredicate(format: "SELF MATCHES %@ OR SELF MATCHES %@", koreanNameRegex, englishNameRegex)
-            return namePredicate.evaluate(with: trimmedName)
+            return NameInputStep.isValid(viewModel.realName)
         case 1:
-            if wantsToInputBirthday {
-                let trimmedBirthday = viewModel.birthday.trimmingCharacters(in: .whitespacesAndNewlines)
-                return !trimmedBirthday.isEmpty && trimmedBirthday.count == 8 && trimmedBirthday.allSatisfy { $0.isNumber }
-            } else {
-                return true
-            }
+            return BirthdayPickerStep.isValid(wantsToInput: wantsToInputBirthday, birthday: viewModel.birthday)
         case 2:
             return false  // 전화번호 입력 단계에서는 다음 버튼 비활성화
         case 3:
@@ -304,248 +295,52 @@ struct SignUpView: View {
         }
     }
     
-    // 국가코드별 전화번호 유효성 검사
-    private var isPhoneNumberValid: Bool {
-        guard let selected = selectedCountry else { return false }
-        let phone = viewModel.phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // 공백 포함 여부 확인
-        if phone.contains(" ") { return false }
-
-        switch selected.code {
-        case "+82":
-            if phone.hasPrefix("010") {
-                return phone.count == 11
-            } else if phone.hasPrefix("10") {
-                return phone.count == 10
-            } else {
-                return false
-            }
-        case "+1":
-            return phone.count == 10
-        case "+44":
-            return phone.count == 10 || phone.count == 11
-        default:
-            return !phone.isEmpty
-        }
-    }
-    
     // 이름 입력 필드
     private var nameStep: some View {
-        VStack {
-            Text("이름을 입력하세요")
-                .font(.title2)
-                .foregroundColor(.gray)
-                .padding(.bottom, 8)
-            
-            HStack {
-                Image(systemName: "person.fill")
-                    .foregroundColor(.gray)
-                    .imageScale(.small)
-                TextField("이름", text: $viewModel.realName)
-                    .font(.system(size: 20))
-            }
-            .padding()
-            .glassSurface(radius: 10)
-            .cornerRadius(8)
-            .padding(.horizontal, 30)
-
-            Text("이름은 앱 내에서 친구에게 표시될 닉네임으로 사용됩니다.")
-                .font(.caption)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.top, 4)
-        }
+        NameInputStep(name: $viewModel.realName)
     }
     
     // 생년월일 입력 필드
     private var birthdayStep: some View {
-        VStack {
-            Toggle(isOn: $wantsToInputBirthday) {
-                Text("생년월일 입력")
-                    .font(.title2)
-                    .foregroundColor(.gray)
-            }
-            .padding(.horizontal, 30)
-
-            if wantsToInputBirthday {
-                DatePicker("생년월일", selection: Binding(
-                    get: {
-                        viewModel.birthdayDate ?? Calendar.current.date(byAdding: .year, value: -20, to: Date()) ?? Date()
-                    },
-                    set: { newDate in
-                        if wantsToInputBirthday {
-                            viewModel.birthdayDate = newDate
-                            let formatter = DateFormatter()
-                            formatter.dateFormat = "yyyyMMdd"
-                            viewModel.birthday = formatter.string(from: newDate)
-                        } else {
-                            viewModel.birthdayDate = nil
-                            viewModel.birthday = ""
-                        }
-                    }
-                ), in: ...Date(), displayedComponents: [.date])
-                .datePickerStyle(.wheel)
-                .environment(\.locale, Locale(identifier: "ko_KR"))
-                .labelsHidden()
-                .padding(.horizontal, 30)
-            }
-            Text("생년월일은 사용자의 생일 알림 기능에만 사용됩니다. 앱 내 다른 용도로는 사용되지 않습니다.")
-                .font(.caption)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.top, 4)
-                .padding(.horizontal, 30)
-        }
+        BirthdayPickerStep(wantsToInput: $wantsToInputBirthday, birthday: $viewModel.birthday)
     }
     
     // 휴대전화 입력 필드
     private var phoneNumberStep: some View {
-        VStack(spacing: 15) {
-            Text("휴대전화를 입력하세요 (- 없이)")
-                .font(.title2)
-                .foregroundColor(.gray)
-                .padding(.bottom, 8)
-            
-            HStack(spacing: 10) {
-                Menu {
-                    ForEach(countryCodes, id: \.id) { code in
-                        Button(action: {
-                            selectedCountry = code
-                        }) {
-                            Text("\(code.emoji) \(code.country) \(code.display)")
-                                .font(.system(size: 14))
-                        }
-                    }
-                } label: {
-                    if let selected = selectedCountry {
-                        Text("\(selected.emoji) \(selected.display)")
-                            .font(.system(size: 14))
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                    } else {
-                        Text("선택 ⬇️")
-                            .font(.system(size: 14))
-                    }
-                }
-                .frame(width: 90)
-                
-                TextField("휴대전화", text: $viewModel.phoneNumber)
-                    .keyboardType(.numberPad)
-                    .onChange(of: viewModel.phoneNumber) { newValue in
-                        if let selected = selectedCountry {
-                            if selected.code == "+82" {
-                                if newValue.hasPrefix("010") {
-                                    if newValue.count > 11 {
-                                        viewModel.phoneNumber = String(newValue.prefix(11))
-                                    }
-                                } else if newValue.hasPrefix("10") {
-                                    if newValue.count > 10 {
-                                        viewModel.phoneNumber = String(newValue.prefix(10))
-                                    }
-                                } else {
-                                    viewModel.phoneNumber = newValue
-                                }
-                            } else if selected.code == "+1" {
-                                if newValue.count > 10 {
-                                    viewModel.phoneNumber = String(newValue.prefix(10))
-                                }
-                            } else if selected.code == "+44" {
-                                if newValue.count > 11 {
-                                    viewModel.phoneNumber = String(newValue.prefix(11))
-                                }
-                            } else {
-                                if newValue.count > 15 {
-                                    viewModel.phoneNumber = String(newValue.prefix(15))
-                                }
-                            }
-                        }
-                    }
-                    .font(.system(size: 20))
+        PhoneNumberStep(
+            countryCodes: countryCodes,
+            selectedCountry: $selectedCountry,
+            phoneNumber: $viewModel.phoneNumber
+        ) {
+            // 인증번호 전송 기능
+            if let selected = selectedCountry {
+                viewModel.selectedCountryCode = selected.code
+                let fullPhoneNumber = selected.code + viewModel.phoneNumber
+                isLoading = true  // 진행 중: 로딩 시작
+                viewModel.sendVerificationCode(fullPhoneNumber: fullPhoneNumber)
             }
-            .padding()
-            .glassSurface(radius: 10)
-            .cornerRadius(8)
-            .padding(.horizontal, 30)
-            
-            Button("인증번호 전송") {
-                // 인증번호 전송 기능
-                if let selected = selectedCountry {
-                    viewModel.selectedCountryCode = selected.code
-                    let fullPhoneNumber = selected.code + viewModel.phoneNumber
-                    isLoading = true  // 진행 중: 로딩 시작
-                    viewModel.sendVerificationCode(fullPhoneNumber: fullPhoneNumber)
-                }
-            }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(isPhoneNumberValid ? Color.blue : Color.gray)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-            .padding(.horizontal, 30)
-            .disabled(!isPhoneNumberValid)
-
-            Text("전화번호는 친구를 찾고 추가하는 데 사용됩니다.")
-                .font(.caption)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.top, 4)
         }
     }
     
     private var verificationCodeStep: some View {
-        VStack(spacing: 15) {
-            Text("인증번호를 입력하세요")
-                .font(.title2)
-                .foregroundColor(.gray)
-                .padding(.bottom, 8)
-            
-            HStack(spacing: 10) {
-                ZStack(alignment: .trailing) {
-                    TextField("인증번호 입력", text: $viewModel.verificationCode)
-                        .keyboardType(.numberPad)
-                        .padding()
-                        .glassSurface(radius: 10)
-                        .cornerRadius(8)
-                    // 타이머 표시
-                    Text("\(String(format: "%02d:%02d", viewModel.timerValue/60, viewModel.timerValue % 60))")
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .padding(.trailing, 10)
+        VerificationCodeStep(
+            verificationCode: $viewModel.verificationCode,
+            timerValue: viewModel.timerValue,
+            isEnabled: viewModel.isVerificationUIEnabled,
+            onResend: {
+                // 인증번호 재전송 기능
+                if let selected = selectedCountry {
+                    let fullPhoneNumber = selected.code + viewModel.phoneNumber
+                    isLoading = true  // 진행 중: 로딩 시작
+                    viewModel.resendCode(fullPhoneNumber: fullPhoneNumber)
                 }
-                
-                Button("재전송") {
-                    // 인증번호 재전송 기능
-                    if let selected = selectedCountry {
-                        let fullPhoneNumber = selected.code + viewModel.phoneNumber
-                        isLoading = true  // 진행 중: 로딩 시작
-                        viewModel.resendCode(fullPhoneNumber: fullPhoneNumber)
-                    }
-                }
-                .foregroundColor(viewModel.isVerificationUIEnabled ? .blue : .gray)
-                .disabled(!viewModel.isVerificationUIEnabled)
-            }
-            .padding(.horizontal, 30)
-            
-            Button("인증번호 확인") {
+            },
+            onVerify: {
                 // 인증번호 확인 기능
                 isLoading = true  // 진행 중: 로딩 시작
                 viewModel.verifyCode()
             }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(viewModel.isVerificationUIEnabled ? Color.blue : Color.gray)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-            .padding(.horizontal, 30)
-            .disabled(!viewModel.isVerificationUIEnabled)
-            
-            Text("인증번호가 오지 않았다면, 번호가 잘못되었을 수 있습니다.")
-                .font(.caption)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.top, 4)
-        }
+        )
     }
     
     // 이메일 입력 필드
