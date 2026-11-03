@@ -96,7 +96,7 @@ final class SocialSignUpViewModel: ObservableObject {
     var canProceed: Bool {
         switch step {
         case .phoneNumber:
-            return false  // 인증번호 전송으로만 진행
+            return isPhoneVerified  // 인증 전에는 인증번호 전송으로만 진행
         case .verificationCode:
             return isPhoneVerified
         case .name:

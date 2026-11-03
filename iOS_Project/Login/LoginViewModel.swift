@@ -360,6 +360,18 @@ class LoginViewModel: ObservableObject {
         checkAutoLogin()
     }
 
+    // 소셜 회원정보 입력 완료 후 세션 확립 (메인 이동)
+    func completeSocialSignUp() {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            signOut(updateFirestore: false)
+            return
+        }
+        isLoggingIn = true
+        currentAlert = nil
+        let attemptID = beginLoginAttempt()
+        establishSession(uid: uid, attemptID: attemptID)
+    }
+
     // 소셜 로그인 수단 연결 여부
     // TODO: 카카오/네이버 - providerData에 남지 않으므로 도입 시 판별 기준 추가 필요
     private static let socialProviderIDs = Set(SocialAuthProvider.allCases.map(\.providerID))
