@@ -103,9 +103,69 @@ class LoginViewModel: ObservableObject {
         }
     }
 
+    // 소셜 로그인 (Google/Apple)
+    func socialLogin(with provider: SocialAuthProvider) {
+        guard !isLoggingIn else { return }
+        isLoggingIn = true
+        currentAlert = nil
+        Task { @MainActor [weak self] in
+            do {
+                let result = try await SocialAuthManager.signIn(with: provider)
+                guard let self = self else { return }
+                // 소셜 로그인 창 입력 시간이 있어 인증 완료 후부터 시간 제한 적용
+                let attemptID = self.beginLoginAttempt()
+                if result.isNewUser {
+                    self.registerTempSocialUser(uid: result.user.uid, provider: provider)
+                }
+                print("[Login] Social authentication succeeded; loading user document")
+                self.establishSession(uid: result.user.uid, attemptID: attemptID, allowsProfileSetup: true)
+            } catch SocialAuthError.canceled {
+                self?.isLoggingIn = false
+            } catch {
+                print("[Login] Social authentication failed (code: \((error as NSError).code))")
+                self?.failLogin(Self.messageForSocialAuthError(error))
+            }
+        }
+    }
+
+    // 회원정보 입력 전 이탈한 소셜 계정 정리용 (Functions에서 일정 시간 후 삭제)
+    private func registerTempSocialUser(uid: String, provider: SocialAuthProvider) {
+        db.collection("tempUsers").document(uid).setData([
+            "uid": uid,
+            "createdAt": Timestamp(date: Date()),
+            "linked": false,
+            "provider": provider.providerID
+        ]) { error in
+            if let error = error {
+                print("[Login] Temp social user save failed (code: \((error as NSError).code))")
+            }
+        }
+    }
+
+    private static func messageForSocialAuthError(_ error: Error) -> String {
+        if let socialError = error as? SocialAuthError {
+            return socialError.localizedDescription
+        }
+        if (error as NSError).domain == AuthErrorDomain,
+           let code = AuthErrorCode(rawValue: (error as NSError).code) {
+            switch code {
+            case .accountExistsWithDifferentCredential:
+                return "같은 이메일로 가입된 계정이 있습니다. 기존 로그인 방법으로 로그인해주세요."
+            case .networkError:
+                return "네트워크 연결을 확인하고 다시 시도해주세요."
+            case .userDisabled:
+                return "사용할 수 없는 계정입니다. 고객센터에 문의해주세요."
+            default:
+                break
+            }
+        }
+        return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요. (\(error.localizedDescription))"
+    }
+
     // Firebase 인증 이후 공통 세션 처리
     // 이메일/소셜 로그인 모두 인증 성공 후 호출
-    private func establishSession(uid: String, attemptID: UUID) {
+    // allowsProfileSetup: 사용자 문서가 없으면 회원정보 입력으로 이동 (소셜 최초 로그인)
+    private func establishSession(uid: String, attemptID: UUID, allowsProfileSetup: Bool = false) {
         let userRef = db.collection("users").document(uid)
         userRef.getDocument { [weak self] snapshot, error in
             DispatchQueue.main.async {
@@ -116,6 +176,13 @@ class LoginViewModel: ObservableObject {
                     return
                 }
                 guard let data = snapshot?.data() else {
+                    if allowsProfileSetup {
+                        print("[Login] User document missing; profile setup required")
+                        self.loginAttemptID = nil
+                        self.isLoggingIn = false
+                        self.authState = .needsProfile
+                        return
+                    }
                     print("[Login] User document missing")
                     self.failLogin("사용자 정보가 없습니다. 고객센터에 문의해주세요.")
                     return
@@ -241,6 +308,7 @@ class LoginViewModel: ObservableObject {
         self.pendingUserRef = nil
         do {
             try Auth.auth().signOut()
+            GoogleAuthService.signOut()
             DispatchQueue.main.async {
                 self.authState = .loggedOut
                 self.currentAlert = nil
@@ -349,6 +417,7 @@ class LoginViewModel: ObservableObject {
                 }
                 do {
                     try Auth.auth().signOut()
+                    GoogleAuthService.signOut()
                     UserDefaults.standard.set(false, forKey: "isLoggedIn")
                     DispatchQueue.main.async {
                         self.authState = .loggedOut
@@ -360,6 +429,7 @@ class LoginViewModel: ObservableObject {
         } else {
             do {
                 try Auth.auth().signOut()
+                GoogleAuthService.signOut()
                 UserDefaults.standard.set(false, forKey: "isLoggedIn")
                 DispatchQueue.main.async {
                     self.authState = .loggedOut

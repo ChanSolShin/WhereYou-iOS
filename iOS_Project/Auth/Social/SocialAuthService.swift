@@ -10,9 +10,10 @@ import FirebaseAuth
 
 // 소셜 로그인 수단
 // TODO: 카카오/네이버 - case 추가 (Cloud Functions Custom Token 방식)
+// case 순서 = 로그인 화면 버튼 순서 (Apple 가이드상 Apple 버튼을 다른 소셜 버튼보다 눈에 덜 띄게 두지 않도록 첫 번째)
 enum SocialAuthProvider: CaseIterable {
-    case google
     case apple
+    case google
 
     // Firebase Auth providerID (users 문서 providers 값과 동일)
     var providerID: String {
