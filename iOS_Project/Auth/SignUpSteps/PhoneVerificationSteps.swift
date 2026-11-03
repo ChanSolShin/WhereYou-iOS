@@ -108,6 +108,23 @@ struct PhoneNumberStep: View {
         }
     }
 
+    // users 문서 phoneNumber 저장 형식으로 변환 (국가코드 + 번호)
+    // +82: 010으로 시작할 경우 10으로 시작하도록 변환
+    static func formatted(_ phoneNumber: String, countryCode: String) -> String {
+        if countryCode == "+82" {
+            var digits = phoneNumber
+            if digits.hasPrefix("0") {
+                digits = String(digits.dropFirst())
+            }
+            return countryCode + digits
+        } else {
+            if phoneNumber.hasPrefix("+") {
+                return phoneNumber
+            }
+            return countryCode + phoneNumber
+        }
+    }
+
     // 국가코드별 최대 길이 초과 시 잘라낸 값 (초과하지 않으면 nil)
     private static func limitedLength(_ phoneNumber: String, countryCode: String?) -> String? {
         guard let countryCode else { return nil }

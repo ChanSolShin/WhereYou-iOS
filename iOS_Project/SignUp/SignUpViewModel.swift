@@ -311,18 +311,6 @@ class SignUpViewModel: ObservableObject {
     
     // MARK: - Helper: 전화번호 형식 변환 (선택된 국가코드 기준)
     private func formatPhoneNumber(_ number: String) -> String {
-        // +82: 010으로 시작할 경우 10으로 시작하도록 변환
-        if selectedCountryCode == "+82" {
-            var digits = number
-            if digits.hasPrefix("0") {
-                digits = String(digits.dropFirst())
-            }
-            return selectedCountryCode + digits
-        } else {
-            if number.hasPrefix("+") {
-                return number
-            }
-            return selectedCountryCode + number
-        }
+        PhoneNumberStep.formatted(number, countryCode: selectedCountryCode)
     }
 }
