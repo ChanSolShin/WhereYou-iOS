@@ -320,7 +320,7 @@ class LoginViewModel: ObservableObject {
     }
 
     // 앱 시작 시 자동 로그인 상태 확인
-    // 사용자 문서 유무로 메인 / 회원정보 입력 / 로그아웃 분기
+    // 사용자 문서 유무로 메인 / 로그아웃 분기
     private func checkAutoLogin() {
         guard let currentUser = Auth.auth().currentUser else {
             authState = .loggedOut
@@ -344,12 +344,11 @@ class LoginViewModel: ObservableObject {
                     self.startListeningForForcedLogout(uid: uid)
                     // 로그인 유지 중인 기존 유저도 providers, loginEmail backfill
                     UserAuthInfo.syncIfNeeded(user: currentUser, existing: data)
-                } else if Self.hasSocialProvider(currentUser) {
-                    // 소셜 가입 도중 이탈 → 회원정보 입력 이어서 진행
-                    self.authState = .needsProfile
                 } else {
-                    // 이메일 가입 도중 이탈한 임시 계정: 로그아웃 (임시 계정은 Functions에서 정리)
-                    self.signOut(updateFirestore: false)
+                    // 가입 도중 이탈한 임시 계정 (이메일/소셜 공통): 서버에서 삭제 후 로그인 화면부터 다시 시작
+                    TempAccountService.discard { [weak self] in
+                        self?.signOut(updateFirestore: false)
+                    }
                 }
             }
         }
@@ -372,14 +371,6 @@ class LoginViewModel: ObservableObject {
         establishSession(uid: uid, attemptID: attemptID)
     }
 
-    // 소셜 로그인 수단 연결 여부
-    // TODO: 카카오/네이버 - providerData에 남지 않으므로 도입 시 판별 기준 추가 필요
-    private static let socialProviderIDs = Set(SocialAuthProvider.allCases.map(\.providerID))
-
-    private static func hasSocialProvider(_ user: FirebaseAuth.User) -> Bool {
-        user.providerData.contains { socialProviderIDs.contains($0.providerID) }
-    }
-    
     // Firestore 문서 변경 감지 -> 다른 기기에서 로그인 시 강제 로그아웃 처리
     func startListeningForForcedLogout(uid: String? = nil) {
         let uidToUse: String

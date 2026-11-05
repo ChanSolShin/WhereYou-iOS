@@ -15,7 +15,7 @@ const {
   createCompleteLegacyMeetingInvitationHandler,
 } = require('./meetingChat');
 const { getAppBadgeCount, badgeApns, createSendChatNotificationHandler } = require('./appBadge');
-const { cleanupTempAccounts } = require('./tempAccountCleanup');
+const { cleanupTempAccounts, createDiscardTempAccountHandler } = require('./tempAccountCleanup');
 
 admin.initializeApp({
   databaseURL: "https://meetingapp-2985d-default-rtdb.firebaseio.com"
@@ -38,6 +38,10 @@ exports.sendMeetingChatBadge = functions.firestore.onDocumentCreated(
 );
 exports.acceptMeetingInvitation = onCall(
   { region: 'us-central1' }, createAcceptMeetingInvitationHandler({ db })
+);
+// 가입 포기 시 본인 임시 계정 즉시 삭제 (가입 미완료 계정만)
+exports.discardTempAccount = onCall(
+  { region: 'us-central1' }, createDiscardTempAccountHandler({ db, auth: admin.auth() })
 );
 
 // Older app versions mark an invitation accepted and then update the meeting

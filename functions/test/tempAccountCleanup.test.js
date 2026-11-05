@@ -4,6 +4,7 @@ const {
   EMAIL_SIGNUP_TTL_MS,
   SOCIAL_SIGNUP_TTL_MS,
   cleanupTempAccounts,
+  createDiscardTempAccountHandler,
 } = require('../tempAccountCleanup');
 
 const NOW = Date.UTC(2026, 10, 3, 12, 0, 0);
@@ -26,6 +27,7 @@ function fakeServices({ tempUsers = {}, users = [], authUsers = [] }) {
               })),
             };
           },
+          doc: (id) => ({ delete: async () => { tempRecords.delete(id); } }),
         };
       }
       return { doc: (id) => ({ get: async () => ({ exists: userDocs.has(id) }) }) };
@@ -107,4 +109,35 @@ test('a failure on one account does not stop the rest', async () => {
 
   assert.deepEqual(deletedUids, ['ok']);
   assert.equal(services.tempRecords.has('broken'), true);
+});
+
+test('discard deletes the caller temp account immediately', async () => {
+  const services = fakeServices({
+    tempUsers: { temp: { createdAt: minutesAgo(1), provider: 'google.com' } },
+    authUsers: ['temp'],
+  });
+  const handler = createDiscardTempAccountHandler(services);
+
+  const result = await handler({ auth: { uid: 'temp' } });
+
+  assert.deepEqual(result, { deleted: true });
+  assert.equal(services.authRecords.has('temp'), false);
+  assert.equal(services.tempRecords.has('temp'), false);
+});
+
+test('discard never deletes an account that finished signup', async () => {
+  const services = fakeServices({ users: ['member'], authUsers: ['member'] });
+  const handler = createDiscardTempAccountHandler(services);
+
+  await assert.rejects(handler({ auth: { uid: 'member' } }), { code: 'failed-precondition' });
+  assert.equal(services.authRecords.has('member'), true);
+});
+
+test('discard requires sign-in and tolerates an already deleted account', async () => {
+  const services = fakeServices({ tempUsers: { gone: { createdAt: minutesAgo(1) } } });
+  const handler = createDiscardTempAccountHandler(services);
+
+  await assert.rejects(handler({}), { code: 'unauthenticated' });
+  assert.deepEqual(await handler({ auth: { uid: 'gone' } }), { deleted: true });
+  assert.equal(services.tempRecords.has('gone'), false);
 });

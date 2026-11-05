@@ -357,19 +357,12 @@ final class SocialSignUpViewModel: ObservableObject {
 
     // MARK: - 가입 취소 / 기존 계정 안내 후 이동
 
-    // 임시 소셜 계정 삭제 후 로그인 화면으로
+    // 임시 소셜 계정 삭제(서버) 후 로그인 화면으로
     // 삭제에 실패해도 tempUsers 정리(Functions)에서 일정 시간 후 삭제
     func discardTempAccountAndReturn() {
         timer?.cancel()
-        guard let user = Auth.auth().currentUser else {
-            result = .returnToLogin
-            return
-        }
         isLoading = true
-        user.delete { [weak self] error in
-            if let error = error {
-                print("[SocialSignUp] Temp account delete failed (code: \((error as NSError).code))")
-            }
+        TempAccountService.discard { [weak self] in
             self?.isLoading = false
             self?.result = .returnToLogin
         }
