@@ -196,6 +196,11 @@
 			path = Auth;
 			sourceTree = "<group>";
 		};
+		D1B2C3D4E5F60718293A4B5C /* Resources */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		F5EA74C42D9047A100EAC863 /* Extension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Extension;
@@ -375,6 +380,7 @@
 				F5FD2F992E95453700238639 /* Deep-Link */,
 				F5EA74C42D9047A100EAC863 /* Extension */,
 				C0A1B2C3D4E5F60718293A4B /* Auth */,
+				D1B2C3D4E5F60718293A4B5C /* Resources */,
 				EA86C11B2CC2F15700989E43 /* Assets.xcassets */,
 				F5E8486A2D66DBF200047AA1 /* AppDelegate.swift */,
 				EA86C11E2CC2F15700989E43 /* iOS_ProjectApp.swift */,
@@ -511,6 +517,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				C0A1B2C3D4E5F60718293A4B /* Auth */,
+				D1B2C3D4E5F60718293A4B5C /* Resources */,
 				F5EA74C42D9047A100EAC863 /* Extension */,
 				F5FD2F992E95453700238639 /* Deep-Link */,
 			);
@@ -594,6 +601,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ko,
 			);
 			mainGroup = EABADF222CB9223E00962A40;
 			minimizedProjectReferenceProxies = 1;
