@@ -28,6 +28,8 @@ enum SocialSignUpAlert: Identifiable {
     case phoneNumberInUse           // 사용 중인 번호지만 가입 정보 확인 불가 → 다른 번호 입력
     case sessionExpired             // 임시 계정 만료 → 로그인 화면으로
     case failure(String)
+    case confirmCancel              // 가입 취소 확인
+    case loginFailed(String)        // 가입 완료 후 세션 확립 실패 → 재시도
 
     var id: String {
         switch self {
@@ -38,6 +40,8 @@ enum SocialSignUpAlert: Identifiable {
         case .phoneNumberInUse: return "phoneNumberInUse"
         case .sessionExpired: return "sessionExpired"
         case .failure: return "failure"
+        case .confirmCancel: return "confirmCancel"
+        case .loginFailed: return "loginFailed"
         }
     }
 }

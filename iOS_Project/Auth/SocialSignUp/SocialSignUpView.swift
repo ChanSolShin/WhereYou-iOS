@@ -11,7 +11,6 @@ import SwiftUI
 struct SocialSignUpView: View {
     @EnvironmentObject var loginViewModel: LoginViewModel
     @StateObject private var viewModel = SocialSignUpViewModel()
-    @State private var showCancelConfirm = false
     @State private var showSafariView = false
 
     var body: some View {
@@ -52,31 +51,30 @@ struct SocialSignUpView: View {
         }
         .padding()
         .background(GlassBackdrop())
-        .alert(item: $viewModel.alert) { alert in
-            alertView(for: alert)
-        }
-        .alert("가입을 취소할까요?", isPresented: $showCancelConfirm) {
-            Button("계속 입력", role: .cancel) {}
-            Button("가입 취소", role: .destructive) {
-                viewModel.discardTempAccountAndReturn()
-            }
-        } message: {
-            Text("입력한 정보는 저장되지 않으며 로그인 화면으로 돌아갑니다.")
+        // 알림은 이 하나로만 표시
+        // 이 화면은 NavigationView 없이 앱 루트에 바로 붙어 있어, 기존 방식(Alert) 알림은
+        // 루트의 업데이트 알림과 겹쳐 표시되지 않으므로 iOS 15 방식 API 사용
+        .alert(
+            viewModel.alert?.title ?? "",
+            isPresented: Binding(
+                get: { viewModel.alert != nil },
+                set: { if !$0 { viewModel.alert = nil } }
+            ),
+            presenting: viewModel.alert
+        ) { alert in
+            alertActions(for: alert)
+        } message: { alert in
+            Text(alert.message)
         }
         // 가입 완료 후 세션 확립 실패 시 (users 문서는 저장된 상태라 재시도만)
-        .alert("로그인 실패", isPresented: Binding(
-            get: { loginViewModel.currentAlert != nil },
-            set: { if !$0 { loginViewModel.currentAlert = nil } }
-        )) {
-            Button("다시 시도") {
-                loginViewModel.completeSocialSignUp()
-            }
-        } message: {
-            if case .loginFailed(let message) = loginViewModel.currentAlert {
-                Text(message)
+        .onReceive(loginViewModel.$currentAlert) { alert in
+            guard let alert else { return }
+            if case .loginFailed(let message) = alert {
+                viewModel.alert = .loginFailed(message)
             } else {
-                Text("로그인에 실패했습니다. 다시 시도해주세요.")
+                viewModel.alert = .loginFailed("로그인에 실패했습니다. 다시 시도해주세요.")
             }
+            loginViewModel.currentAlert = nil
         }
         .onChange(of: viewModel.result) { result in
             switch result {
@@ -209,7 +207,7 @@ struct SocialSignUpView: View {
         HStack {
             if viewModel.step == .phoneNumber {
                 Button("취소") {
-                    showCancelConfirm = true
+                    viewModel.alert = .confirmCancel
                 }
                 .padding()
                 .foregroundColor(.gray)
@@ -248,62 +246,70 @@ struct SocialSignUpView: View {
 
     // MARK: - 알림
 
-    private func alertView(for alert: SocialSignUpAlert) -> Alert {
+    @ViewBuilder
+    private func alertActions(for alert: SocialSignUpAlert) -> some View {
         switch alert {
         case .codeSent:
-            return Alert(
-                title: Text("인증번호 전송"),
-                message: Text("인증번호가 전송되었습니다."),
-                dismissButton: .default(Text("확인")) {
-                    withAnimation {
-                        viewModel.step = .verificationCode
-                    }
+            Button("확인") {
+                withAnimation {
+                    viewModel.step = .verificationCode
                 }
-            )
-        case .verificationFailure:
-            return Alert(
-                title: Text("인증 실패"),
-                message: Text("인증번호가 일치하지 않습니다."),
-                dismissButton: .default(Text("확인"))
-            )
-        case .verificationTimeout:
-            return Alert(
-                title: Text("시간 만료"),
-                message: Text("인증 시간이 만료되었습니다. 인증번호를 다시 요청해주세요."),
-                dismissButton: .default(Text("확인"))
-            )
-        case .existingAccount(let message):
-            return Alert(
-                title: Text("이미 가입된 계정"),
-                message: Text(message),
-                dismissButton: .default(Text("로그인하러 가기")) {
-                    viewModel.discardTempAccountAndReturn()
-                }
-            )
+            }
+        case .verificationFailure, .verificationTimeout, .failure:
+            Button("확인", role: .cancel) {}
+        case .existingAccount:
+            Button("로그인하러 가기") {
+                viewModel.discardTempAccountAndReturn()
+            }
         case .phoneNumberInUse:
-            return Alert(
-                title: Text("사용 중인 번호"),
-                message: Text("이미 사용 중인 번호입니다. 잠시 후 다시 시도하거나 다른 번호를 입력해주세요."),
-                dismissButton: .default(Text("확인")) {
-                    withAnimation {
-                        viewModel.step = .phoneNumber
-                    }
+            Button("확인") {
+                withAnimation {
+                    viewModel.step = .phoneNumber
                 }
-            )
+            }
         case .sessionExpired:
-            return Alert(
-                title: Text("가입 시간 만료"),
-                message: Text("가입 시간이 만료되었습니다. 다시 시도해주세요."),
-                dismissButton: .default(Text("확인")) {
-                    viewModel.discardTempAccountAndReturn()
-                }
-            )
-        case .failure(let message):
-            return Alert(
-                title: Text("회원가입 실패"),
-                message: Text(message),
-                dismissButton: .default(Text("확인"))
-            )
+            Button("확인") {
+                viewModel.discardTempAccountAndReturn()
+            }
+        case .confirmCancel:
+            Button("계속 입력", role: .cancel) {}
+            Button("가입 취소", role: .destructive) {
+                viewModel.discardTempAccountAndReturn()
+            }
+        case .loginFailed:
+            Button("다시 시도") {
+                loginViewModel.completeSocialSignUp()
+            }
+        }
+    }
+}
+
+private extension SocialSignUpAlert {
+    var title: String {
+        switch self {
+        case .codeSent: return "인증번호 전송"
+        case .verificationFailure: return "인증 실패"
+        case .verificationTimeout: return "시간 만료"
+        case .existingAccount: return "이미 가입된 계정"
+        case .phoneNumberInUse: return "사용 중인 번호"
+        case .sessionExpired: return "가입 시간 만료"
+        case .failure: return "회원가입 실패"
+        case .confirmCancel: return "가입을 취소할까요?"
+        case .loginFailed: return "로그인 실패"
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .codeSent: return "인증번호가 전송되었습니다."
+        case .verificationFailure: return "인증번호가 일치하지 않습니다."
+        case .verificationTimeout: return "인증 시간이 만료되었습니다. 인증번호를 다시 요청해주세요."
+        case .existingAccount(let message): return message
+        case .phoneNumberInUse: return "이미 사용 중인 번호입니다. 잠시 후 다시 시도하거나 다른 번호를 입력해주세요."
+        case .sessionExpired: return "가입 시간이 만료되었습니다. 다시 시도해주세요."
+        case .failure(let message): return message
+        case .confirmCancel: return "입력한 정보는 저장되지 않으며 로그인 화면으로 돌아갑니다."
+        case .loginFailed(let message): return message
         }
     }
 }
