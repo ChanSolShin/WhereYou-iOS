@@ -93,8 +93,13 @@ struct LoginView: View {
                 .disabled(viewModel.isLoggingIn)
                 .padding(.bottom, 16)
 
-                // 이메일 찾기 | 비밀번호 찾기 | 회원가입
+                // 회원가입 | 이메일 찾기 | 비밀번호 찾기
                 HStack(spacing: 12) {
+                    NavigationLink(destination: SignUpView()) {
+                        Text("회원가입")
+                    }
+                    Text("|")
+                        .foregroundColor(.gray.opacity(0.5))
                     NavigationLink(destination: FindEmailView()) {
                         Text("이메일 찾기")
                     }
@@ -102,11 +107,6 @@ struct LoginView: View {
                         .foregroundColor(.gray.opacity(0.5))
                     NavigationLink(destination: FindPasswordView()) {
                         Text("비밀번호 찾기")
-                    }
-                    Text("|")
-                        .foregroundColor(.gray.opacity(0.5))
-                    NavigationLink(destination: SignUpView()) {
-                        Text("회원가입")
                     }
                 }
                 .font(.system(size: 14))
