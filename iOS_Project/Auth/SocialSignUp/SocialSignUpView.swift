@@ -258,6 +258,11 @@ struct SocialSignUpView: View {
         case .verificationFailure, .verificationTimeout, .failure:
             Button("확인", role: .cancel) {}
         case .existingAccount:
+            Button("다른 번호로 인증") {
+                withAnimation {
+                    viewModel.retryWithAnotherNumber()
+                }
+            }
             Button("로그인하러 가기") {
                 viewModel.discardTempAccountAndReturn()
             }

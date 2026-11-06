@@ -174,6 +174,31 @@ final class SocialSignUpViewModel: ObservableObject {
             withVerificationID: verificationID,
             verificationCode: verificationCode
         )
+
+        // 삭제되지 않은 임시 계정으로 다시 들어온 경우 이미 번호가 연결되어 있을 수 있음
+        // 같은 번호면 그대로 인증 완료, 다른 번호면 기존 연결 해제 후 새 번호 연결 (Auth와 users 번호 일치)
+        guard let linkedPhoneNumber = user.phoneNumber else {
+            linkPhone(credential, to: user)
+            return
+        }
+        if linkedPhoneNumber == formattedPhoneNumber {
+            isLoading = false
+            markPhoneVerified()
+            return
+        }
+        user.unlink(fromProvider: "phone") { [weak self] updatedUser, error in
+            guard let self = self else { return }
+            if let error = error {
+                print("[SocialSignUp] Phone unlink failed (code: \((error as NSError).code))")
+                self.isLoading = false
+                self.alert = .failure("인증에 실패했습니다. 잠시 후 다시 시도해주세요.")
+                return
+            }
+            self.linkPhone(credential, to: updatedUser ?? user)
+        }
+    }
+
+    private func linkPhone(_ credential: PhoneAuthCredential, to user: FirebaseAuth.User) {
         user.link(with: credential) { [weak self] _, error in
             guard let self = self else { return }
             guard let error = error else {
@@ -184,8 +209,8 @@ final class SocialSignUpViewModel: ObservableObject {
 
             let code = AuthErrorCode(rawValue: (error as NSError).code)
             switch code {
-            case .providerAlreadyLinked:
-                // 뒤로 갔다가 다시 인증한 경우 이미 연결된 상태
+            case .providerAlreadyLinked where Auth.auth().currentUser?.phoneNumber == self.formattedPhoneNumber:
+                // 같은 번호가 이미 연결된 상태
                 self.isLoading = false
                 self.markPhoneVerified()
             case .credentialAlreadyInUse:
@@ -211,6 +236,17 @@ final class SocialSignUpViewModel: ObservableObject {
 
     func resendCode() {
         sendVerificationCode()
+    }
+
+    // 기존 계정 안내에서 "다른 번호로 인증" 선택 → 임시 계정 유지, 휴대전화 단계부터 다시
+    func retryWithAnotherNumber() {
+        timer?.cancel()
+        isTimerActive = false
+        timerValue = 300
+        verificationID = nil
+        verificationCode = ""
+        phoneNumber = ""
+        step = .phoneNumber
     }
 
     private func markPhoneVerified() {
