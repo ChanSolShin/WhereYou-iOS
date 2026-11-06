@@ -27,6 +27,32 @@ enum UserAuthInfo {
         return fields
     }
 
+    // 기존 계정의 로그인 수단별 안내 문구 (소셜 가입의 기존 계정 안내, 이메일 찾기 결과)
+    // providers가 없는 기존 계정은 모두 이메일 가입이므로 이메일 로그인 안내
+    static func loginGuideMessage(for data: [String: Any]) -> String {
+        let providers = data["providers"] as? [String] ?? []
+        let socialProviders = SocialAuthProvider.allCases.filter { providers.contains($0.providerID) }
+
+        if providers.isEmpty || providers.contains("password") {
+            let loginEmail = data["loginEmail"] as? String ?? data["email"] as? String ?? ""
+            let methods = ["이메일"] + socialProviders.map(\.displayName)
+            return "\(maskedEmail(loginEmail)) 으로 가입된 계정이 있어요.\n\(methods.joined(separator: " 또는 "))로 로그인해 주세요."
+        }
+        if !socialProviders.isEmpty {
+            let methods = socialProviders.map(\.displayName).joined(separator: " 또는 ")
+            return "\(methods)로 가입된 계정이 있어요.\n\(methods)로 로그인해 주세요."
+        }
+        return "이미 가입된 계정이 있어요.\n기존 계정으로 로그인해 주세요."
+    }
+
+    // ab***@naver.com (아이디 앞 2글자만 표시)
+    static func maskedEmail(_ email: String) -> String {
+        let parts = email.split(separator: "@", maxSplits: 1)
+        guard parts.count == 2 else { return "***" }
+        let visibleCount = parts[0].count > 2 ? 2 : 1
+        return "\(parts[0].prefix(visibleCount))***@\(parts[1])"
+    }
+
     // 기존 유저 backfill 및 로그인 수단 변경 반영 (값이 다를 때만 저장)
     // 실패해도 로그인 흐름은 막지 않음
     static func syncIfNeeded(user: FirebaseAuth.User, existing data: [String: Any]) {

@@ -286,30 +286,8 @@ final class SocialSignUpViewModel: ObservableObject {
                 self.alert = .phoneNumberInUse
                 return
             }
-            self.alert = .existingAccount(Self.existingAccountMessage(for: data))
+            self.alert = .existingAccount(UserAuthInfo.loginGuideMessage(for: data))
         }
-    }
-
-    // 기존 계정의 로그인 수단별 안내 문구
-    // providers가 없는 기존 계정은 모두 이메일 가입이므로 이메일 로그인 안내
-    static func existingAccountMessage(for data: [String: Any]) -> String {
-        let providers = data["providers"] as? [String] ?? []
-        if providers.isEmpty || providers.contains("password") {
-            let loginEmail = data["loginEmail"] as? String ?? data["email"] as? String ?? ""
-            return "\(maskedEmail(loginEmail)) 으로 가입된 계정이 있어요.\n이메일로 로그인해 주세요."
-        }
-        if let provider = SocialAuthProvider.allCases.first(where: { providers.contains($0.providerID) }) {
-            return "\(provider.displayName)로 가입된 계정이 있어요.\n\(provider.displayName)로 로그인해 주세요."
-        }
-        return "이미 가입된 계정이 있어요.\n기존 계정으로 로그인해 주세요."
-    }
-
-    // ab***@naver.com (아이디 앞 2글자만 표시)
-    static func maskedEmail(_ email: String) -> String {
-        let parts = email.split(separator: "@", maxSplits: 1)
-        guard parts.count == 2 else { return "***" }
-        let visibleCount = parts[0].count > 2 ? 2 : 1
-        return "\(parts[0].prefix(visibleCount))***@\(parts[1])"
     }
 
     // MARK: - 이메일 (선택 입력, 입력 시 형식 + 중복 검사)
