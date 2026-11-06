@@ -43,6 +43,32 @@ struct EditProfileView: View {
         return formatter.string(from: date)
     }
 
+    // 탈퇴 확인 문구 (본인 확인 방식 안내)
+    private var deleteConfirmMessage: String {
+        switch viewModel.withdrawalReauth {
+        case .social(let provider):
+            return "계정이 영구적으로 삭제됩니다.\n본인 확인을 위해 \(provider.displayName) 로그인을 한 번 더 진행합니다."
+        case .password, nil:
+            return "계정이 영구적으로 삭제됩니다."
+        }
+    }
+
+    // 로그인 수단에 맞는 재인증 후 탈퇴
+    private func startWithdrawal() {
+        switch viewModel.withdrawalReauth {
+        case .password:
+            showPasswordAlert = true
+        case .social(let provider):
+            // 확인 알림이 닫힌 뒤 로그인 창 표시 (닫히는 중인 알림 위에는 Google 로그인 화면을 띄울 수 없음)
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 400_000_000)
+                viewModel.reauthenticateWithSocialAndDelete(provider)
+            }
+        case nil:
+            viewModel.showDeleteFailure("로그인 정보를 확인하지 못했습니다. 다시 로그인한 뒤 시도해주세요.")
+        }
+    }
+
     var body: some View {
         VStack {
             ScrollView {
@@ -238,11 +264,15 @@ struct EditProfileView: View {
             case .delete:
                 return Alert(
                     title: Text("정말로 탈퇴하시겠습니까?"),
-                    message: Text("계정이 영구적으로 삭제됩니다."),
-                    primaryButton: .destructive(Text("탈퇴"), action: {
-                        showPasswordAlert = true
-                    }),
+                    message: Text(deleteConfirmMessage),
+                    primaryButton: .destructive(Text("탈퇴"), action: startWithdrawal),
                     secondaryButton: .cancel(Text("취소"))
+                )
+            case .deleteFailed:
+                return Alert(
+                    title: Text("탈퇴 실패"),
+                    message: Text(viewModel.errorMessage ?? "탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."),
+                    dismissButton: .default(Text("확인"))
                 )
             case .validation:
                 return Alert(
