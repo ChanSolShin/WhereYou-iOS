@@ -53,6 +53,20 @@ final class AppleAuthService: NSObject, SocialAuthService {
         )
     }
 
+    // 탈퇴 시 Apple 토큰 해지 (App Store 심사 요구사항, 인증 코드는 발급 후 5분 유효)
+    // 실패해도 탈퇴는 계속 진행
+    static func revokeToken(authorizationCode: String?) async {
+        guard let authorizationCode else {
+            print("[Auth] Apple revoke skipped (no authorization code)")
+            return
+        }
+        do {
+            try await Auth.auth().revokeToken(withAuthorizationCode: authorizationCode)
+        } catch {
+            print("[Auth] Apple revoke failed (code: \((error as NSError).code))")
+        }
+    }
+
     private func finish(with result: Result<ASAuthorizationAppleIDCredential, Error>) {
         continuation?.resume(with: result)
         continuation = nil

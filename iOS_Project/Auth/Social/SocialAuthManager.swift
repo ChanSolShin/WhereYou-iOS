@@ -47,4 +47,16 @@ enum SocialAuthManager {
             social: social
         )
     }
+
+    // 소셜 인증 → 현재 계정 재인증 (탈퇴 전 본인 확인)
+    // 다른 소셜 계정으로 인증하면 Firebase가 userMismatch 오류 반환
+    @MainActor
+    static func reauthenticate(_ user: FirebaseAuth.User, with provider: SocialAuthProvider) async throws -> SocialAuthResult {
+        let social = try await service(for: provider).authorize()
+        switch social.credential {
+        case .firebase(let credential):
+            _ = try await user.reauthenticate(with: credential)
+        }
+        return social
+    }
 }

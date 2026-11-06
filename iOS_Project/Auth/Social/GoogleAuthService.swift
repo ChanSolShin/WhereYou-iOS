@@ -46,4 +46,18 @@ final class GoogleAuthService: SocialAuthService {
     static func signOut() {
         GIDSignIn.sharedInstance.signOut()
     }
+
+    // 탈퇴 시 앱의 Google 계정 접근 권한 해제
+    // 실패해도 탈퇴는 이미 완료된 상태라 로그만 남김
+    @MainActor
+    static func disconnect() async {
+        do {
+            if GIDSignIn.sharedInstance.currentUser == nil {
+                _ = try await GIDSignIn.sharedInstance.restorePreviousSignIn()
+            }
+            try await GIDSignIn.sharedInstance.disconnect()
+        } catch {
+            print("[Auth] Google disconnect failed (code: \((error as NSError).code))")
+        }
+    }
 }

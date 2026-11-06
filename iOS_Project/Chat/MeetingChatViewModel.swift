@@ -58,9 +58,13 @@ struct MeetingChatOperations: Sendable {
                     .getDocuments()
                 return snapshot.documents.compactMap(MeetingChatMessage.decode)
             },
+            // users 문서가 없으면 탈퇴한 사용자, 조회 실패 시에는 기본 표시
             loadMemberName: { memberID in
-                let doc = try? await Firestore.firestore().collection("users").document(memberID).getDocument()
-                return doc?.data()?["name"] as? String ?? "멤버"
+                guard let doc = try? await Firestore.firestore().collection("users").document(memberID).getDocument() else {
+                    return "멤버"
+                }
+                guard doc.exists else { return "탈퇴한 사용자" }
+                return doc.data()?["name"] as? String ?? "멤버"
             },
             markRead: { meetingID, messageID in
                 _ = try await Functions.functions()
