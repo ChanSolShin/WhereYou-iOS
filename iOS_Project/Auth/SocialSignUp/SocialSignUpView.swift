@@ -162,7 +162,7 @@ struct SocialSignUpView: View {
                     .padding(.top, 4)
             }
 
-            Text("친구가 이메일로 나를 찾을 때 사용됩니다. 비워 두어도 가입할 수 있습니다.")
+            Text("친구가 이메일로 나를 찾을 때 사용됩니다. \n비워 두어도 가입할 수 있습니다.")
                 .font(.caption)
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
@@ -209,8 +209,7 @@ struct SocialSignUpView: View {
                 Button("취소") {
                     viewModel.alert = .confirmCancel
                 }
-                .padding()
-                .foregroundColor(.gray)
+                .buttonStyle(SignUpTextButtonStyle(color: .gray))
             } else {
                 Button("뒤로") {
                     withAnimation {
@@ -218,8 +217,7 @@ struct SocialSignUpView: View {
                         viewModel.goBack()
                     }
                 }
-                .padding()
-                .foregroundColor(.blue)
+                .buttonStyle(SignUpTextButtonStyle(color: .blue))
             }
 
             Spacer()
@@ -232,11 +230,7 @@ struct SocialSignUpView: View {
                         viewModel.goNext()
                     }
                 }
-                .padding()
-                .frame(width: 200, height: 50)
-                .background(viewModel.canProceed ? Color.blue : Color.gray)
-                .foregroundColor(.white)
-                .cornerRadius(25)
+                .buttonStyle(SignUpFilledButtonStyle(isActive: viewModel.canProceed, width: 200, height: 50, cornerRadius: 25))
                 .font(.title3)
                 .disabled(!viewModel.canProceed)
             }

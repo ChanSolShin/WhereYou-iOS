@@ -62,11 +62,7 @@ struct PhoneNumberStep: View {
             Button("인증번호 전송") {
                 onSend()
             }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(isValid ? Color.blue : Color.gray)
-            .foregroundColor(.white)
-            .cornerRadius(8)
+            .buttonStyle(SignUpFilledButtonStyle(isActive: isValid))
             .padding(.horizontal, 30)
             .disabled(!isValid)
 
@@ -189,11 +185,7 @@ struct VerificationCodeStep: View {
             Button("인증번호 확인") {
                 onVerify()
             }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(isEnabled ? Color.blue : Color.gray)
-            .foregroundColor(.white)
-            .cornerRadius(8)
+            .buttonStyle(SignUpFilledButtonStyle(isActive: isEnabled))
             .padding(.horizontal, 30)
             .disabled(!isEnabled)
 

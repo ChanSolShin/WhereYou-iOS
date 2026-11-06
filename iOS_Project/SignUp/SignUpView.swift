@@ -108,10 +108,9 @@ struct SignUpView: View {
                             currentStep = max(0, currentStep - 1)
                         }
                     }
-                    .padding()
-                    .foregroundColor(.blue)
+                    .buttonStyle(SignUpTextButtonStyle(color: .blue))
                 }
-                
+
                 Spacer()
                 
                 if currentStep != 2 {
@@ -131,11 +130,7 @@ struct SignUpView: View {
                             }
                         }
                     }
-                    .padding()
-                    .frame(width: 200, height: 50)
-                    .background(isNextButtonEnabled ? Color.blue : Color.gray)
-                    .foregroundColor(.white)
-                    .cornerRadius(25)
+                    .buttonStyle(SignUpFilledButtonStyle(isActive: isNextButtonEnabled, width: 200, height: 50, cornerRadius: 25))
                     .font(.title3)
                     .disabled(!isNextButtonEnabled)
                 }
