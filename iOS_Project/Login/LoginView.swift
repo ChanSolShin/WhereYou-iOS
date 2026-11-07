@@ -66,18 +66,8 @@ struct LoginView: View {
                 .padding()
                 .glassSurface(radius: 12)
                 .padding(.horizontal, 30)
-                .padding(.bottom, 5)
+                .padding(.bottom, 20)
                 .padding(.top, 10)
-                
-                NavigationLink(destination: FindPasswordView()){
-                    Text("비밀번호 찾기")
-                }
-                .font(.system(size: 14))
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .foregroundColor(.gray)
-                .underline()
-                .padding(.horizontal, 10)
-                .padding(.bottom, 15)
                 
                 // 로그인 버튼 (중복 전환 방지를 위해 NavigationLink 제거)
                 Button(action: {
@@ -101,26 +91,53 @@ struct LoginView: View {
                 .contentShape(Rectangle())
                 .padding(.horizontal, 30)
                 .disabled(viewModel.isLoggingIn)
-                .padding(.bottom, 20)
-                
-                HStack {
+                .padding(.bottom, 16)
+
+                // 회원가입 | 이메일 찾기 | 비밀번호 찾기
+                HStack(spacing: 12) {
                     NavigationLink(destination: SignUpView()) {
                         Text("회원가입")
-                            .foregroundColor(.black)
-                            .underline()
                     }
                     Text("|")
-                        .foregroundColor(.gray)
-                        .underline()
-                        .padding(.horizontal, 15)
-                    
-                    NavigationLink(destination: FindEmailView()){
+                        .foregroundColor(.gray.opacity(0.5))
+                    NavigationLink(destination: FindEmailView()) {
                         Text("이메일 찾기")
-                            .foregroundColor(.black)
-                            .underline()
+                    }
+                    Text("|")
+                        .foregroundColor(.gray.opacity(0.5))
+                    NavigationLink(destination: FindPasswordView()) {
+                        Text("비밀번호 찾기")
                     }
                 }
-                .padding(.horizontal, 40)
+                .font(.system(size: 14))
+                .foregroundColor(.gray)
+                .padding(.bottom, 28)
+
+                // 소셜 로그인
+                HStack(spacing: 12) {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(height: 1)
+                    Text("또는")
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(height: 1)
+                }
+                .padding(.horizontal, 30)
+                .padding(.bottom, 16)
+
+                // 원형 로고 버튼 (카카오/네이버 추가 시 SocialAuthProvider에 case 추가)
+                HStack(spacing: 20) {
+                    ForEach(SocialAuthProvider.allCases, id: \.self) { provider in
+                        SocialLoginButton(provider: provider) {
+                            viewModel.socialLogin(with: provider)
+                        }
+                    }
+                }
+                .disabled(viewModel.isLoggingIn)
+
                 Spacer()
             }
             .background(GlassBackdrop())

@@ -15,6 +15,7 @@ const {
   createCompleteLegacyMeetingInvitationHandler,
 } = require('./meetingChat');
 const { getAppBadgeCount, badgeApns, createSendChatNotificationHandler } = require('./appBadge');
+const { cleanupTempAccounts, createDiscardTempAccountHandler } = require('./tempAccountCleanup');
 
 admin.initializeApp({
   databaseURL: "https://meetingapp-2985d-default-rtdb.firebaseio.com"
@@ -37,6 +38,10 @@ exports.sendMeetingChatBadge = functions.firestore.onDocumentCreated(
 );
 exports.acceptMeetingInvitation = onCall(
   { region: 'us-central1' }, createAcceptMeetingInvitationHandler({ db })
+);
+// 가입 포기 시 본인 임시 계정 즉시 삭제 (가입 미완료 계정만)
+exports.discardTempAccount = onCall(
+  { region: 'us-central1' }, createDiscardTempAccountHandler({ db, auth: admin.auth() })
 );
 
 // Older app versions mark an invitation accepted and then update the meeting
@@ -564,34 +569,10 @@ exports.deleteExpiredMeetings = onSchedule("every 1 minutes", async (event) => {
 });
 
 
-// 5분 지난 임시 계정 중 이메일이 없는 계정 삭제
+// 회원정보 입력 전 이탈한 임시 계정 삭제 (이메일 가입 5분, 소셜 가입 30분 경과 + users 문서 없음)
 exports.deleteUnlinkedTempAccounts = onSchedule("every 5 minutes", async (event) => {
-    const now = new Date();
-    const koreaTimeOffset = 9 * 60;
-    now.setMinutes(now.getMinutes() + now.getTimezoneOffset() + koreaTimeOffset / (60 * 1000));
-
-    const threshold = new Date(now.getTime() - 5 * 60 * 1000); // 5분 전
-
     try {
-        const snapshot = await db.collection("tempUsers").get();
-
-        for (const doc of snapshot.docs) {
-            const data = doc.data();
-            const createdAt = data.createdAt?.toDate?.();
-
-            if (!createdAt || createdAt > threshold) continue;
-
-            const uid = doc.id;
-
-            const userRecord = await admin.auth().getUser(uid);
-
-            // 이메일이 없으면 (링크 안됐으면) 삭제
-            if (!userRecord.email) {
-                await admin.auth().deleteUser(uid);
-                await db.collection("tempUsers").doc(uid).delete();
-                console.log(`🗑️ 임시 계정 삭제됨: ${uid}`);
-            }
-        }
+        await cleanupTempAccounts({ db, auth: admin.auth() });
     } catch (error) {
         console.error("❌ 임시 계정 삭제 중 오류 발생:", error);
     }

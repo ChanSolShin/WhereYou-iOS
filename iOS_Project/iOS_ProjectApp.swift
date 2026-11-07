@@ -11,6 +11,7 @@ import FirebaseAuth
 import CoreLocation
 import UserNotifications
 import FirebaseRemoteConfig
+import GoogleSignIn
 
 @main
 struct iOS_ProjectApp: App {
@@ -22,11 +23,28 @@ struct iOS_ProjectApp: App {
     @State private var showAlert = false
     @State private var showNotificationAlert = false // 알림 권한 요청 상태
     @State private var showUpdateAlert = false
-    
+    @State private var isSplashMinimumElapsed = false
+
+    // 앱 시작 직후 최소 시간 동안, 그리고 사용자 정보 확인 중에는 스플래시 표시
+    private var showsSplash: Bool {
+        guard !ChatKeyboardUITest.isEnabled else { return false }
+        switch loginViewModel.authState {
+        case .checking, .checkFailed:
+            return true
+        case .loggedIn, .needsProfile, .loggedOut:
+            return !isSplashMinimumElapsed
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             Group {
-                    if loginViewModel.isLoggedIn || ChatKeyboardUITest.isEnabled {
+                if showsSplash {
+                    AuthCheckView()
+                        .transition(.opacity)
+                } else {
+                    switch ChatKeyboardUITest.isEnabled ? .loggedIn : loginViewModel.authState {
+                    case .loggedIn:
                         MainTabView()
                             .onAppear {
                                 guard !ChatKeyboardUITest.isEnabled else { return }
@@ -34,17 +52,31 @@ struct iOS_ProjectApp: App {
                                 checkVersion()
                                 // 로그인 후 강제 로그아웃 리스너는 LoginViewModel에서 처리됨.
                             }
-                    } else {
+                    case .needsProfile:
+                        SocialSignUpView()
+                    case .checking, .checkFailed:
+                        AuthCheckView()
+                    case .loggedOut:
                         LoginView()
                             .onAppear {
                                 checkVersion()
                             }
                     }
-          }
+                }
+            }
+            .animation(.easeOut(duration: 0.3), value: showsSplash)
+            .task {
+                try? await Task.sleep(nanoseconds: 800_000_000)
+                isSplashMinimumElapsed = true
+            }
             .background(GlassBackdrop())
             .environmentObject(loginViewModel) // LoginViewModel을 전역에서 사용
             .environmentObject(AppRouter.shared) 
             .environmentObject(router)
+            // Google 로그인 완료 후 앱으로 돌아오는 URL 처리
+            .onOpenURL { url in
+                _ = GIDSignIn.sharedInstance.handle(url)
+            }
             .onAppear {
                 guard !ChatKeyboardUITest.isEnabled else { return }
                 // 위치 권한이 허용되지 않으면 경고 표시

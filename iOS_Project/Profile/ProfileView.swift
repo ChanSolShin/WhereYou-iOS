@@ -25,9 +25,12 @@ struct ProfileView: View {
                                 Text(profile.name)
                                     .font(.title3)
                                     .fontWeight(.semibold)
-                                Text(profile.email)
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
+                                // 이메일이 없으면 줄을 비우지 않아 이름이 세로 중앙에 위치
+                                if !profile.email.trimmingCharacters(in: .whitespaces).isEmpty {
+                                    Text(profile.email)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
                             }
                             Spacer()
                             NavigationLink(destination: EditProfileView(viewModel: viewModel)
