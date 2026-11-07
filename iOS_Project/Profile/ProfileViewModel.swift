@@ -32,6 +32,7 @@ enum WithdrawalReauth {
 
 class ProfileViewModel: ObservableObject {
     @Published var profile: ProfileModel?
+    @Published private var storedProviders: [String] = []  // users 문서 providers (서버 관리 수단 포함)
     @Published var isEditing = false
     @Published var errorMessage: String? // 에러 메시지 상태 추가
     @Published var navigateToLogin = false // 로그인 화면으로 이동 플래그
@@ -61,8 +62,17 @@ class ProfileViewModel: ObservableObject {
                 let phoneNumber = data["phoneNumber"] as? String ?? ""
                 let birthday = data["birthday"] as? String ?? ""
                 self.profile = ProfileModel(name: name, email: email, phoneNumber: phoneNumber, birthday: birthday)
+                self.storedProviders = data["providers"] as? [String] ?? []
             }
         }
+    }
+
+    // 연결된 소셜 로그인 수단 (프로필 배지 표시용, 로그인 화면 버튼 순서)
+    // Auth 연결 정보 + users 문서 providers (추후 카카오/네이버 등 서버 관리 수단)
+    var linkedSocialProviders: [SocialAuthProvider] {
+        let authProviders = Auth.auth().currentUser?.providerData.map(\.providerID) ?? []
+        let providerIDs = Set(authProviders + storedProviders)
+        return SocialAuthProvider.allCases.filter { providerIDs.contains($0.providerID) }
     }
     
     // 이메일 수정 가능 여부
