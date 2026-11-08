@@ -1,0 +1,13 @@
+/*
+  InfoPlist.strings
+  iOS_Project
+
+  Created by 최용훈 on 03/11/26.
+
+  시스템 화면에 표시되는 앱 이름
+  CFBundleName: 소셜 로그인 확인 창 등 ("웨어유"이(가) google.com을 사용하여 로그인하려고 합니다)
+  CFBundleName은 빌드 시 PRODUCT_NAME(iOS_Project)으로 생성되어 Info.plist로는 변경되지 않음
+*/
+
+"CFBundleName" = "웨어유";
+"CFBundleDisplayName" = "웨어유";

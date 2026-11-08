@@ -29,13 +29,27 @@ struct FriendListView: View {
                         List {
                             ForEach(viewModel.friends) { friend in
                                 HStack {
-                                    VStack(alignment: .leading) {
-                                        Text(friend.name)
-                                            .font(.headline)
-                                        Text(friend.email)
-                                            .font(.subheadline)
-                                        Text("Phone: \(friend.phoneNumber)")
-                                            .font(.subheadline)
+                                    // 이메일/전화번호 중 없는 줄은 비우지 않고, 셀 높이는 유지한 채 세로 중앙 정렬
+                                    ZStack(alignment: .leading) {
+                                        VStack(alignment: .leading) {
+                                            Text(" ").font(.headline)
+                                            Text(" ").font(.subheadline)
+                                            Text(" ").font(.subheadline)
+                                        }
+                                        .hidden()
+
+                                        VStack(alignment: .leading) {
+                                            Text(friend.name)
+                                                .font(.headline)
+                                            if !friend.email.trimmingCharacters(in: .whitespaces).isEmpty {
+                                                Text(friend.email)
+                                                    .font(.subheadline)
+                                            }
+                                            if !friend.phoneNumber.trimmingCharacters(in: .whitespaces).isEmpty {
+                                                Text("Phone: \(friend.phoneNumber)")
+                                                    .font(.subheadline)
+                                            }
+                                        }
                                     }
                                     Spacer()
                                 }

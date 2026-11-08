@@ -25,9 +25,18 @@ enum LoginAlert: Identifiable {
     case loginFailed(String)
 }
 
+// 인증 상태별 화면 분기
+enum AuthState: Equatable {
+    case checking       // 앱 시작 시 사용자 문서 확인 중
+    case checkFailed    // 사용자 문서 확인 실패 (재시도 필요)
+    case loggedOut
+    case needsProfile   // 소셜 최초 로그인 후 회원정보 미입력
+    case loggedIn
+}
+
 class LoginViewModel: ObservableObject {
     @Published var user: SignUpUserModel = SignUpUserModel(username: "", password: "")
-    @Published var isLoggedIn: Bool = false
+    @Published var authState: AuthState = .checking
     @Published var isLoggingIn: Bool = false
     // 기존 forcedLogout, showNewDeviceLoginAlert -> 하나로 통합
     @Published var currentAlert: LoginAlert?
@@ -88,56 +97,137 @@ class LoginViewModel: ObservableObject {
                     return
                 }
 
-                let userRef = self.db.collection("users").document(uid)
                 print("[Login] Authentication succeeded; loading user document")
-                userRef.getDocument { [weak self] snapshot, error in
+                self.establishSession(uid: uid, attemptID: attemptID)
+            }
+        }
+    }
+
+    // 소셜 로그인 (Google/Apple)
+    func socialLogin(with provider: SocialAuthProvider) {
+        guard !isLoggingIn else { return }
+        isLoggingIn = true
+        currentAlert = nil
+        Task { @MainActor [weak self] in
+            do {
+                let result = try await SocialAuthManager.signIn(with: provider)
+                guard let self = self else { return }
+                // 소셜 로그인 창 입력 시간이 있어 인증 완료 후부터 시간 제한 적용
+                let attemptID = self.beginLoginAttempt()
+                if result.isNewUser {
+                    self.registerTempSocialUser(uid: result.user.uid, provider: provider)
+                }
+                print("[Login] Social authentication succeeded; loading user document")
+                self.establishSession(uid: result.user.uid, attemptID: attemptID, allowsProfileSetup: true)
+            } catch SocialAuthError.canceled {
+                self?.isLoggingIn = false
+            } catch {
+                print("[Login] Social authentication failed (code: \((error as NSError).code))")
+                self?.failLogin(Self.messageForSocialAuthError(error))
+            }
+        }
+    }
+
+    // 회원정보 입력 전 이탈한 소셜 계정 정리용 (Functions에서 일정 시간 후 삭제)
+    private func registerTempSocialUser(uid: String, provider: SocialAuthProvider) {
+        db.collection("tempUsers").document(uid).setData([
+            "uid": uid,
+            "createdAt": Timestamp(date: Date()),
+            "linked": false,
+            "provider": provider.providerID
+        ]) { error in
+            if let error = error {
+                print("[Login] Temp social user save failed (code: \((error as NSError).code))")
+            }
+        }
+    }
+
+    private static func messageForSocialAuthError(_ error: Error) -> String {
+        if let socialError = error as? SocialAuthError {
+            return socialError.localizedDescription
+        }
+        if (error as NSError).domain == AuthErrorDomain,
+           let code = AuthErrorCode(rawValue: (error as NSError).code) {
+            switch code {
+            case .accountExistsWithDifferentCredential:
+                return "같은 이메일로 가입된 계정이 있습니다. 기존 로그인 방법으로 로그인해주세요."
+            case .networkError:
+                return "네트워크 연결을 확인하고 다시 시도해주세요."
+            case .userDisabled:
+                return "사용할 수 없는 계정입니다. 고객센터에 문의해주세요."
+            default:
+                break
+            }
+        }
+        return "로그인에 실패했습니다. 잠시 후 다시 시도해주세요. (\(error.localizedDescription))"
+    }
+
+    // Firebase 인증 이후 공통 세션 처리
+    // 이메일/소셜 로그인 모두 인증 성공 후 호출
+    // allowsProfileSetup: 사용자 문서가 없으면 회원정보 입력으로 이동 (소셜 최초 로그인)
+    private func establishSession(uid: String, attemptID: UUID, allowsProfileSetup: Bool = false) {
+        let userRef = db.collection("users").document(uid)
+        userRef.getDocument { [weak self] snapshot, error in
+            DispatchQueue.main.async {
+                guard let self = self, self.loginAttemptID == attemptID else { return }
+                if let error = error {
+                    print("[Login] User document read failed (code: \((error as NSError).code))")
+                    self.failLogin("사용자 정보를 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도해주세요. (\(error.localizedDescription))")
+                    return
+                }
+                guard let data = snapshot?.data() else {
+                    if allowsProfileSetup {
+                        print("[Login] User document missing; profile setup required")
+                        self.loginAttemptID = nil
+                        self.isLoggingIn = false
+                        self.authState = .needsProfile
+                        return
+                    }
+                    print("[Login] User document missing")
+                    self.failLogin("사용자 정보가 없습니다. 고객센터에 문의해주세요.")
+                    return
+                }
+                print("[Login] User document loaded")
+                if let user = Auth.auth().currentUser {
+                    UserAuthInfo.syncIfNeeded(user: user, existing: data)
+                }
+                self.pendingUserRef = userRef
+                if let existingDeviceID = data["deviceID"] as? String,
+                   existingDeviceID != self.deviceID {
+                    self.loginAttemptID = nil
+                    self.isLoggingIn = false
+                    self.currentAlert = .newDeviceLogin
+                    return
+                }
+
+                userRef.setData([
+                    "loginStatus": true,
+                    "deviceID": self.deviceID,
+                    "lastLogin": Timestamp(date: Date())
+                ], merge: true) { [weak self] error in
                     DispatchQueue.main.async {
                         guard let self = self, self.loginAttemptID == attemptID else { return }
                         if let error = error {
-                            print("[Login] User document read failed (code: \((error as NSError).code))")
-                            self.failLogin("사용자 정보를 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도해주세요. (\(error.localizedDescription))")
+                            print("[Login] Login state write failed (code: \((error as NSError).code))")
+                            self.failLogin("로그인 상태를 저장하지 못했습니다. 다시 시도해주세요. (\(error.localizedDescription))")
                             return
                         }
-                        guard let data = snapshot?.data() else {
-                            print("[Login] User document missing")
-                            self.failLogin("사용자 정보가 없습니다. 고객센터에 문의해주세요.")
-                            return
-                        }
-                        print("[Login] User document loaded")
-                        self.pendingUserRef = userRef
-                        if let existingDeviceID = data["deviceID"] as? String,
-                           existingDeviceID != self.deviceID {
-                            self.loginAttemptID = nil
-                            self.isLoggingIn = false
-                            self.currentAlert = .newDeviceLogin
-                            return
-                        }
-
-                        userRef.setData([
-                            "loginStatus": true,
-                            "deviceID": self.deviceID,
-                            "lastLogin": Timestamp(date: Date())
-                        ], merge: true) { [weak self] error in
-                            DispatchQueue.main.async {
-                                guard let self = self, self.loginAttemptID == attemptID else { return }
-                                if let error = error {
-                                    print("[Login] Login state write failed (code: \((error as NSError).code))")
-                                    self.failLogin("로그인 상태를 저장하지 못했습니다. 다시 시도해주세요. (\(error.localizedDescription))")
-                                    return
-                                }
-                                print("[Login] Login state saved")
-                                self.loginAttemptID = nil
-                                self.isLoggingIn = false
-                                self.isLoggedIn = true
-                                UserDefaults.standard.set(true, forKey: "isLoggedIn")
-                                self.startListeningForForcedLogout(uid: uid)
-                                PushTokenManager.syncCurrentToken()
-                            }
-                        }
+                        print("[Login] Login state saved")
+                        self.completeLogin(uid: uid)
                     }
                 }
             }
         }
+    }
+
+    // 로그인 확정 후 공통 처리 (상태 반영, 강제 로그아웃 리스너, FCM 토큰 동기화)
+    private func completeLogin(uid: String) {
+        loginAttemptID = nil
+        isLoggingIn = false
+        authState = .loggedIn
+        UserDefaults.standard.set(true, forKey: "isLoggedIn")
+        startListeningForForcedLogout(uid: uid)
+        PushTokenManager.syncCurrentToken()
     }
 
     private func failLogin(_ message: String) {
@@ -206,14 +296,9 @@ class LoginViewModel: ObservableObject {
                     self.failLogin("기기 전환에 실패했습니다. 다시 시도해주세요. (\(error.localizedDescription))")
                     return
                 }
-                self.loginAttemptID = nil
-                self.isLoggingIn = false
-                self.isLoggedIn = true
                 self.currentAlert = nil
                 self.pendingUserRef = nil
-                UserDefaults.standard.set(true, forKey: "isLoggedIn")
-                self.startListeningForForcedLogout(uid: uid)
-                PushTokenManager.syncCurrentToken()
+                self.completeLogin(uid: uid)
             }
         }
     }
@@ -223,8 +308,9 @@ class LoginViewModel: ObservableObject {
         self.pendingUserRef = nil
         do {
             try Auth.auth().signOut()
+            GoogleAuthService.signOut()
             DispatchQueue.main.async {
-                self.isLoggedIn = false
+                self.authState = .loggedOut
                 self.currentAlert = nil
                 UserDefaults.standard.set(false, forKey: "isLoggedIn")
             }
@@ -232,20 +318,59 @@ class LoginViewModel: ObservableObject {
             print("Error signing out: \(signOutError.localizedDescription)")
         }
     }
-    
+
     // 앱 시작 시 자동 로그인 상태 확인
+    // 사용자 문서 유무로 메인 / 로그아웃 분기
     private func checkAutoLogin() {
-        if Auth.auth().currentUser != nil {
-            self.isLoggedIn = true
-            if let uid = Auth.auth().currentUser?.uid {
-                self.startListeningForForcedLogout(uid: uid)
-            }
-        } else {
-            self.isLoggedIn = false
+        guard let currentUser = Auth.auth().currentUser else {
+            authState = .loggedOut
             UserDefaults.standard.set(false, forKey: "isLoggedIn")
+            return
+        }
+
+        authState = .checking
+        let uid = currentUser.uid
+        db.collection("users").document(uid).getDocument { [weak self] snapshot, error in
+            DispatchQueue.main.async {
+                // 확인 중 로그아웃 등으로 사용자가 바뀐 경우 무시
+                guard let self = self, Auth.auth().currentUser?.uid == uid else { return }
+                if let error = error {
+                    print("[Login] Auto login check failed (code: \((error as NSError).code))")
+                    self.authState = .checkFailed
+                    return
+                }
+                if let data = snapshot?.data() {
+                    self.authState = .loggedIn
+                    self.startListeningForForcedLogout(uid: uid)
+                    // 로그인 유지 중인 기존 유저도 providers, loginEmail backfill
+                    UserAuthInfo.syncIfNeeded(user: currentUser, existing: data)
+                } else {
+                    // 가입 도중 이탈한 임시 계정 (이메일/소셜 공통): 서버에서 삭제 후 로그인 화면부터 다시 시작
+                    TempAccountService.discard { [weak self] in
+                        self?.signOut(updateFirestore: false)
+                    }
+                }
+            }
         }
     }
-    
+
+    // 사용자 문서 확인 실패 시 재시도
+    func retryAutoLoginCheck() {
+        checkAutoLogin()
+    }
+
+    // 소셜 회원정보 입력 완료 후 세션 확립 (메인 이동)
+    func completeSocialSignUp() {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            signOut(updateFirestore: false)
+            return
+        }
+        isLoggingIn = true
+        currentAlert = nil
+        let attemptID = beginLoginAttempt()
+        establishSession(uid: uid, attemptID: attemptID)
+    }
+
     // Firestore 문서 변경 감지 -> 다른 기기에서 로그인 시 강제 로그아웃 처리
     func startListeningForForcedLogout(uid: String? = nil) {
         let uidToUse: String
@@ -279,7 +404,7 @@ class LoginViewModel: ObservableObject {
     // 로그아웃 처리
     func signOut(updateFirestore: Bool = true) {
         guard let uid = Auth.auth().currentUser?.uid else {
-            self.isLoggedIn = false
+            self.authState = .loggedOut
             return
         }
         
@@ -295,9 +420,10 @@ class LoginViewModel: ObservableObject {
                 }
                 do {
                     try Auth.auth().signOut()
+                    GoogleAuthService.signOut()
                     UserDefaults.standard.set(false, forKey: "isLoggedIn")
                     DispatchQueue.main.async {
-                        self.isLoggedIn = false
+                        self.authState = .loggedOut
                     }
                 } catch let signOutError as NSError {
                     print("Error signing out: \(signOutError.localizedDescription)")
@@ -306,9 +432,10 @@ class LoginViewModel: ObservableObject {
         } else {
             do {
                 try Auth.auth().signOut()
+                GoogleAuthService.signOut()
                 UserDefaults.standard.set(false, forKey: "isLoggedIn")
                 DispatchQueue.main.async {
-                    self.isLoggedIn = false
+                    self.authState = .loggedOut
                 }
             } catch let signOutError as NSError {
                 print("Error signing out: \(signOutError.localizedDescription)")

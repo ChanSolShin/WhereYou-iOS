@@ -48,6 +48,14 @@ struct FindPasswordView: View {
                 .alert(isPresented: $showAlert) {
                     Alert(title: Text("알림"), message: Text(viewModel.errorMessage ?? "비밀번호 재설정 이메일이 발송되었습니다."))
                 }
+
+                // 소셜 로그인 계정은 비밀번호가 없어 재설정 메일이 발송되지 않음
+                Text("Apple, Google 등 소셜 로그인으로 가입한 계정은 비밀번호가 없어요.\n로그인 화면에서 가입한 방식으로 로그인해 주세요.")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 16)
+                    .padding(.horizontal, 30)
             }
         }
         .background(GlassBackdrop())

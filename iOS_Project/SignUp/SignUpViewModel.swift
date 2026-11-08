@@ -17,7 +17,6 @@ class SignUpViewModel: ObservableObject {
     @Published var agreedToTerms: Bool = false
     @Published var realName: String = ""
     @Published var birthday: String = ""
-    @Published var birthdayDate: Date? = nil
     @Published var phoneNumber: String = ""
     @Published var verificationCode: String = ""
     @Published var signUpErrorMessage: String?
@@ -140,7 +139,11 @@ class SignUpViewModel: ObservableObject {
         if !birthday.isEmpty {
             userData["birthday"] = birthday
         }
-        
+        // 로그인 수단 (phone, password), loginEmail
+        if let user = Auth.auth().currentUser {
+            userData.merge(UserAuthInfo.fields(for: user)) { _, new in new }
+        }
+
         db.collection("users").document(uid).setData(userData) { [weak self] error in
             if let error = error {
                 print("Firestore 저장 오류: \(error.localizedDescription)")
@@ -308,18 +311,6 @@ class SignUpViewModel: ObservableObject {
     
     // MARK: - Helper: 전화번호 형식 변환 (선택된 국가코드 기준)
     private func formatPhoneNumber(_ number: String) -> String {
-        // +82: 010으로 시작할 경우 10으로 시작하도록 변환
-        if selectedCountryCode == "+82" {
-            var digits = number
-            if digits.hasPrefix("0") {
-                digits = String(digits.dropFirst())
-            }
-            return selectedCountryCode + digits
-        } else {
-            if number.hasPrefix("+") {
-                return number
-            }
-            return selectedCountryCode + number
-        }
+        PhoneNumberStep.formatted(number, countryCode: selectedCountryCode)
     }
 }

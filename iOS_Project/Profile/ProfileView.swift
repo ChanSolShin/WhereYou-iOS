@@ -22,12 +22,28 @@ struct ProfileView: View {
                     if let profile = viewModel.profile {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(profile.name)
-                                    .font(.title3)
-                                    .fontWeight(.semibold)
-                                Text(profile.email)
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
+                                HStack(spacing: 6) {
+                                    Text(profile.name)
+                                        .font(.title3)
+                                        .fontWeight(.semibold)
+                                    // 연결된 소셜 로그인 수단 배지 (이메일 계정은 표시 안 함)
+                                    let providers = viewModel.linkedSocialProviders
+                                    if !providers.isEmpty {
+                                        HStack(spacing: 4) {
+                                            ForEach(providers, id: \.providerID) { provider in
+                                                SocialProviderLogo(provider: provider, size: 20)
+                                            }
+                                        }
+                                        .accessibilityElement(children: .ignore)
+                                        .accessibilityLabel(providers.map(\.displayName).joined(separator: ", ") + " 계정으로 로그인")
+                                    }
+                                }
+                                // 이메일이 없으면 줄을 비우지 않아 이름이 세로 중앙에 위치
+                                if !profile.email.trimmingCharacters(in: .whitespaces).isEmpty {
+                                    Text(profile.email)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
                             }
                             Spacer()
                             NavigationLink(destination: EditProfileView(viewModel: viewModel)

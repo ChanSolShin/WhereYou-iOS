@@ -283,12 +283,31 @@ struct AddSelectedFriend: View {
         var isRequested: Bool
         var onTap: () -> Void
 
+        // 이메일 우선, 없으면 전화번호 표시
+        private var contactText: String? {
+            let email = friend.email.trimmingCharacters(in: .whitespaces)
+            if !email.isEmpty { return email }
+            let phone = friend.phoneNumber.trimmingCharacters(in: .whitespaces)
+            return phone.isEmpty ? nil : "Phone: \(phone)"
+        }
+
         var body: some View {
             Button(action: onTap) {
                 HStack {
-                    VStack(alignment: .leading) {
-                        Text(friend.name).font(.headline)
-                        Text(friend.email).font(.subheadline)
+                    // 연락처가 없어도 셀 높이는 유지한 채 세로 중앙 정렬
+                    ZStack(alignment: .leading) {
+                        VStack(alignment: .leading) {
+                            Text(" ").font(.headline)
+                            Text(" ").font(.subheadline)
+                        }
+                        .hidden()
+
+                        VStack(alignment: .leading) {
+                            Text(friend.name).font(.headline)
+                            if let contactText {
+                                Text(contactText).font(.subheadline)
+                            }
+                        }
                     }
                     Spacer()
                     if isRequested {
